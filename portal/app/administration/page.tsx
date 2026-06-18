@@ -11,7 +11,7 @@ export default function GovernanceLibraryPage() {
           <Topbar />
           <div className="p-8">
             <ModuleShell
-              title="Enterprise Administration Library"
+              title="Enterprise Administration"
               subtitle="Controlled publication system for Hassan Industries governance, treasury, administration, records, legal, tax, and enterprise management publications."
             />
           </div>

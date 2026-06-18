@@ -1,0 +1,1 @@
+# PURPOSE: Defines the page layout, cards, search, tables, detail panel, quick actions, and module pages.
