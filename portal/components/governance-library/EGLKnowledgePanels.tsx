@@ -47,18 +47,14 @@ export default function EGLKnowledgePanels() {
           Lifecycle Flow
         </h3>
 
-        <div className="mt-5 flex items-center gap-2 overflow-x-auto">
-          {lifecycleSteps.map(([code, label], index) => (
-            <div key={code} className="flex items-center gap-2">
-              <div className="rounded-lg border border-amber-400/40 bg-white/5 px-4 py-3 text-center">
-                <div className="text-sm font-bold text-amber-400">{code}</div>
-                <div className="mt-1 whitespace-nowrap text-xs text-slate-300">
-                  {label}
-                </div>
-              </div>
-              {index < lifecycleSteps.length - 1 && (
-                <div className="h-px w-8 bg-amber-400/40" />
-              )}
+        <div className="mt-5 grid grid-cols-7 gap-2">
+          {lifecycleSteps.map(([code, label]) => (
+            <div
+              key={code}
+              className="rounded-lg border border-amber-400/40 bg-white/5 px-3 py-3 text-center"
+            >
+              <div className="text-sm font-bold text-amber-400">{code}</div>
+              <div className="mt-1 text-[11px] text-slate-300">{label}</div>
             </div>
           ))}
         </div>

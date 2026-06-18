@@ -8,7 +8,7 @@ export default function RelationshipPanel() {
       </h3>
 
       <div className="mt-5 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-5">
-        <div className="mx-auto w-fit rounded-full bg-[#071426] px-5 py-2 text-sm font-bold text-white">
+        <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[#071426] text-center text-xs font-bold text-white">
           Publication
         </div>
 
@@ -22,10 +22,6 @@ export default function RelationshipPanel() {
             </div>
           ))}
         </div>
-
-        <p className="mt-4 text-center text-xs text-slate-500">
-          Interactive relationship diagram coming in a future implementation.
-        </p>
       </div>
     </div>
   );
