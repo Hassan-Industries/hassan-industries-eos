@@ -19,16 +19,15 @@ export default function GovernanceLibraryPage() {
 
           <div className="p-8">
             <EGLCommandRibbon />
-
             <EGLStats />
 
             <div className="mt-6 grid grid-cols-12 gap-6">
-              <section className="col-span-9">
+              <section className="col-span-8 space-y-6">
                 <PublicationSeriesGrid />
                 <RecentlyUpdatedPublications />
               </section>
 
-              <aside className="col-span-3 space-y-6">
+              <aside className="col-span-4 space-y-6">
                 <PublicationDetailsPreview />
                 <EGLQuickActions />
               </aside>
