@@ -34,7 +34,7 @@ export default function EnterpriseOverview() {
       </div>
 
       <div className="mt-6 h-64 min-h-[256px] w-full">
-        <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
           <LineChart data={overviewData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="month" />
