@@ -1,12 +1,14 @@
 import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
 import EGLCommandRibbon from "@/components/governance-library/EGLCommandRibbon";
+import EGLSearchBar from "@/components/governance-library/EGLSearchBar";
 import EGLStats from "@/components/governance-library/EGLStats";
 import PublicationSeriesGrid from "@/components/governance-library/PublicationSeriesGrid";
 import RecentlyUpdatedPublications from "@/components/governance-library/RecentlyUpdatedPublications";
 import PublicationDetailsPreview from "@/components/governance-library/PublicationDetailsPreview";
 import EGLQuickActions from "@/components/governance-library/EGLQuickActions";
 import EGLKnowledgePanels from "@/components/governance-library/EGLKnowledgePanels";
+import EGLFooterStrip from "@/components/governance-library/EGLFooterStrip";
 
 export default function GovernanceLibraryPage() {
   return (
@@ -19,6 +21,7 @@ export default function GovernanceLibraryPage() {
 
           <div className="p-8">
             <EGLCommandRibbon />
+            <EGLSearchBar />
             <EGLStats />
 
             <div className="mt-6 grid grid-cols-12 gap-6">
@@ -34,6 +37,7 @@ export default function GovernanceLibraryPage() {
             </div>
 
             <EGLKnowledgePanels />
+            <EGLFooterStrip />
           </div>
         </section>
       </div>
