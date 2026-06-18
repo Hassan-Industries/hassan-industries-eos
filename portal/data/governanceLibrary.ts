@@ -13,6 +13,29 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
+export type PublicationRecord = {
+  documentNo: string;
+  title: string;
+  series: string;
+  status: string;
+  version: string;
+  owner: string;
+  documentType: string;
+  authority: string;
+  documentState: string;
+  effectiveDate: string;
+  reviewDate: string;
+  originalExecutedLocation: string;
+  certifiedCopy: string;
+  supersedes: string;
+  supersededBy: string;
+  relatedResolution: string;
+  relatedImplementationProject: string;
+  classification: string;
+  retentionCategory: string;
+  notes: string;
+};
+
 export const eglStats = [
   ["Active Publications", "241", BookOpen],
   ["Pending Review", "23", Clock],
@@ -34,33 +57,117 @@ export const publicationSeries = [
   ["Forms & Templates", "28 Publications", FileText],
 ];
 
-export const publications = [
-  [
-    "HI-ADM-001",
-    "Enterprise Administration & Enterprise Services Manual",
-    "Administration",
-    "AP",
-    "1.0",
-    "HCA",
-  ],
-  [
-    "HI-ADM-002",
-    "Enterprise Document Control Standard",
-    "Administration",
-    "AP",
-    "1.0",
-    "HCA",
-  ],
-  ["HI-TRE-001", "Enterprise Treasury Manual", "Treasury", "AP", "1.0", "HCA"],
-  ["HI-GOV-001", "Enterprise Governance Manual", "Governance", "DR", "0.1", "HCA"],
-  [
-    "HCP-RES-2026-001",
-    "Foundational Treasury Resolution",
-    "Resolutions",
-    "OE",
-    "1.0",
-    "HCP",
-  ],
+export const publications: PublicationRecord[] = [
+  {
+    documentNo: "HI-ADM-001",
+    title: "Enterprise Administration & Enterprise Services Manual",
+    series: "Administration",
+    status: "AP",
+    version: "1.0",
+    owner: "HCA",
+    documentType: "Manual",
+    authority: "Hassan Capital Partners, LLC",
+    documentState: "Active",
+    effectiveDate: "2026-06-18",
+    reviewDate: "2027-06-18",
+    originalExecutedLocation: "HCA Vault / Originals",
+    certifiedCopy: "Available",
+    supersedes: "N/A",
+    supersededBy: "N/A",
+    relatedResolution: "HCP-RES-2026-001",
+    relatedImplementationProject: "HIEOS-IMP-006A",
+    classification: "Internal Governance",
+    retentionCategory: "Permanent",
+    notes: "Flagship enterprise administration publication.",
+  },
+  {
+    documentNo: "HI-ADM-002",
+    title: "Enterprise Document Control Standard",
+    series: "Administration",
+    status: "AP",
+    version: "1.0",
+    owner: "HCA",
+    documentType: "Standard",
+    authority: "Hassan Corporate Agents",
+    documentState: "Active",
+    effectiveDate: "2026-06-18",
+    reviewDate: "2027-06-18",
+    originalExecutedLocation: "HCA Vault / Originals",
+    certifiedCopy: "Available",
+    supersedes: "N/A",
+    supersededBy: "N/A",
+    relatedResolution: "N/A",
+    relatedImplementationProject: "HIEOS-IMP-006A",
+    classification: "Internal Governance",
+    retentionCategory: "Permanent",
+    notes: "Controls numbering, revisions, classifications, and document records.",
+  },
+  {
+    documentNo: "HI-TRE-001",
+    title: "Enterprise Treasury Manual",
+    series: "Treasury",
+    status: "AP",
+    version: "1.0",
+    owner: "HCA",
+    documentType: "Manual",
+    authority: "Hassan Capital Partners, LLC",
+    documentState: "Active",
+    effectiveDate: "2026-06-20",
+    reviewDate: "2027-06-20",
+    originalExecutedLocation: "HCA Vault / Originals",
+    certifiedCopy: "Available",
+    supersedes: "N/A",
+    supersededBy: "N/A",
+    relatedResolution: "HCP-RES-2026-001",
+    relatedImplementationProject: "HIEOS-IMP-006A",
+    classification: "Confidential",
+    retentionCategory: "Permanent",
+    notes: "Enterprise treasury governance publication.",
+  },
+  {
+    documentNo: "HI-GOV-001",
+    title: "Enterprise Governance Manual",
+    series: "Governance",
+    status: "DR",
+    version: "0.1",
+    owner: "HCA",
+    documentType: "Manual",
+    authority: "Hassan Capital Partners, LLC",
+    documentState: "Draft",
+    effectiveDate: "Pending",
+    reviewDate: "Pending",
+    originalExecutedLocation: "N/A",
+    certifiedCopy: "Not Available",
+    supersedes: "N/A",
+    supersededBy: "N/A",
+    relatedResolution: "N/A",
+    relatedImplementationProject: "HIEOS-IMP-006A",
+    classification: "Internal Draft",
+    retentionCategory: "Governance Draft",
+    notes: "Draft governance publication pending review.",
+  },
+  {
+    documentNo: "HCP-RES-2026-001",
+    title: "Foundational Treasury Resolution",
+    series: "Resolutions",
+    status: "OE",
+    version: "1.0",
+    owner: "HCP",
+    documentType: "Resolution",
+    authority: "Hassan Capital Partners, LLC",
+    documentState: "Original Executed",
+    effectiveDate: "2026-06-20",
+    reviewDate: "N/A",
+    originalExecutedLocation: "HCA Vault / Originals",
+    certifiedCopy: "Available",
+    supersedes: "N/A",
+    supersededBy: "N/A",
+    relatedResolution: "N/A",
+    relatedImplementationProject: "HIEOS-IMP-006A",
+    classification: "Confidential",
+    retentionCategory: "Permanent",
+    notes: "Foundational resolution adopting HI-TRE-001.",
+  },
 ];
 
 export const statusCodes = [
@@ -72,27 +179,6 @@ export const statusCodes = [
   ["SP", "Superseded"],
   ["AR", "Archived"],
   ["VO", "Void"],
-];
-
-export const detailPreview = [
-  ["Publication Series", "Administration"],
-  ["Document Type", "Manual"],
-  ["Owner", "Hassan Corporate Agents"],
-  ["Authority", "Hassan Capital Partners, LLC"],
-  ["Version", "1.0"],
-  ["Status", "AP — Approved"],
-  ["Document State", "Active"],
-  ["Effective Date", "2026-06-18"],
-  ["Review Date", "2027-06-18"],
-  ["Original Executed Location", "HCA Vault / Originals"],
-  ["Certified Copy", "Available"],
-  ["Supersedes", "N/A"],
-  ["Superseded By", "N/A"],
-  ["Related Resolution", "HCP-RES-2026-001"],
-  ["Related Implementation Project", "HIEOS-IMP-006A"],
-  ["Classification", "Internal Governance"],
-  ["Retention Category", "Permanent"],
-  ["Notes", "Flagship enterprise administration publication."],
 ];
 
 export const quickActions = [
