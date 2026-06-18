@@ -1,0 +1,7 @@
+export default function EGLFooterStrip() {
+    return (
+      <div className="mt-6 rounded-xl bg-[#071426] px-6 py-4 text-center text-xs font-semibold uppercase tracking-[0.35em] text-amber-400 shadow">
+        Persistence · Vision · Governance · Authority
+      </div>
+    );
+  }
