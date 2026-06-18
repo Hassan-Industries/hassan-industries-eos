@@ -1,0 +1,21 @@
+import { notifications } from "@/data/dashboard";
+
+export default function NotificationsPanel() {
+  return (
+    <div className="rounded-xl bg-white p-6 shadow">
+      <div className="flex items-center justify-between">
+        <h3 className="font-bold">Notifications</h3>
+        <span className="text-xs text-blue-700">View all</span>
+      </div>
+
+      <div className="mt-4 space-y-4">
+        {notifications.map(([title, detail]) => (
+          <div key={title} className="border-b pb-4">
+            <p className="text-sm font-semibold">{title}</p>
+            <p className="mt-1 text-xs text-slate-500">{detail}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}

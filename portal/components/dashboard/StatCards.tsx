@@ -1,0 +1,23 @@
+import { stats } from "@/data/dashboard";
+
+export default function StatCards() {
+  return (
+    <div className="mt-6 grid grid-cols-5 gap-4">
+      {stats.map((item) => {
+        const Icon = item.icon;
+
+        return (
+          <div key={item.label} className="rounded-xl bg-white p-5 shadow">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-500">{item.label}</p>
+                <p className="mt-2 text-3xl font-bold">{item.value}</p>
+              </div>
+              <Icon className="text-amber-500" size={30} />
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
