@@ -1,23 +1,33 @@
-import { eglStats, BookOpen } from "@/data/governanceLibrary";
+import { publicationSeries, BookOpen } from "@/data/governanceLibrary";
 
-export default function EGLStats() {
+export default function PublicationSeriesGrid() {
   return (
-    <div className="mt-6 grid grid-cols-5 gap-4">
-      {eglStats.map(([label, value, Icon]) => {
-        const IconComponent = Icon as typeof BookOpen;
+    <div className="rounded-xl bg-white p-6 shadow">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-bold">Publication Series</h2>
+        <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+          Controlled Categories
+        </span>
+      </div>
 
-        return (
-          <div key={label as string} className="rounded-xl bg-white p-5 shadow">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-500">{label}</p>
-                <p className="mt-2 text-3xl font-bold">{value}</p>
-              </div>
-              <IconComponent className="text-amber-500" size={30} />
+      <div className="mt-5 grid grid-cols-5 gap-4">
+        {publicationSeries.map(([title, count, Icon]) => {
+          const IconComponent = Icon as typeof BookOpen;
+
+          return (
+            <div
+              key={title as string}
+              className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-center transition hover:border-amber-400 hover:bg-amber-50"
+            >
+              <IconComponent className="mx-auto mb-3 text-amber-500" size={26} />
+              <p className="text-xs font-bold uppercase tracking-wide">
+                {title as string}
+              </p>
+              <p className="mt-1 text-xs text-slate-500">{count as string}</p>
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }
