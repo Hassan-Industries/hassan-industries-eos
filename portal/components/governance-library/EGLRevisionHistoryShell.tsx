@@ -1,0 +1,318 @@
+import Link from "next/link";
+import {
+  ArrowLeft,
+  BookOpen,
+  Clock3,
+  FileCheck2,
+  GitBranch,
+  History,
+  ShieldCheck,
+} from "lucide-react";
+
+import Sidebar from "@/components/layout/Sidebar";
+import Topbar from "@/components/layout/Topbar";
+import type { PublicationRecord } from "@/data/governanceLibrary";
+import {
+  getPublicationDocumentNumber,
+  getPublicationRecordHref,
+  getPublicationViewerHref,
+} from "@/lib/eglPublicationRecords";
+
+interface EGLRevisionHistoryShellProps {
+  publication: PublicationRecord;
+}
+
+type DisplayPublicationRecord = PublicationRecord & {
+  title?: string;
+  documentType?: string;
+  owner?: string;
+  authority?: string;
+  version?: string;
+  status?: string;
+  documentState?: string;
+  effectiveDate?: string;
+  reviewDate?: string;
+  classification?: string;
+  notes?: string;
+};
+
+const lifecycleEvents = [
+  {
+    code: "DR",
+    label: "Draft Created",
+    detail: "Initial controlled publication shell prepared.",
+    status: "Placeholder",
+  },
+  {
+    code: "RV",
+    label: "Review Cycle",
+    detail: "Administrative or governance review pending backend workflow.",
+    status: "Pending",
+  },
+  {
+    code: "AP",
+    label: "Approved Version",
+    detail: "Approved publication metadata currently shown from static data.",
+    status: "Current",
+  },
+  {
+    code: "CC",
+    label: "Certified Copy",
+    detail: "Certified-copy issuance history will be connected later.",
+    status: "Future",
+  },
+];
+
+export default function EGLRevisionHistoryShell({
+  publication,
+}: EGLRevisionHistoryShellProps) {
+  const record = publication as DisplayPublicationRecord;
+  const documentNumber = getPublicationDocumentNumber(publication);
+
+  return (
+    <div className="flex min-h-screen bg-slate-100 text-slate-950">
+      <Sidebar />
+
+      <div className="flex min-h-screen min-w-0 flex-1 flex-col">
+        <Topbar />
+
+        <main className="flex-1 px-5 py-4">
+          <div className="mx-auto max-w-[1500px] space-y-4">
+            <section className="rounded-xl bg-slate-950 px-5 py-5 text-white shadow-sm">
+              <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.36em] text-amber-400">
+                    Hassan Industries
+                  </p>
+
+                  <h1 className="mt-2 text-[26px] font-extrabold uppercase leading-none tracking-wide">
+                    EGL Revision History
+                  </h1>
+
+                  <p className="mt-3 max-w-3xl text-[12px] leading-5 text-slate-200">
+                    Frontend lifecycle and version-history shell for controlled
+                    publication records, future audit trails, certified copies,
+                    supersession records, and document change history.
+                  </p>
+                </div>
+
+                <div className="rounded-lg border border-amber-500/70 bg-slate-900 px-6 py-4 text-center">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-200">
+                    History Status
+                  </p>
+
+                  <p className="mt-2 text-lg font-extrabold text-amber-400">
+                    Shell
+                  </p>
+
+                  <p className="mt-1 text-[11px] text-slate-300">
+                    Frontend Only
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <Link
+                  href={getPublicationRecordHref(documentNumber)}
+                  className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-950 shadow-sm transition hover:border-amber-500 hover:bg-amber-50"
+                >
+                  <ArrowLeft className="h-4 w-4 text-amber-600" />
+                  Back to Record Detail
+                </Link>
+
+                <Link
+                  href="/governance-library"
+                  className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-950 shadow-sm transition hover:border-amber-500 hover:bg-amber-50"
+                >
+                  Back to EGL Dashboard
+                </Link>
+              </div>
+
+              <p className="hidden text-xs font-semibold uppercase tracking-[0.18em] text-slate-400 md:block">
+                Controlled Version History
+              </p>
+            </div>
+
+            <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_380px]">
+              <div className="space-y-4">
+                <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                  <div className="flex items-start gap-4">
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-slate-950">
+                      <BookOpen className="h-7 w-7 text-amber-400" />
+                    </div>
+
+                    <div>
+                      <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-slate-400">
+                        Controlled Record
+                      </p>
+
+                      <h2 className="mt-2 text-2xl font-extrabold text-slate-950">
+                        {documentNumber}
+                      </h2>
+
+                      <p className="mt-2 text-sm font-semibold text-slate-800">
+                        {record.title ?? "Unregistered Publication Record"}
+                      </p>
+
+                      <p className="mt-3 text-xs leading-5 text-slate-600">
+                        Revision history is currently displayed as a frontend
+                        shell. Future backend work will connect this page to
+                        actual version logs, approval events, replacement files,
+                        supersession records, and certified-copy events.
+                      </p>
+                    </div>
+                  </div>
+                </section>
+
+                <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                  <div className="mb-5 flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-950">
+                      <GitBranch className="h-5 w-5 text-amber-400" />
+                    </div>
+
+                    <div>
+                      <h2 className="text-[13px] font-bold uppercase tracking-[0.18em] text-slate-950">
+                        Lifecycle Timeline
+                      </h2>
+
+                      <p className="mt-1 text-xs text-slate-500">
+                        Placeholder timeline for future document lifecycle
+                        events.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    {lifecycleEvents.map((event) => (
+                      <div
+                        key={event.code}
+                        className="grid gap-3 rounded-lg border border-slate-200 bg-slate-50 p-4 md:grid-cols-[80px_minmax(0,1fr)_100px]"
+                      >
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-950 text-xs font-extrabold text-amber-400">
+                          {event.code}
+                        </div>
+
+                        <div>
+                          <p className="text-sm font-extrabold text-slate-950">
+                            {event.label}
+                          </p>
+
+                          <p className="mt-1 text-xs leading-5 text-slate-600">
+                            {event.detail}
+                          </p>
+                        </div>
+
+                        <div className="flex items-start justify-start md:justify-end">
+                          <span className="rounded-full bg-white px-3 py-1 text-[11px] font-bold text-slate-600 ring-1 ring-slate-200">
+                            {event.status}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+
+                <section className="grid gap-4 lg:grid-cols-3">
+                  <HistoryMetric label="Current Version" value={record.version ?? "1.0"} />
+                  <HistoryMetric label="Current Status" value={record.status ?? "AP"} />
+                  <HistoryMetric label="Review Date" value={record.reviewDate ?? "2027-06-18"} />
+                </section>
+              </div>
+
+              <aside className="space-y-4">
+                <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                  <h2 className="text-[13px] font-bold uppercase tracking-[0.18em] text-slate-950">
+                    History Actions
+                  </h2>
+
+                  <div className="mt-4 space-y-2">
+                    <Link
+                      href={getPublicationViewerHref(documentNumber)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      prefetch={false}
+                      className="flex w-full items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 py-3 text-xs font-bold text-white transition hover:bg-slate-800"
+                    >
+                      <BookOpen className="h-4 w-4" />
+                      Open Viewer
+                    </Link>
+
+                    <Link
+                      href={getPublicationRecordHref(documentNumber)}
+                      className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-xs font-bold text-slate-950 transition hover:border-amber-500 hover:bg-amber-50"
+                    >
+                      <ArrowLeft className="h-4 w-4 text-amber-600" />
+                      Return to Record
+                    </Link>
+                  </div>
+                </section>
+
+                <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                  <div className="mb-4 flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-950">
+                      <ShieldCheck className="h-5 w-5 text-amber-400" />
+                    </div>
+
+                    <h2 className="text-[13px] font-bold uppercase tracking-[0.18em] text-slate-950">
+                      Future Controls
+                    </h2>
+                  </div>
+
+                  <ul className="space-y-2 text-xs leading-5 text-slate-600">
+                    <li>• Version events will be system-generated.</li>
+                    <li>• File replacements will create history entries.</li>
+                    <li>• Review decisions will be logged.</li>
+                    <li>• Certified copies will link to source records.</li>
+                    <li>• Superseded records will remain traceable.</li>
+                  </ul>
+                </section>
+
+                <section className="rounded-lg border border-dashed border-slate-300 bg-white p-5 shadow-sm">
+                  <div className="mb-4 flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-950">
+                      <Clock3 className="h-5 w-5 text-amber-400" />
+                    </div>
+
+                    <h2 className="text-[13px] font-bold uppercase tracking-[0.18em] text-slate-950">
+                      Training Note
+                    </h2>
+                  </div>
+
+                  <p className="text-xs leading-5 text-slate-600">
+                    Employees and executives should understand revision history
+                    as the official record of how a controlled publication
+                    changed over time. Future releases should connect this page
+                    to backend audit logs, replacement workflows, certification
+                    workflows, and approval activity.
+                  </p>
+                </section>
+              </aside>
+            </section>
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}
+
+function HistoryMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="flex items-center gap-3">
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-950">
+          <FileCheck2 className="h-4 w-4 text-amber-400" />
+        </div>
+
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">
+            {label}
+          </p>
+
+          <p className="mt-1 text-lg font-extrabold text-slate-950">{value}</p>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -18,6 +18,8 @@ import {
 import {
   getPublicationCertificationHref,
   getPublicationRecordHref,
+  getPublicationReviewRequestHref,
+  getPublicationRevisionHistoryHref,
   getPublicationUploadHref,
   getPublicationViewerHref,
 } from "@/lib/eglPublicationRecords";
@@ -37,6 +39,8 @@ export default function EGLRecordActionControls({
   const viewerHref = getPublicationViewerHref(documentNumber);
   const uploadHref = getPublicationUploadHref(documentNumber);
   const certificationHref = getPublicationCertificationHref(documentNumber);
+  const revisionHistoryHref = getPublicationRevisionHistoryHref(documentNumber);
+  const reviewRequestHref = getPublicationReviewRequestHref(documentNumber);
 
   async function handleCopyDocumentNumber() {
     try {
@@ -130,9 +134,17 @@ export default function EGLRecordActionControls({
           icon={FileCheck2}
         />
 
-        <ActionButton label="View Revision History" icon={GitBranch} />
+        <ActionLink
+          href={revisionHistoryHref}
+          label="View Revision History"
+          icon={GitBranch}
+        />
 
-        <ActionButton label="Request Review" icon={RefreshCcw} />
+        <ActionLink
+          href={reviewRequestHref}
+          label="Request Review"
+          icon={RefreshCcw}
+        />
       </div>
     </section>
   );
@@ -145,7 +157,12 @@ interface ActionLinkProps {
   newTab?: boolean;
 }
 
-function ActionLink({ href, label, icon: Icon, newTab = false }: ActionLinkProps) {
+function ActionLink({
+  href,
+  label,
+  icon: Icon,
+  newTab = false,
+}: ActionLinkProps) {
   return (
     <Link
       href={href}
