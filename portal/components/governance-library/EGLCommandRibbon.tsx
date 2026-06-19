@@ -1,35 +1,37 @@
 export default function EGLCommandRibbon() {
-    return (
-      <div className="rounded-xl bg-[#071426] p-6 text-white shadow">
-        <div className="flex items-start justify-between gap-6">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-400">
-              Hassan Industries
-            </p>
-  
-            <h1 className="mt-2 text-3xl font-bold uppercase tracking-wide">
-              Enterprise Governance Library
-            </h1>
-  
-            <p className="mt-2 max-w-3xl text-sm text-slate-300">
-              Controlled publication system for Hassan Industries governance,
-              administration, treasury, legal, tax, records, correspondence,
-              technology, resolutions, forms, templates, and certified copies.
-            </p>
-          </div>
-  
-          <div className="min-w-56 rounded-lg border border-amber-400/40 bg-white/5 p-4 text-right">
-            <p className="text-xs uppercase tracking-[0.25em] text-slate-300">
-              Operational Mode
-            </p>
-            <p className="mt-2 text-lg font-bold text-amber-400">
-              Foundation Mode
-            </p>
-            <p className="mt-1 text-xs text-slate-400">
-              Governance • Authority • Integrity
-            </p>
-          </div>
+  return (
+    <section className="rounded-xl bg-slate-950 px-5 py-5 text-white shadow-sm">
+      <div className="flex items-center justify-between gap-6">
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-[0.36em] text-amber-400">
+            Hassan Industries
+          </p>
+
+          <h1 className="mt-2 text-[26px] font-extrabold uppercase leading-none tracking-wide">
+            Enterprise Governance Library
+          </h1>
+
+          <p className="mt-3 max-w-3xl text-[12px] leading-5 text-slate-200">
+            Controlled publication system for Hassan Industries governance,
+            administration, treasury, legal, tax, records, correspondence,
+            technology, resolutions, forms, templates, and certified copies.
+          </p>
+        </div>
+
+        <div className="hidden rounded-lg border border-amber-500/70 bg-slate-900 px-7 py-4 text-center lg:block">
+          <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-slate-200">
+            Operational Mode
+          </p>
+
+          <p className="mt-2 text-lg font-extrabold text-amber-400">
+            Foundation Mode
+          </p>
+
+          <p className="mt-1 text-[11px] text-slate-300">
+            Integrity • Governance • Authority
+          </p>
         </div>
       </div>
-    );
-  }
+    </section>
+  );
+}

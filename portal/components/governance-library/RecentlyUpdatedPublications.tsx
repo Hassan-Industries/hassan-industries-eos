@@ -1,73 +1,181 @@
+"use client";
+
 import type { PublicationRecord } from "@/data/governanceLibrary";
 
-type Props = {
+interface RecentlyUpdatedPublicationsProps {
   publications: PublicationRecord[];
-  selectedDocumentNo: string;
+  selectedPublication: PublicationRecord;
   onSelectPublication: (publication: PublicationRecord) => void;
+}
+
+type DisplayPublicationRecord = PublicationRecord & {
+  id?: string;
+  documentId?: string;
+  documentNo?: string;
+  documentNumber?: string;
+  title?: string;
+  series?: string;
+  publicationSeries?: string;
+  status?: string;
+  documentState?: string;
+  version?: string;
+  owner?: string;
+  reviewDate?: string;
 };
 
 export default function RecentlyUpdatedPublications({
   publications,
-  selectedDocumentNo,
+  selectedPublication,
   onSelectPublication,
-}: Props) {
+}: RecentlyUpdatedPublicationsProps) {
   return (
-    <div className="rounded-xl bg-white p-6 shadow">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-bold">Recently Updated Publications</h2>
-        <span className="text-sm text-blue-700">View all publications</span>
+    <section className="min-w-0 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="mb-3 flex items-center justify-between gap-4">
+        <h2 className="text-[13px] font-bold uppercase tracking-[0.18em] text-slate-950">
+          Recently Updated Publications
+        </h2>
+
+        <button
+          type="button"
+          className="whitespace-nowrap text-[11px] font-semibold text-blue-700 hover:text-blue-900"
+        >
+          View All Publications →
+        </button>
       </div>
 
-      <div className="mt-5 overflow-hidden rounded-lg border">
-        <table className="w-full text-left text-sm">
-          <thead className="bg-slate-50 text-xs uppercase text-slate-500">
-            <tr>
-              <th className="p-3">Document No.</th>
-              <th className="p-3">Title</th>
-              <th className="p-3">Series</th>
-              <th className="p-3">Status</th>
-              <th className="p-3">Version</th>
-              <th className="p-3">Owner</th>
+      <div className="overflow-x-auto rounded-md border border-slate-200">
+        <table className="min-w-[760px] w-full border-collapse text-[11px] leading-tight">
+          <thead className="bg-slate-50">
+            <tr className="border-b border-slate-200 text-left uppercase tracking-[0.1em] text-slate-500">
+              <th className="w-[14%] px-2.5 py-2.5 font-bold">Document No.</th>
+              <th className="w-[30%] px-2.5 py-2.5 font-bold">Title</th>
+              <th className="w-[14%] px-2.5 py-2.5 font-bold">Series</th>
+              <th className="w-[10%] px-2.5 py-2.5 font-bold">Status</th>
+              <th className="w-[8%] px-2.5 py-2.5 font-bold">Version</th>
+              <th className="w-[9%] px-2.5 py-2.5 font-bold">Owner</th>
+              <th className="w-[15%] px-2.5 py-2.5 font-bold">Review Date</th>
             </tr>
           </thead>
 
           <tbody>
-            {publications.map((publication) => {
-              const isActive =
-                publication.documentNo === selectedDocumentNo;
-
-              return (
-                <tr
-                  key={publication.documentNo}
-                  onClick={() => onSelectPublication(publication)}
-                  className={`cursor-pointer border-t transition ${
-                    isActive
-                      ? "bg-amber-50"
-                      : "hover:bg-slate-50"
-                  }`}
+            {publications.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={7}
+                  className="px-3 py-7 text-center text-xs text-slate-500"
                 >
-                  <td className="p-3 font-semibold">
-                    {publication.documentNo}
-                  </td>
-                  <td className="p-3">{publication.title}</td>
-                  <td className="p-3">{publication.series}</td>
-                  <td className="p-3">
-                    <span className="rounded bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-700">
-                      {publication.status}
-                    </span>
-                  </td>
-                  <td className="p-3">{publication.version}</td>
-                  <td className="p-3">{publication.owner}</td>
-                </tr>
-              );
-            })}
+                  No publications match the current search.
+                </td>
+              </tr>
+            ) : (
+              publications.map((publication) => {
+                const isSelected =
+                  getPublicationKey(publication) ===
+                  getPublicationKey(selectedPublication);
+
+                return (
+                  <tr
+                    key={getPublicationKey(publication)}
+                    onClick={() => onSelectPublication(publication)}
+                    className={`cursor-pointer border-b border-slate-200 transition last:border-b-0 ${
+                      isSelected
+                        ? "bg-amber-50"
+                        : "bg-white hover:bg-slate-50"
+                    }`}
+                  >
+                    <td className="px-2.5 py-2.5 font-bold text-slate-950">
+                      {getDocumentNumber(publication)}
+                    </td>
+
+                    <td className="px-2.5 py-2.5 font-medium text-slate-950">
+                      {getTitle(publication)}
+                    </td>
+
+                    <td className="px-2.5 py-2.5 text-slate-950">
+                      {getSeries(publication)}
+                    </td>
+
+                    <td className="px-2.5 py-2.5">
+                      <span className="rounded bg-emerald-100 px-2 py-1 text-[10px] font-bold text-emerald-700">
+                        {getStatus(publication)}
+                      </span>
+                    </td>
+
+                    <td className="px-2.5 py-2.5 text-slate-950">
+                      {getVersion(publication)}
+                    </td>
+
+                    <td className="px-2.5 py-2.5 text-slate-950">
+                      {getOwner(publication)}
+                    </td>
+
+                    <td className="px-2.5 py-2.5 text-slate-950">
+                      {getReviewDate(publication)}
+                    </td>
+                  </tr>
+                );
+              })
+            )}
           </tbody>
         </table>
       </div>
-
-      <p className="mt-3 text-xs text-slate-500">
-        Select a publication row to update the Document Profile.
-      </p>
-    </div>
+    </section>
   );
+}
+
+function getRecord(publication: PublicationRecord) {
+  return publication as DisplayPublicationRecord;
+}
+
+function getPublicationKey(publication: PublicationRecord) {
+  const record = getRecord(publication);
+
+  return (
+    record.id ??
+    record.documentId ??
+    record.documentNo ??
+    record.documentNumber ??
+    record.title ??
+    "publication-record"
+  );
+}
+
+function getDocumentNumber(publication: PublicationRecord) {
+  const record = getRecord(publication);
+
+  return (
+    record.documentNo ??
+    record.documentNumber ??
+    record.documentId ??
+    record.id ??
+    "N/A"
+  );
+}
+
+function getTitle(publication: PublicationRecord) {
+  return getRecord(publication).title ?? "Untitled Publication";
+}
+
+function getSeries(publication: PublicationRecord) {
+  const record = getRecord(publication);
+
+  return record.series ?? record.publicationSeries ?? "Unassigned";
+}
+
+function getStatus(publication: PublicationRecord) {
+  const record = getRecord(publication);
+
+  return record.status ?? record.documentState ?? "AP";
+}
+
+function getVersion(publication: PublicationRecord) {
+  return getRecord(publication).version ?? "1.0";
+}
+
+function getOwner(publication: PublicationRecord) {
+  return getRecord(publication).owner ?? "HCA";
+}
+
+function getReviewDate(publication: PublicationRecord) {
+  return getRecord(publication).reviewDate ?? "2027-06-18";
 }

@@ -1,23 +1,62 @@
-import { eglStats, BookOpen } from "@/data/governanceLibrary";
+import {
+  BookOpen,
+  ClipboardCheck,
+  Clock3,
+  FileCheck2,
+  FileText,
+} from "lucide-react";
+
+const stats = [
+  {
+    label: "Active Publications",
+    value: "241",
+    icon: BookOpen,
+  },
+  {
+    label: "Pending Review",
+    value: "23",
+    icon: Clock3,
+  },
+  {
+    label: "Pending Execution",
+    value: "17",
+    icon: ClipboardCheck,
+  },
+  {
+    label: "Certified Copies",
+    value: "89",
+    icon: FileCheck2,
+  },
+  {
+    label: "Active Policies",
+    value: "64",
+    icon: FileText,
+  },
+];
 
 export default function EGLStats() {
   return (
-    <div className="mt-6 grid grid-cols-5 gap-4">
-      {eglStats.map(([label, value, Icon]) => {
-        const IconComponent = Icon as typeof BookOpen;
+    <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+      {stats.map((stat) => {
+        const Icon = stat.icon;
 
         return (
-          <div key={label as string} className="rounded-xl bg-white p-5 shadow">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-500">{label}</p>
-                <p className="mt-2 text-3xl font-bold">{value}</p>
-              </div>
-              <IconComponent className="text-amber-500" size={30} />
+          <div
+            key={stat.label}
+            className="flex min-h-[78px] items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm"
+          >
+            <div>
+              <p className="text-[11px] text-slate-500">{stat.label}</p>
+
+              <p className="mt-1 text-[25px] font-extrabold leading-none text-slate-950">
+                {stat.value}
+              </p>
             </div>
+
+            <Icon className="h-6 w-6 text-amber-500" />
           </div>
         );
       })}
-    </div>
+    </section>
   );
 }
