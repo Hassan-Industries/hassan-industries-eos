@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { BookOpen, Download, Eye } from "lucide-react";
 
 import type { PublicationRecord } from "@/data/governanceLibrary";
@@ -37,6 +38,7 @@ export default function PublicationDetailsPreview({
   publication,
 }: PublicationDetailsPreviewProps) {
   const record = publication as DisplayPublicationRecord;
+  const documentNumber = getDocumentNumber(record);
 
   return (
     <aside className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -55,7 +57,7 @@ export default function PublicationDetailsPreview({
           <BookOpen className="h-8 w-8 text-amber-400" />
 
           <div>
-            <h3 className="text-lg font-bold">{getDocumentNumber(record)}</h3>
+            <h3 className="text-lg font-bold">{documentNumber}</h3>
 
             <p className="mt-1 text-xs text-slate-300">
               {record.title ?? "Untitled Publication"}
@@ -120,7 +122,7 @@ export default function PublicationDetailsPreview({
             />
             <ProfileRow
               label="Related Implementation Project"
-              value={record.relatedImplementationProject ?? "HIEOS-IMP-006E"}
+              value={record.relatedImplementationProject ?? "HIEOS-IMP-006G"}
             />
             <ProfileRow
               label="Classification"
@@ -139,13 +141,15 @@ export default function PublicationDetailsPreview({
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-3">
-        <button
-          type="button"
+        <Link
+          href={`/governance-library/publications/${encodeURIComponent(
+            documentNumber,
+          )}`}
           className="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 py-3 text-sm font-bold text-white transition hover:bg-slate-800"
         >
           <Eye className="h-4 w-4" />
           View Full Record
-        </button>
+        </Link>
 
         <button
           type="button"
