@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import type { PublicationRecord } from "@/data/governanceLibrary";
 
 interface RecentlyUpdatedPublicationsProps {
@@ -35,12 +37,12 @@ export default function RecentlyUpdatedPublications({
           Recently Updated Publications
         </h2>
 
-        <button
-          type="button"
+        <Link
+          href="/governance-library/publications"
           className="whitespace-nowrap text-[11px] font-semibold text-blue-700 hover:text-blue-900"
         >
           View All Publications →
-        </button>
+        </Link>
       </div>
 
       <div className="overflow-x-auto rounded-md border border-slate-200">

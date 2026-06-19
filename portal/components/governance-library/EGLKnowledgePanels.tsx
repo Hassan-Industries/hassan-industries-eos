@@ -1,3 +1,5 @@
+import Link from "next/link";
+import type { ReactNode } from "react";
 import {
   Archive,
   BadgeCheck,
@@ -11,6 +13,8 @@ import {
   GitBranch,
   XCircle,
 } from "lucide-react";
+
+import { eglModuleRoutes } from "@/data/eglModules";
 
 const statusCodes = [
   ["DR", "Draft"],
@@ -47,17 +51,6 @@ const lifecycleBranches = [
   { code: "SP", label: "Superseded", icon: GitBranch },
   { code: "AR", label: "Archived", icon: Archive },
   { code: "VO", label: "Void", icon: XCircle },
-];
-
-const modulePages = [
-  "/governance-library",
-  "/governance-library/publications",
-  "/governance-library/resolutions",
-  "/governance-library/forms",
-  "/governance-library/templates",
-  "/governance-library/certified-copies",
-  "/governance-library/pending-review",
-  "/governance-library/pending-execution",
 ];
 
 export function DocumentStatusCodesPanel() {
@@ -115,16 +108,24 @@ export function RelationshipsPanel() {
         <div className="absolute left-[23%] top-[24%] h-px w-[54%] rotate-45 bg-slate-300" />
         <div className="absolute left-[23%] bottom-[24%] h-px w-[54%] -rotate-45 bg-slate-300" />
 
-        <RelationshipNode className="left-[5%] top-[45%]">Entities</RelationshipNode>
-        <RelationshipNode className="left-[35%] top-[6%]">Resolutions</RelationshipNode>
+        <RelationshipNode className="left-[5%] top-[45%]">
+          Entities
+        </RelationshipNode>
+        <RelationshipNode className="left-[35%] top-[6%]">
+          Resolutions
+        </RelationshipNode>
         <RelationshipNode className="right-[4%] top-[34%]">
           Implementation
         </RelationshipNode>
-        <RelationshipNode className="right-[13%] bottom-[8%]">Registers</RelationshipNode>
+        <RelationshipNode className="right-[13%] bottom-[8%]">
+          Registers
+        </RelationshipNode>
         <RelationshipNode className="left-[34%] bottom-[5%]">
           Certified Copies
         </RelationshipNode>
-        <RelationshipNode className="left-[3%] bottom-[23%]">Forms</RelationshipNode>
+        <RelationshipNode className="left-[3%] bottom-[23%]">
+          Forms
+        </RelationshipNode>
       </div>
     </section>
   );
@@ -196,14 +197,15 @@ export function PlannedModulePagesPanel() {
       <PanelTitle>Planned Module Pages</PanelTitle>
 
       <div className="mt-4 grid gap-2">
-        {modulePages.map((page) => (
-          <div
-            key={page}
-            className="flex items-center gap-2 rounded border border-slate-400 bg-white px-3 py-2 text-[11px] text-slate-950"
+        {eglModuleRoutes.map((route) => (
+          <Link
+            key={route.href}
+            href={route.href}
+            className="flex items-center gap-2 rounded border border-slate-400 bg-white px-3 py-2 text-[11px] text-slate-950 transition hover:border-amber-500 hover:bg-amber-50"
           >
             <FolderArchive className="h-3.5 w-3.5 shrink-0 text-amber-500" />
-            <span className="truncate">{page}</span>
-          </div>
+            <span className="truncate">{route.href}</span>
+          </Link>
         ))}
       </div>
     </section>
@@ -220,7 +222,7 @@ export default function EGLKnowledgePanels() {
   );
 }
 
-function PanelTitle({ children }: { children: React.ReactNode }) {
+function PanelTitle({ children }: { children: ReactNode }) {
   return (
     <h2 className="text-[13px] font-bold uppercase tracking-[0.18em] text-slate-950">
       {children}
@@ -232,7 +234,7 @@ function RelationshipNode({
   children,
   className,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   className: string;
 }) {
   return (
