@@ -488,3 +488,30 @@ Changes
 Impact
 
 Improved EGL operating discipline by requiring intentional record selection before metadata, authority, lifecycle, and action controls are displayed. Established the frontend intake structure needed before backend publication creation, document numbering, file upload, approval routing, Microsoft 365, and SharePoint integrations are introduced.
+
+## HIEOS-IMP-006N
+### EGL Resolutions Registry & Publication Intake Access
+
+Status:
+Completed
+
+Summary
+
+Added a frontend Resolutions Registry and resolution record detail shell while also adding Create New Publication access directly inside the Publications Registry.
+
+Changes
+
+- Added EGL resolution records data layer.
+- Added resolution record routing helpers.
+- Added Resolutions Registry frontend shell.
+- Added no-default-selection behavior for the Resolutions Registry.
+- Added selected resolution preview panel.
+- Added resolution detail page shell.
+- Created `/governance-library/resolutions/[resolutionId]` route.
+- Updated `/governance-library/resolutions` to render the registry list.
+- Added Create New Publication action inside the Publications Registry header.
+- Preserved existing EGL publication record, viewer, upload, certification, revision history, request review, and publication intake routes.
+
+Impact
+
+Expanded the Enterprise Governance Library from publication control into formal governance decision tracking by introducing a controlled frontend registry for resolutions. Improved publication intake access by placing Create New Publication directly inside the Publications Registry where applicable users would reasonably expect it.

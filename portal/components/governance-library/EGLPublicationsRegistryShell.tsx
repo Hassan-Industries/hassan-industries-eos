@@ -1,13 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ElementType } from "react";
 import {
   ArrowLeft,
   BookOpen,
   ClipboardList,
   Eye,
-  FileCheck2,
   FilePlus2,
   FileText,
   GitBranch,
@@ -16,20 +15,9 @@ import {
   Upload,
 } from "lucide-react";
 
-import EGLSelectionPlaceholder from "@/components/governance-library/EGLSelectionPlaceholder";
 import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
-import type { PublicationRecord } from "@/data/governanceLibrary";
-import { publications } from "@/data/governanceLibrary";
-import {
-  getPublicationCertificationHref,
-  getPublicationDocumentNumber,
-  getPublicationRecordHref,
-  getPublicationReviewRequestHref,
-  getPublicationRevisionHistoryHref,
-  getPublicationUploadHref,
-  getPublicationViewerHref,
-} from "@/lib/eglPublicationRecords";
+import { publications, type PublicationRecord } from "@/data/governanceLibrary";
 
 type DisplayPublicationRecord = PublicationRecord & {
   id?: string;
@@ -43,92 +31,69 @@ type DisplayPublicationRecord = PublicationRecord & {
   series?: string;
   publicationSeries?: string;
   category?: string;
-  documentType?: string;
   owner?: string;
   authority?: string;
-  version?: string;
+  version?: string | number;
   status?: string;
+  statusLabel?: string;
   documentState?: string;
-  effectiveDate?: string;
+  documentType?: string;
   reviewDate?: string;
-  originalExecutedLocation?: string;
-  certifiedCopy?: string;
-  supersedes?: string;
-  supersededBy?: string;
-  relatedResolution?: string;
-  relatedImplementationProject?: string;
+  effectiveDate?: string;
   classification?: string;
   retentionCategory?: string;
+  originalExecutedLocation?: string;
+  certifiedCopy?: string;
+  relatedResolution?: string;
+  relatedImplementationProject?: string;
   notes?: string;
 };
 
-const statusFilters = [
-  "All Statuses",
-  "AP",
-  "DR",
-  "RV",
-  "OE",
-  "CC",
-  "SP",
-  "AR",
-  "VO",
+const statusFilters = ["All Statuses", "AP", "DR", "RV", "OE", "CC", "SP", "AR", "VO"];
+const seriesFilters = [
+  "All Series",
+  "Administration",
+  "Treasury",
+  "Governance",
+  "Resolutions",
+  "Corporate Records",
+  "Legal",
+  "Tax",
 ];
-
 const classificationFilters = [
   "All Classifications",
-  "Internal",
   "Internal Governance",
+  "Internal",
   "Confidential",
   "Restricted",
 ];
 
 export default function EGLPublicationsRegistryShell() {
-  const records = publications as DisplayPublicationRecord[];
+  const records = publications.filter(Boolean) as DisplayPublicationRecord[];
 
   const [searchValue, setSearchValue] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Statuses");
   const [seriesFilter, setSeriesFilter] = useState("All Series");
-  const [classificationFilter, setClassificationFilter] = useState(
-    "All Classifications",
-  );
+  const [classificationFilter, setClassificationFilter] =
+    useState("All Classifications");
   const [selectedDocumentNumber, setSelectedDocumentNumber] = useState<
     string | null
   >(null);
-
-  const seriesFilters = useMemo(() => {
-    const seriesValues = records
-      .map((record) => getSeries(record))
-      .filter(Boolean)
-      .sort();
-
-    return ["All Series", ...Array.from(new Set(seriesValues))];
-  }, [records]);
 
   const filteredRecords = useMemo(() => {
     const normalizedSearch = searchValue.trim().toLowerCase();
 
     return records.filter((record) => {
-      const documentNumber = getPublicationDocumentNumber(record);
-      const title = getTitle(record);
-      const series = getSeries(record);
-      const status = getStatus(record);
-      const classification = getClassification(record);
-      const owner = getOwner(record);
-
       const searchText = [
-        documentNumber,
-        title,
-        series,
-        status,
-        classification,
-        owner,
-        record.documentType,
-        record.authority,
-        record.notes,
-        record.description,
-        record.summary,
+        getDocumentNumber(record),
+        getTitle(record),
+        getDescription(record),
+        getSeries(record),
+        getStatus(record),
+        getOwner(record),
+        getAuthority(record),
+        getClassification(record),
       ]
-        .filter(Boolean)
         .join(" ")
         .toLowerCase();
 
@@ -136,14 +101,14 @@ export default function EGLPublicationsRegistryShell() {
         normalizedSearch.length === 0 || searchText.includes(normalizedSearch);
 
       const matchesStatus =
-        statusFilter === "All Statuses" || status === statusFilter;
+        statusFilter === "All Statuses" || getStatus(record) === statusFilter;
 
       const matchesSeries =
-        seriesFilter === "All Series" || series === seriesFilter;
+        seriesFilter === "All Series" || getSeries(record) === seriesFilter;
 
       const matchesClassification =
         classificationFilter === "All Classifications" ||
-        classification === classificationFilter;
+        getClassification(record) === classificationFilter;
 
       return (
         matchesSearch &&
@@ -158,19 +123,13 @@ export default function EGLPublicationsRegistryShell() {
     selectedDocumentNumber === null
       ? null
       : records.find(
-          (record) =>
-            getPublicationDocumentNumber(record) === selectedDocumentNumber,
+          (record) => getDocumentNumber(record) === selectedDocumentNumber,
         ) ?? null;
-
-  const activeDocumentNumber =
-    selectedRecord === null
-      ? null
-      : getPublicationDocumentNumber(selectedRecord);
 
   const approvedCount = records.filter((record) => getStatus(record) === "AP")
     .length;
 
-  const reviewCount = records.filter((record) =>
+  const reviewDraftCount = records.filter((record) =>
     ["DR", "RV"].includes(getStatus(record)),
   ).length;
 
@@ -198,7 +157,7 @@ export default function EGLPublicationsRegistryShell() {
                     Publications Registry
                   </h1>
 
-                  <p className="mt-3 max-w-3xl text-[12px] leading-5 text-slate-200">
+                  <p className="mt-3 max-w-4xl text-[12px] leading-5 text-slate-200">
                     Controlled frontend registry for Enterprise Governance
                     Library publications, manuals, standards, resolutions,
                     policies, templates, and related publication records.
@@ -241,16 +200,19 @@ export default function EGLPublicationsRegistryShell() {
                 value={records.length.toString()}
                 icon={ClipboardList}
               />
+
               <RegistryMetric
                 label="Approved"
                 value={approvedCount.toString()}
-                icon={FileCheck2}
+                icon={FileText}
               />
+
               <RegistryMetric
                 label="Review / Draft"
-                value={reviewCount.toString()}
+                value={reviewDraftCount.toString()}
                 icon={RefreshCcw}
               />
+
               <RegistryMetric
                 label="Original Executed"
                 value={originalExecutedCount.toString()}
@@ -259,7 +221,7 @@ export default function EGLPublicationsRegistryShell() {
             </section>
 
             <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-end">
+              <div className="flex flex-col gap-4 xl:flex-row xl:items-end">
                 <div className="min-w-0 flex-1">
                   <label className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">
                     Search Registry
@@ -335,21 +297,22 @@ export default function EGLPublicationsRegistryShell() {
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2">
-                      <span className="rounded-full bg-amber-100 px-3 py-1 text-[11px] font-bold text-amber-700">
+                    <span className="rounded-full bg-amber-100 px-3 py-1 text-[11px] font-bold text-amber-700">
                       {filteredRecords.length} shown
-                   </span>
+                    </span>
 
-                        <Link
-                          href="/governance-library/publications/new"
-                          className="inline-flex items-center gap-2 rounded-lg bg-slate-950 px-3 py-2 text-[11px] font-bold text-white transition hover:bg-slate-800"
-                        >
-                          <FilePlus2 className="h-3.5 w-3.5 text-amber-400" />
-                          Create New Publication
-                        </Link>
-                      </div>
+                    <Link
+                      href="/governance-library/publications/new"
+                      className="inline-flex items-center gap-2 rounded-lg bg-slate-950 px-3 py-2 text-[11px] font-bold text-white transition hover:bg-slate-800"
+                    >
+                      <FilePlus2 className="h-3.5 w-3.5 text-amber-400" />
+                      Create New Publication
+                    </Link>
+                  </div>
+                </div>
 
                 <div className="overflow-x-auto p-5">
-                  <table className="min-w-[1060px] w-full border-collapse text-left text-xs">
+                  <table className="min-w-[980px] w-full border-collapse text-left text-xs">
                     <thead>
                       <tr className="border-b border-slate-200 bg-slate-50 text-[11px] uppercase tracking-[0.14em] text-slate-500">
                         <th className="px-3 py-3 font-extrabold">
@@ -371,10 +334,9 @@ export default function EGLPublicationsRegistryShell() {
 
                     <tbody>
                       {filteredRecords.map((record) => {
-                        const documentNumber =
-                          getPublicationDocumentNumber(record);
+                        const documentNumber = getDocumentNumber(record);
                         const isSelected =
-                          documentNumber === activeDocumentNumber;
+                          selectedDocumentNumber === documentNumber;
 
                         return (
                           <tr
@@ -397,7 +359,7 @@ export default function EGLPublicationsRegistryShell() {
                               </button>
                             </td>
 
-                            <td className="max-w-[310px] px-3 py-4 align-top">
+                            <td className="max-w-[330px] px-3 py-4 align-top">
                               <button
                                 type="button"
                                 onClick={() =>
@@ -423,34 +385,24 @@ export default function EGLPublicationsRegistryShell() {
                               <StatusBadge status={getStatus(record)} />
                             </td>
 
-                            <td className="px-3 py-4 align-top font-semibold">
-                              {record.version ?? "1.0"}
+                            <td className="px-3 py-4 align-top font-semibold text-slate-950">
+                              {String(record.version ?? "1.0")}
                             </td>
 
-                            <td className="px-3 py-4 align-top font-semibold">
+                            <td className="px-3 py-4 align-top font-semibold text-slate-950">
                               {getOwner(record)}
                             </td>
 
-                            <td className="px-3 py-4 align-top font-semibold">
-                              {record.reviewDate ?? "Pending"}
+                            <td className="px-3 py-4 align-top font-semibold text-slate-950">
+                              {getReviewDate(record)}
                             </td>
 
                             <td className="px-3 py-4 align-top">
-                              <div className="flex justify-end gap-2">
+                              <div className="flex justify-end">
                                 <SmallActionLink
-                                  href={getPublicationRecordHref(
-                                    documentNumber,
-                                  )}
+                                  href={getRecordHref(record)}
                                   label="Record"
                                   icon={Eye}
-                                  newTab
-                                />
-                                <SmallActionLink
-                                  href={getPublicationViewerHref(
-                                    documentNumber,
-                                  )}
-                                  label="Viewer"
-                                  icon={FileText}
                                   newTab
                                 />
                               </div>
@@ -469,7 +421,7 @@ export default function EGLPublicationsRegistryShell() {
 
                       <p className="mt-2 text-xs text-slate-500">
                         Clear filters or search by another document number,
-                        title, owner, series, or status.
+                        owner, series, title, or classification.
                       </p>
                     </div>
                   )}
@@ -480,7 +432,7 @@ export default function EGLPublicationsRegistryShell() {
                 {selectedRecord ? (
                   <PublicationPreviewPanel record={selectedRecord} />
                 ) : (
-                  <EGLSelectionPlaceholder context="registry" />
+                  <PublicationSelectionPlaceholder />
                 )}
 
                 <section className="rounded-lg border border-dashed border-slate-300 bg-white p-5 shadow-sm">
@@ -489,11 +441,11 @@ export default function EGLPublicationsRegistryShell() {
                   </h2>
 
                   <p className="mt-3 text-xs leading-5 text-slate-600">
-                    This registry page is frontend-only. It prepares the
-                    operating pattern for future backend records, role-based
-                    access, workflow queues, document storage, employee
-                    training, approval routing, Microsoft 365, and SharePoint
-                    integrations.
+                    This registry remains frontend-only. Future backend work
+                    should connect this list to stored publication records,
+                    upload workflows, approval routing, audit logs, certified
+                    copy generation, and Microsoft 365 or SharePoint file
+                    locations.
                   </p>
                 </section>
               </aside>
@@ -510,8 +462,6 @@ function PublicationPreviewPanel({
 }: {
   record: DisplayPublicationRecord;
 }) {
-  const documentNumber = getPublicationDocumentNumber(record);
-
   return (
     <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
       <div className="mb-4 flex items-start justify-between gap-4">
@@ -521,7 +471,7 @@ function PublicationPreviewPanel({
           </p>
 
           <h2 className="mt-2 text-xl font-extrabold text-slate-950">
-            {documentNumber}
+            {getDocumentNumber(record)}
           </h2>
 
           <p className="mt-2 text-sm font-bold leading-5 text-slate-800">
@@ -540,6 +490,7 @@ function PublicationPreviewPanel({
             <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-300">
               Controlled Publication
             </p>
+
             <p className="mt-1 text-xs text-slate-200">
               {getClassification(record)}
             </p>
@@ -554,15 +505,9 @@ function PublicationPreviewPanel({
           value={record.documentType ?? "Manual"}
         />
         <PreviewField label="Owner" value={getOwner(record)} />
-        <PreviewField
-          label="Authority"
-          value={record.authority ?? "Hassan Capital Partners, LLC"}
-        />
-        <PreviewField label="Version" value={record.version ?? "1.0"} />
-        <PreviewField
-          label="Review Date"
-          value={record.reviewDate ?? "Pending"}
-        />
+        <PreviewField label="Authority" value={getAuthority(record)} />
+        <PreviewField label="Version" value={String(record.version ?? "1.0")} />
+        <PreviewField label="Review Date" value={getReviewDate(record)} />
         <PreviewField
           label="Retention"
           value={record.retentionCategory ?? "Permanent"}
@@ -571,38 +516,96 @@ function PublicationPreviewPanel({
 
       <div className="mt-4 grid gap-2">
         <ActionLink
-          href={getPublicationRecordHref(documentNumber)}
+          href={getRecordHref(record)}
           label="View Record"
           icon={Eye}
-          newTab
           primary
+          newTab
         />
+
         <ActionLink
-          href={getPublicationViewerHref(documentNumber)}
+          href={`${getRecordHref(record)}/viewer`}
           label="Open Viewer"
           icon={FileText}
           newTab
         />
+
         <ActionLink
-          href={getPublicationUploadHref(documentNumber)}
+          href={`${getRecordHref(record)}/upload-replacement`}
           label="Upload Replacement"
           icon={Upload}
+          newTab
         />
+
         <ActionLink
-          href={getPublicationCertificationHref(documentNumber)}
+          href={`${getRecordHref(record)}/certified-copy`}
           label="Create Certified Copy"
-          icon={FileCheck2}
+          icon={FileText}
+          newTab
         />
+
         <ActionLink
-          href={getPublicationRevisionHistoryHref(documentNumber)}
+          href={`${getRecordHref(record)}/revision-history`}
           label="Revision History"
           icon={GitBranch}
+          newTab
         />
+
         <ActionLink
-          href={getPublicationReviewRequestHref(documentNumber)}
+          href={`${getRecordHref(record)}/request-review`}
           label="Request Review"
           icon={RefreshCcw}
+          newTab
         />
+      </div>
+    </section>
+  );
+}
+
+function PublicationSelectionPlaceholder() {
+  return (
+    <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="mb-4 flex items-start justify-between gap-4">
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-400">
+            Registry Preview
+          </p>
+
+          <h2 className="mt-2 text-lg font-extrabold text-slate-950">
+            No Record Selected
+          </h2>
+
+          <p className="mt-2 text-xs leading-5 text-slate-600">
+            Select a controlled publication record to open its profile,
+            metadata, authority, lifecycle status, and available EGL actions.
+          </p>
+        </div>
+
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-950">
+          <BookOpen className="h-5 w-5 text-amber-400" />
+        </div>
+      </div>
+
+      <div className="rounded-lg bg-slate-950 p-4 text-white">
+        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-300">
+          Controlled Publication Workspace
+        </p>
+
+        <p className="mt-2 text-xs leading-5 text-slate-200">
+          Profiles open only after intentional record selection.
+        </p>
+      </div>
+
+      <div className="mt-4 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4">
+        <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">
+          Training Note
+        </p>
+
+        <p className="mt-2 text-xs leading-5 text-slate-600">
+          Future training materials should describe this registry as the
+          controlled lookup point for publication records before employees or
+          executives perform document actions.
+        </p>
       </div>
     </section>
   );
@@ -615,7 +618,7 @@ function RegistryMetric({
 }: {
   label: string;
   value: string;
-  icon: React.ElementType;
+  icon: ElementType;
 }) {
   return (
     <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
@@ -689,7 +692,7 @@ function ActionLink({
 }: {
   href: string;
   label: string;
-  icon: React.ElementType;
+  icon: ElementType;
   primary?: boolean;
   newTab?: boolean;
 }) {
@@ -719,7 +722,7 @@ function SmallActionLink({
 }: {
   href: string;
   label: string;
-  icon: React.ElementType;
+  icon: ElementType;
   newTab?: boolean;
 }) {
   return (
@@ -736,6 +739,22 @@ function SmallActionLink({
   );
 }
 
+function getDocumentNumber(record: DisplayPublicationRecord) {
+  return (
+    record.documentNumber ??
+    record.documentNo ??
+    record.documentId ??
+    record.id ??
+    "N/A"
+  );
+}
+
+function getRecordHref(record: DisplayPublicationRecord) {
+  return `/governance-library/publications/${encodeURIComponent(
+    getDocumentNumber(record),
+  )}`;
+}
+
 function getTitle(record: DisplayPublicationRecord) {
   return record.title ?? record.name ?? "Untitled Publication";
 }
@@ -744,7 +763,6 @@ function getDescription(record: DisplayPublicationRecord) {
   return (
     record.description ??
     record.summary ??
-    record.notes ??
     "Controlled enterprise publication record."
   );
 }
@@ -758,14 +776,22 @@ function getSeries(record: DisplayPublicationRecord) {
   );
 }
 
-function getOwner(record: DisplayPublicationRecord) {
-  return record.owner ?? "HCA";
-}
-
 function getStatus(record: DisplayPublicationRecord) {
   return record.status ?? "AP";
 }
 
+function getOwner(record: DisplayPublicationRecord) {
+  return record.owner ?? "HCA";
+}
+
+function getAuthority(record: DisplayPublicationRecord) {
+  return record.authority ?? "Hassan Capital Partners, LLC";
+}
+
 function getClassification(record: DisplayPublicationRecord) {
   return record.classification ?? "Internal Governance";
+}
+
+function getReviewDate(record: DisplayPublicationRecord) {
+  return record.reviewDate ?? record.effectiveDate ?? "Pending";
 }

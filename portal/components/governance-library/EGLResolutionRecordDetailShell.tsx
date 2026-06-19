@@ -10,6 +10,7 @@ import {
 
 import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
+import CopyToClipboardButton from "@/components/governance-library/CopyToClipboardButton";
 import { findResolutionRecord } from "@/lib/eglResolutionRecords";
 
 interface EGLResolutionRecordDetailShellProps {
@@ -237,14 +238,11 @@ export default function EGLResolutionRecordDetailShell({
                       <FileText className="h-4 w-4" />
                       Open Related Publication
                     </Link>
-
-                    <button
-                      type="button"
-                      className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-xs font-bold text-slate-950 transition hover:border-amber-500 hover:bg-amber-50"
-                    >
-                      Copy Resolution ID
-                    </button>
-
+                    <CopyToClipboardButton
+                    value={displayRecord.resolutionId}
+                    label="Copy Resolution ID"
+                    copiedLabel="Resolution ID Copied"
+                    />
                     <button
                       type="button"
                       className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-xs font-bold text-slate-950 transition hover:border-amber-500 hover:bg-amber-50"
