@@ -6,7 +6,6 @@ import {
   ArrowLeft,
   BookOpen,
   ClipboardList,
-  Download,
   Eye,
   FileCheck2,
   FileText,
@@ -16,6 +15,7 @@ import {
   Upload,
 } from "lucide-react";
 
+import EGLSelectionPlaceholder from "@/components/governance-library/EGLSelectionPlaceholder";
 import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
 import type { PublicationRecord } from "@/data/governanceLibrary";
@@ -90,9 +90,9 @@ export default function EGLPublicationsRegistryShell() {
   const [classificationFilter, setClassificationFilter] = useState(
     "All Classifications",
   );
-  const [selectedDocumentNumber, setSelectedDocumentNumber] = useState(
-    getPublicationDocumentNumber(records[0]),
-  );
+  const [selectedDocumentNumber, setSelectedDocumentNumber] = useState<
+    string | null
+  >(null);
 
   const seriesFilters = useMemo(() => {
     const seriesValues = records
@@ -154,17 +154,17 @@ export default function EGLPublicationsRegistryShell() {
   }, [classificationFilter, records, searchValue, seriesFilter, statusFilter]);
 
   const selectedRecord =
-    filteredRecords.find(
-      (record) =>
-        getPublicationDocumentNumber(record) === selectedDocumentNumber,
-    ) ??
-    records.find(
-      (record) =>
-        getPublicationDocumentNumber(record) === selectedDocumentNumber,
-    ) ??
-    records[0];
+    selectedDocumentNumber === null
+      ? null
+      : records.find(
+          (record) =>
+            getPublicationDocumentNumber(record) === selectedDocumentNumber,
+        ) ?? null;
 
-  const activeDocumentNumber = getPublicationDocumentNumber(selectedRecord);
+  const activeDocumentNumber =
+    selectedRecord === null
+      ? null
+      : getPublicationDocumentNumber(selectedRecord);
 
   const approvedCount = records.filter((record) => getStatus(record) === "AP")
     .length;
@@ -306,6 +306,7 @@ export default function EGLPublicationsRegistryShell() {
                     setStatusFilter("All Statuses");
                     setSeriesFilter("All Series");
                     setClassificationFilter("All Classifications");
+                    setSelectedDocumentNumber(null);
                   }}
                   className="rounded-lg border border-slate-300 bg-white px-4 py-3 text-xs font-bold text-slate-950 shadow-sm transition hover:border-amber-500 hover:bg-amber-50"
                 >
@@ -398,7 +399,7 @@ export default function EGLPublicationsRegistryShell() {
                                   {getTitle(record)}
                                 </span>
 
-                                <span className="mt-1 block line-clamp-2 text-[11px] leading-4 text-slate-500">
+                                <span className="mt-1 block text-[11px] leading-4 text-slate-500">
                                   {getDescription(record)}
                                 </span>
                               </button>
@@ -466,7 +467,11 @@ export default function EGLPublicationsRegistryShell() {
               </section>
 
               <aside className="space-y-4">
-                <PublicationPreviewPanel record={selectedRecord} />
+                {selectedRecord ? (
+                  <PublicationPreviewPanel record={selectedRecord} />
+                ) : (
+                  <EGLSelectionPlaceholder context="registry" />
+                )}
 
                 <section className="rounded-lg border border-dashed border-slate-300 bg-white p-5 shadow-sm">
                   <h2 className="text-[13px] font-bold uppercase tracking-[0.18em] text-slate-950">

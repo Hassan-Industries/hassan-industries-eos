@@ -463,3 +463,28 @@ Changes
 Impact
 
 Established the operational Publications Registry workspace needed before backend publication records, database pagination, role permissions, workflow queues, upload processing, certified-copy issuance, Microsoft 365, and SharePoint integrations are introduced.
+
+## HIEOS-IMP-006M
+### EGL Selection State & Publication Intake Shell
+
+Status:
+Completed
+
+Summary
+
+Added a frontend Create Publication intake shell and corrected EGL dashboard and Publications Registry selection behavior so document profiles and selected record previews open only after intentional record selection.
+
+Changes
+
+- Added shared EGL selection placeholder component.
+- Added Create New Publication frontend intake shell.
+- Created `/governance-library/publications/new` route.
+- Updated EGL Quick Actions to route Create New Publication to the intake shell.
+- Updated EGL dashboard to avoid opening a default document profile.
+- Updated Publications Registry to avoid opening a default selected record.
+- Added institutional no-selection guidance panels.
+- Preserved EGL dashboard, publications registry, record detail, viewer, upload replacement, certified copy, revision history, and request review behavior.
+
+Impact
+
+Improved EGL operating discipline by requiring intentional record selection before metadata, authority, lifecycle, and action controls are displayed. Established the frontend intake structure needed before backend publication creation, document numbering, file upload, approval routing, Microsoft 365, and SharePoint integrations are introduced.
