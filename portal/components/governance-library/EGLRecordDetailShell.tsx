@@ -1,15 +1,15 @@
 import Link from "next/link";
+import type { ElementType, ReactNode } from "react";
 import {
   ArrowLeft,
   BookOpen,
-  Download,
   FileText,
   History,
-  Layers,
   ShieldCheck,
   Workflow,
 } from "lucide-react";
 
+import EGLRecordActionControls from "@/components/governance-library/EGLRecordActionControls";
 import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
 import type { PublicationRecord } from "@/data/governanceLibrary";
@@ -157,7 +157,11 @@ export default function EGLRecordDetailShell({
                   <RecordPanel title="Record Authority" icon={ShieldCheck}>
                     <RecordField
                       label="Publication Series"
-                      value={record.series ?? record.publicationSeries ?? "Administration"}
+                      value={
+                        record.series ??
+                        record.publicationSeries ??
+                        "Administration"
+                      }
                     />
                     <RecordField
                       label="Document Type"
@@ -175,9 +179,15 @@ export default function EGLRecordDetailShell({
                   </RecordPanel>
 
                   <RecordPanel title="Lifecycle Metadata" icon={History}>
-                    <RecordField label="Version" value={record.version ?? "1.0"} />
+                    <RecordField
+                      label="Version"
+                      value={record.version ?? "1.0"}
+                    />
                     <RecordField label="Status" value={status} />
-                    <RecordField label="Document State" value={documentState} />
+                    <RecordField
+                      label="Document State"
+                      value={documentState}
+                    />
                     <RecordField
                       label="Effective Date"
                       value={record.effectiveDate ?? "2026-06-18"}
@@ -211,7 +221,8 @@ export default function EGLRecordDetailShell({
                     <RelationshipCard
                       label="Original Executed Location"
                       value={
-                        record.originalExecutedLocation ?? "HCA Vault / Originals"
+                        record.originalExecutedLocation ??
+                        "HCA Vault / Originals"
                       }
                     />
                     <RelationshipCard
@@ -233,7 +244,7 @@ export default function EGLRecordDetailShell({
                     <RelationshipCard
                       label="Related Implementation Project"
                       value={
-                        record.relatedImplementationProject ?? "HIEOS-IMP-006G"
+                        record.relatedImplementationProject ?? "HIEOS-IMP-006H"
                       }
                     />
                   </div>
@@ -241,37 +252,10 @@ export default function EGLRecordDetailShell({
               </div>
 
               <aside className="space-y-4">
-                <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-                  <h2 className="text-[13px] font-bold uppercase tracking-[0.18em] text-slate-950">
-                    Record Actions
-                  </h2>
-
-                  <div className="mt-4 space-y-2">
-                    <button
-                      type="button"
-                      className="flex w-full items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 py-3 text-xs font-bold text-white transition hover:bg-slate-800"
-                    >
-                      <FileText className="h-4 w-4" />
-                      View Publication File
-                    </button>
-
-                    <button
-                      type="button"
-                      className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-xs font-bold text-slate-950 transition hover:border-amber-500 hover:bg-amber-50"
-                    >
-                      <Download className="h-4 w-4 text-amber-600" />
-                      Download Copy
-                    </button>
-
-                    <button
-                      type="button"
-                      className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-xs font-bold text-slate-950 transition hover:border-amber-500 hover:bg-amber-50"
-                    >
-                      <Layers className="h-4 w-4 text-amber-600" />
-                      View Revision History
-                    </button>
-                  </div>
-                </section>
+                <EGLRecordActionControls
+                  documentNumber={documentNumber}
+                  context="detail"
+                />
 
                 <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
                   <h2 className="text-[13px] font-bold uppercase tracking-[0.18em] text-slate-950">
@@ -318,8 +302,8 @@ export default function EGLRecordDetailShell({
 
 interface RecordPanelProps {
   title: string;
-  icon: React.ElementType;
-  children: React.ReactNode;
+  icon: ElementType;
+  children: ReactNode;
 }
 
 function RecordPanel({ title, icon: Icon, children }: RecordPanelProps) {
