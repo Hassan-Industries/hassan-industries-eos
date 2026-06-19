@@ -411,3 +411,28 @@ Changes
 Impact
 
 Established the frontend workflow structure needed before real file upload processing, certified-copy generation, approval routing, backend persistence, audit trails, Microsoft 365 integration, and SharePoint storage are introduced.
+
+## HIEOS-IMP-006K
+### EGL Revision History & Review Request Shells
+
+Status:
+Completed
+
+Summary
+
+Created frontend shells for Enterprise Governance Library revision history and review request actions.
+
+Changes
+
+- Added EGL revision history shell component.
+- Added EGL review request shell component.
+- Created Revision History route for controlled publication records.
+- Created Request Review route for controlled publication records.
+- Added route helpers for revision history and review request workflows.
+- Connected Record Detail actions to the new shell routes.
+- Added frontend-only lifecycle timeline, review steps, review reasons, control notes, and training notes.
+- Preserved EGL dashboard, record detail, viewer, upload replacement, and certified copy behavior.
+
+Impact
+
+Established the frontend lifecycle and review-routing structure needed before backend revision history, reviewer assignment, comments, workflow queues, notifications, approval decisions, audit trails, Microsoft 365 version history, and SharePoint versioning are introduced.
