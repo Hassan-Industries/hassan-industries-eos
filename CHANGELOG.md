@@ -291,3 +291,28 @@ The Enterprise Governance Library now behaves more like an operational workspace
 - Preserved publication search behavior.
 - Preserved selected-publication behavior.
 - Preserved static frontend-only implementation scope.
+
+
+## HIEOS-IMP-006F
+### EGL Module Route Shells & Navigation Wiring
+
+Status:
+Completed
+
+Summary
+
+Created frontend route shells for Enterprise Governance Library module pages and connected visible dashboard navigation to those module routes.
+
+Changes
+
+- Added shared EGL module shell component for consistent subpage layout.
+- Added centralized EGL module configuration data.
+- Created Publications, Resolutions, Forms, Templates, Certified Copies, Pending Review, and Pending Execution routes.
+- Connected Planned Module Pages links to actual frontend routes.
+- Connected View All Publications navigation to the Publications route.
+- Connected Quick Actions to relevant EGL module routes.
+- Preserved static frontend-only implementation scope.
+
+Impact
+
+Established the frontend route structure needed before backend registry, document record, workflow, storage, and Microsoft 365 integrations.
