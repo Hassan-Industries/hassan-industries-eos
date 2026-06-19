@@ -1,15 +1,16 @@
 import Link from "next/link";
+import type { ElementType, ReactNode } from "react";
 import {
   ArrowLeft,
   BookOpen,
-  Download,
+  ExternalLink,
   FileText,
   History,
-  Layers,
   ShieldCheck,
   Workflow,
 } from "lucide-react";
 
+import EGLRecordActionControls from "@/components/governance-library/EGLRecordActionControls";
 import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
 import type { PublicationRecord } from "@/data/governanceLibrary";
@@ -54,6 +55,9 @@ export default function EGLRecordDetailShell({
   const title = record.title ?? "Untitled Publication";
   const status = record.status ?? "AP";
   const documentState = record.documentState ?? "Active";
+  const viewerHref = `/governance-library/publications/${encodeURIComponent(
+    documentNumber,
+  )}/viewer`;
 
   return (
     <div className="flex min-h-screen bg-slate-100 text-slate-950">
@@ -157,7 +161,11 @@ export default function EGLRecordDetailShell({
                   <RecordPanel title="Record Authority" icon={ShieldCheck}>
                     <RecordField
                       label="Publication Series"
-                      value={record.series ?? record.publicationSeries ?? "Administration"}
+                      value={
+                        record.series ??
+                        record.publicationSeries ??
+                        "Administration"
+                      }
                     />
                     <RecordField
                       label="Document Type"
@@ -175,9 +183,15 @@ export default function EGLRecordDetailShell({
                   </RecordPanel>
 
                   <RecordPanel title="Lifecycle Metadata" icon={History}>
-                    <RecordField label="Version" value={record.version ?? "1.0"} />
+                    <RecordField
+                      label="Version"
+                      value={record.version ?? "1.0"}
+                    />
                     <RecordField label="Status" value={status} />
-                    <RecordField label="Document State" value={documentState} />
+                    <RecordField
+                      label="Document State"
+                      value={documentState}
+                    />
                     <RecordField
                       label="Effective Date"
                       value={record.effectiveDate ?? "2026-06-18"}
@@ -211,7 +225,8 @@ export default function EGLRecordDetailShell({
                     <RelationshipCard
                       label="Original Executed Location"
                       value={
-                        record.originalExecutedLocation ?? "HCA Vault / Originals"
+                        record.originalExecutedLocation ??
+                        "HCA Vault / Originals"
                       }
                     />
                     <RelationshipCard
@@ -233,7 +248,7 @@ export default function EGLRecordDetailShell({
                     <RelationshipCard
                       label="Related Implementation Project"
                       value={
-                        record.relatedImplementationProject ?? "HIEOS-IMP-006G"
+                        record.relatedImplementationProject ?? "HIEOS-IMP-006I"
                       }
                     />
                   </div>
@@ -241,57 +256,40 @@ export default function EGLRecordDetailShell({
               </div>
 
               <aside className="space-y-4">
-                <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-                  <h2 className="text-[13px] font-bold uppercase tracking-[0.18em] text-slate-950">
-                    Record Actions
-                  </h2>
-
-                  <div className="mt-4 space-y-2">
-                    <button
-                      type="button"
-                      className="flex w-full items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 py-3 text-xs font-bold text-white transition hover:bg-slate-800"
-                    >
-                      <FileText className="h-4 w-4" />
-                      View Publication File
-                    </button>
-
-                    <button
-                      type="button"
-                      className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-xs font-bold text-slate-950 transition hover:border-amber-500 hover:bg-amber-50"
-                    >
-                      <Download className="h-4 w-4 text-amber-600" />
-                      Download Copy
-                    </button>
-
-                    <button
-                      type="button"
-                      className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-xs font-bold text-slate-950 transition hover:border-amber-500 hover:bg-amber-50"
-                    >
-                      <Layers className="h-4 w-4 text-amber-600" />
-                      View Revision History
-                    </button>
-                  </div>
-                </section>
+                <EGLRecordActionControls
+                  documentNumber={documentNumber}
+                  context="detail"
+                />
 
                 <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
                   <h2 className="text-[13px] font-bold uppercase tracking-[0.18em] text-slate-950">
                     File Preview
                   </h2>
 
-                  <div className="mt-4 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-5 text-center">
+                  <Link
+                    href={viewerHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-4 block rounded-lg border border-dashed border-slate-300 bg-slate-50 p-5 text-center transition hover:border-amber-500 hover:bg-amber-50"
+                  >
                     <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-slate-950">
                       <FileText className="h-7 w-7 text-amber-400" />
                     </div>
 
                     <p className="mt-4 text-sm font-bold text-slate-950">
-                      Document viewer pending.
+                      Open document viewer shell.
                     </p>
 
                     <p className="mt-2 text-xs leading-5 text-slate-500">
-                      This shell reserves the frontend space for future PDF,
-                      Office, SharePoint, or internal file preview integration.
+                      Reserved for future PDF, Office, SharePoint, or internal
+                      file preview integration.
                     </p>
-                  </div>
+
+                    <div className="mt-3 inline-flex items-center gap-2 text-xs font-bold text-slate-950">
+                      Open Viewer
+                      <ExternalLink className="h-3.5 w-3.5 text-amber-600" />
+                    </div>
+                  </Link>
                 </section>
 
                 <section className="rounded-lg border border-dashed border-slate-300 bg-white p-5 shadow-sm">
@@ -318,8 +316,8 @@ export default function EGLRecordDetailShell({
 
 interface RecordPanelProps {
   title: string;
-  icon: React.ElementType;
-  children: React.ReactNode;
+  icon: ElementType;
+  children: ReactNode;
 }
 
 function RecordPanel({ title, icon: Icon, children }: RecordPanelProps) {
