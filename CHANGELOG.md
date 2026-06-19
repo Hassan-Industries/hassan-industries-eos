@@ -361,3 +361,29 @@ Changes
 Impact
 
 Established the frontend action-control layer needed before backend file handling, workflow routing, revision history, certified-copy processing, upload/download services, and Microsoft 365 or SharePoint integrations are introduced.
+
+## HIEOS-IMP-006I
+### EGL File Preview Placeholder & Document Viewer Shell
+
+Status:
+Completed
+
+Summary
+
+Created a frontend document viewer shell for Enterprise Governance Library publication records and stabilized the record and viewer routes so they can be tested without uploaded document files.
+
+Changes
+
+- Added EGL document viewer shell component.
+- Created dynamic viewer route at `/governance-library/publications/[documentId]/viewer`.
+- Stabilized the dynamic publication record route at `/governance-library/publications/[documentId]`.
+- Added centralized publication record lookup helpers.
+- Allowed frontend record shells to load from static publication metadata before backend files exist.
+- Connected View Publication File action to the viewer shell.
+- Updated the record detail File Preview card to open the viewer shell.
+- Updated route behavior so missing uploaded files do not cause record detail pages to 404.
+- Preserved EGL dashboard, module route, and record detail behavior.
+
+Impact
+
+Established a testable frontend document viewing workspace before PDF preview, Office document preview, upload/download handling, access controls, Microsoft 365, SharePoint, and backend file storage integrations are introduced.
