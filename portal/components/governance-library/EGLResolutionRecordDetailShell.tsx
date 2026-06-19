@@ -1,0 +1,350 @@
+import Link from "next/link";
+import {
+  ArrowLeft,
+  BookOpen,
+  ClipboardCheck,
+  FileText,
+  Gavel,
+  ShieldCheck,
+} from "lucide-react";
+
+import Sidebar from "@/components/layout/Sidebar";
+import Topbar from "@/components/layout/Topbar";
+import CopyToClipboardButton from "@/components/governance-library/CopyToClipboardButton";
+import { findResolutionRecord } from "@/lib/eglResolutionRecords";
+
+interface EGLResolutionRecordDetailShellProps {
+  resolutionId: string;
+}
+
+export default function EGLResolutionRecordDetailShell({
+  resolutionId,
+}: EGLResolutionRecordDetailShellProps) {
+  const record = findResolutionRecord(resolutionId);
+
+  const displayRecord =
+    record ??
+    ({
+      resolutionId: decodeSafe(resolutionId),
+      title: "Unregistered Resolution Record",
+      summary:
+        "Frontend record shell. No backend registry record or executed resolution file is attached yet.",
+      status: "DR",
+      statusLabel: "Draft",
+      owner: "HCA",
+      authority: "Hassan Industries",
+      version: "Pending",
+      resolutionType: "Resolution Shell",
+      documentState: "Frontend Shell",
+      effectiveDate: "Pending",
+      executionDate: "Pending",
+      reviewDate: "Pending",
+      classification: "Internal Governance",
+      retentionCategory: "Pending",
+      originalExecutedLocation: "No file attached",
+      certifiedCopy: "Not Available",
+      relatedPublication: "N/A",
+      relatedImplementationProject: "HIEOS-IMP-006N",
+      notes:
+        "Placeholder resolution detail route for future backend registry records.",
+    });
+
+  return (
+    <div className="flex min-h-screen bg-slate-100 text-slate-950">
+      <Sidebar />
+
+      <div className="flex min-h-screen min-w-0 flex-1 flex-col">
+        <Topbar />
+
+        <main className="flex-1 px-5 py-4">
+          <div className="mx-auto max-w-[1500px] space-y-4">
+            <section className="rounded-xl bg-slate-950 px-5 py-5 text-white shadow-sm">
+              <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.36em] text-amber-400">
+                    Hassan Industries
+                  </p>
+
+                  <h1 className="mt-2 text-[26px] font-extrabold uppercase leading-none tracking-wide">
+                    EGL Resolution Record
+                  </h1>
+
+                  <p className="mt-3 max-w-4xl text-[12px] leading-5 text-slate-200">
+                    Controlled resolution detail shell for reviewing resolution
+                    authority, execution status, related publications, certified
+                    copy status, lifecycle metadata, and future governance
+                    record actions.
+                  </p>
+                </div>
+
+                <div className="rounded-lg border border-amber-500/70 bg-slate-900 px-6 py-4 text-center">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-200">
+                    Resolution Status
+                  </p>
+
+                  <p className="mt-2 text-lg font-extrabold text-amber-400">
+                    {displayRecord.status}
+                  </p>
+
+                  <p className="mt-1 text-[11px] text-slate-300">
+                    {displayRecord.documentState}
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <Link
+                  href="/governance-library/resolutions"
+                  className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-950 shadow-sm transition hover:border-amber-500 hover:bg-amber-50"
+                >
+                  <ArrowLeft className="h-4 w-4 text-amber-600" />
+                  Back to Resolutions Registry
+                </Link>
+
+                <Link
+                  href="/governance-library"
+                  className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-950 shadow-sm transition hover:border-amber-500 hover:bg-amber-50"
+                >
+                  Back to EGL Dashboard
+                </Link>
+              </div>
+
+              <p className="hidden text-xs font-semibold uppercase tracking-[0.18em] text-slate-400 md:block">
+                Controlled Governance Record
+              </p>
+            </div>
+
+            <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_390px]">
+              <div className="space-y-4">
+                <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                  <div className="flex items-start gap-4">
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-slate-950">
+                      <Gavel className="h-7 w-7 text-amber-400" />
+                    </div>
+
+                    <div>
+                      <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-slate-400">
+                        Resolution Record
+                      </p>
+
+                      <h2 className="mt-2 text-2xl font-extrabold text-slate-950">
+                        {displayRecord.resolutionId}
+                      </h2>
+
+                      <p className="mt-2 text-sm font-bold text-slate-800">
+                        {displayRecord.title}
+                      </p>
+
+                      <p className="mt-3 text-xs leading-5 text-slate-600">
+                        {displayRecord.summary}
+                      </p>
+                    </div>
+                  </div>
+                </section>
+
+                <section className="grid gap-4 lg:grid-cols-2">
+                  <RecordCard title="Resolution Authority" icon={ShieldCheck}>
+                    <DetailField
+                      label="Resolution Type"
+                      value={displayRecord.resolutionType}
+                    />
+                    <DetailField label="Owner" value={displayRecord.owner} />
+                    <DetailField
+                      label="Authority"
+                      value={displayRecord.authority}
+                    />
+                    <DetailField
+                      label="Classification"
+                      value={displayRecord.classification}
+                    />
+                    <DetailField
+                      label="Retention"
+                      value={displayRecord.retentionCategory}
+                    />
+                  </RecordCard>
+
+                  <RecordCard title="Lifecycle Metadata" icon={ClipboardCheck}>
+                    <DetailField label="Version" value={displayRecord.version} />
+                    <DetailField label="Status" value={displayRecord.status} />
+                    <DetailField
+                      label="Status Label"
+                      value={displayRecord.statusLabel}
+                    />
+                    <DetailField
+                      label="Document State"
+                      value={displayRecord.documentState}
+                    />
+                    <DetailField
+                      label="Effective Date"
+                      value={displayRecord.effectiveDate}
+                    />
+                    <DetailField
+                      label="Execution Date"
+                      value={displayRecord.executionDate}
+                    />
+                    <DetailField
+                      label="Review Date"
+                      value={displayRecord.reviewDate}
+                    />
+                  </RecordCard>
+                </section>
+
+                <RecordCard title="Resolution Relationships" icon={BookOpen}>
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <RelationshipBox
+                      label="Related Publication"
+                      value={displayRecord.relatedPublication}
+                    />
+                    <RelationshipBox
+                      label="Related Implementation Project"
+                      value={displayRecord.relatedImplementationProject}
+                    />
+                    <RelationshipBox
+                      label="Original Executed Location"
+                      value={displayRecord.originalExecutedLocation}
+                    />
+                    <RelationshipBox
+                      label="Certified Copy"
+                      value={displayRecord.certifiedCopy}
+                    />
+                  </div>
+                </RecordCard>
+
+                <RecordCard title="Resolution Notes" icon={FileText}>
+                  <p className="text-xs leading-5 text-slate-600">
+                    {displayRecord.notes}
+                  </p>
+                </RecordCard>
+              </div>
+
+              <aside className="space-y-4">
+                <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                  <h2 className="text-[13px] font-bold uppercase tracking-[0.18em] text-slate-950">
+                    Resolution Actions
+                  </h2>
+
+                  <div className="mt-4 grid gap-2">
+                    <Link
+                      href={`/governance-library/publications/${encodeURIComponent(
+                        displayRecord.relatedPublication,
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      prefetch={false}
+                      className="flex w-full items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 py-3 text-xs font-bold text-white transition hover:bg-slate-800"
+                    >
+                      <FileText className="h-4 w-4" />
+                      Open Related Publication
+                    </Link>
+                    <CopyToClipboardButton
+                    value={displayRecord.resolutionId}
+                    label="Copy Resolution ID"
+                    copiedLabel="Resolution ID Copied"
+                    />
+                    <button
+                      type="button"
+                      className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-xs font-bold text-slate-950 transition hover:border-amber-500 hover:bg-amber-50"
+                    >
+                      View Certified Copy
+                    </button>
+
+                    <button
+                      type="button"
+                      className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-xs font-bold text-slate-950 transition hover:border-amber-500 hover:bg-amber-50"
+                    >
+                      Request Governance Review
+                    </button>
+                  </div>
+                </section>
+
+                <section className="rounded-lg border border-dashed border-slate-300 bg-white p-5 shadow-sm">
+                  <h2 className="text-[13px] font-bold uppercase tracking-[0.18em] text-slate-950">
+                    Backend Readiness
+                  </h2>
+
+                  <p className="mt-3 text-xs leading-5 text-slate-600">
+                    This resolution detail page is frontend-only. Future work
+                    should connect this page to executed resolution files,
+                    corporate recordbooks, approval events, certified copies,
+                    officer actions, board decisions, and audit history.
+                  </p>
+                </section>
+
+                <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                  <h2 className="text-[13px] font-bold uppercase tracking-[0.18em] text-slate-950">
+                    Training Note
+                  </h2>
+
+                  <p className="mt-3 text-xs leading-5 text-slate-600">
+                    Employees and executives should understand resolution
+                    records as formal governance evidence. The final backend
+                    version should enforce role-based access, approval
+                    authority, version history, certified-copy handling, and
+                    permanent retention.
+                  </p>
+                </section>
+              </aside>
+            </section>
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}
+
+function RecordCard({
+  title,
+  icon: Icon,
+  children,
+}: {
+  title: string;
+  icon: typeof ShieldCheck;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="mb-4 flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-950">
+          <Icon className="h-5 w-5 text-amber-400" />
+        </div>
+
+        <h2 className="text-[13px] font-bold uppercase tracking-[0.18em] text-slate-950">
+          {title}
+        </h2>
+      </div>
+
+      {children}
+    </section>
+  );
+}
+
+function DetailField({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex justify-between gap-4 border-b border-slate-200 py-2 text-xs last:border-b-0">
+      <dt className="font-bold text-slate-500">{label}</dt>
+      <dd className="text-right font-semibold text-slate-950">{value}</dd>
+    </div>
+  );
+}
+
+function RelationshipBox({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+      <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500">
+        {label}
+      </p>
+
+      <p className="mt-2 text-xs font-bold text-slate-950">{value}</p>
+    </div>
+  );
+}
+
+function decodeSafe(value: string) {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
