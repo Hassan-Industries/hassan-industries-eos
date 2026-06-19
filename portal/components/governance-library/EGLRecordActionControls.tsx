@@ -49,6 +49,7 @@ export default function EGLRecordActionControls({
           href={recordHref}
           target="_blank"
           rel="noopener noreferrer"
+          prefetch={false}
           className="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 py-3 text-sm font-bold text-white transition hover:bg-slate-800"
         >
           <Eye className="h-4 w-4" />
@@ -124,6 +125,7 @@ function ActionLink({ href, label, icon: Icon }: ActionLinkProps) {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
+      prefetch={false}
       className="flex w-full items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 py-3 text-xs font-bold text-white transition hover:bg-slate-800"
     >
       <Icon className="h-4 w-4" />
