@@ -1,101 +1,121 @@
+"use client";
+
+import type { ElementType } from "react";
+import Link from "next/link";
 import {
-  BadgeCheck,
   Building2,
   FileText,
   FolderOpen,
   Gavel,
   Landmark,
   Mail,
-  MonitorCog,
-  ReceiptText,
+  Scale,
+  ScrollText,
+  ShieldCheck,
+  Wrench,
 } from "lucide-react";
 
-const publicationSeries = [
+type PublicationSeriesCard = {
+  title: string;
+  count: string;
+  href: string;
+  icon: ElementType;
+};
+
+const publicationSeries: PublicationSeriesCard[] = [
   {
-    label: "Governance",
+    title: "Governance",
     count: "27 Publications",
-    icon: BadgeCheck,
+    href: "/governance-library/publications?series=Governance",
+    icon: ShieldCheck,
   },
   {
-    label: "Administration",
+    title: "Administration",
     count: "41 Publications",
-    icon: MonitorCog,
+    href: "/governance-library/publications?series=Administration",
+    icon: Wrench,
   },
   {
-    label: "Treasury",
+    title: "Treasury",
     count: "33 Publications",
+    href: "/governance-library/publications?series=Treasury",
     icon: Landmark,
   },
   {
-    label: "Legal",
+    title: "Legal",
     count: "29 Publications",
-    icon: Gavel,
+    href: "/governance-library/publications?series=Legal",
+    icon: Scale,
   },
   {
-    label: "Tax",
+    title: "Tax",
     count: "21 Publications",
-    icon: ReceiptText,
+    href: "/governance-library/publications?series=Tax",
+    icon: ScrollText,
   },
   {
-    label: "Records",
+    title: "Records",
     count: "18 Publications",
+    href: "/governance-library/publications?series=Corporate Records",
     icon: FolderOpen,
   },
   {
-    label: "Correspondence",
+    title: "Correspondence",
     count: "17 Publications",
+    href: "/governance-library/publications?series=Correspondence",
     icon: Mail,
   },
   {
-    label: "Technology",
+    title: "Technology",
     count: "15 Publications",
+    href: "/governance-library/publications?series=Technology",
     icon: Building2,
   },
   {
-    label: "Resolutions",
+    title: "Resolutions",
     count: "12 Publications",
+    href: "/governance-library/resolutions",
     icon: Gavel,
   },
   {
-    label: "Forms & Templates",
+    title: "Forms & Templates",
     count: "28 Publications",
+    href: "/governance-library/forms-templates",
     icon: FileText,
   },
 ];
 
 export default function PublicationSeriesGrid() {
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-      <div className="mb-4 flex items-center justify-between gap-4">
-        <h2 className="text-base font-extrabold text-slate-950">
+    <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="mb-5 flex items-center justify-between gap-4">
+        <h2 className="text-lg font-extrabold text-slate-950">
           Publication Series
         </h2>
 
-        <p className="text-[10px] font-extrabold uppercase tracking-[0.32em] text-slate-400">
+        <p className="hidden text-[11px] font-bold uppercase tracking-[0.32em] text-slate-400 md:block">
           Controlled Categories
         </p>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-3 xl:grid-cols-5">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {publicationSeries.map((series) => {
           const Icon = series.icon;
 
           return (
-            <button
-              key={series.label}
-              type="button"
-              className="flex min-h-[82px] flex-col items-center justify-center rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-center transition hover:border-amber-400 hover:bg-amber-50"
+            <Link
+              key={series.title}
+              href={series.href}
+              className="group flex min-h-[96px] flex-col items-center justify-center rounded-lg border border-slate-200 bg-slate-50 px-3 py-4 text-center transition hover:border-amber-500 hover:bg-amber-50"
             >
-              <Icon className="h-5 w-5 text-amber-500" />
+              <Icon className="h-6 w-6 text-amber-500 transition group-hover:scale-105" />
 
-              <p className="mt-2 text-[11px] font-extrabold uppercase text-slate-950">
-                {series.label}
+              <p className="mt-3 text-xs font-extrabold uppercase text-slate-950">
+                {series.title}
               </p>
 
-              <p className="mt-1 text-[10px] text-slate-500">
-                {series.count}
-              </p>
-            </button>
+              <p className="mt-1 text-[11px] text-slate-500">{series.count}</p>
+            </Link>
           );
         })}
       </div>
