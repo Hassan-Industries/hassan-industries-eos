@@ -3,6 +3,7 @@ import type { ElementType, ReactNode } from "react";
 import {
   ArrowLeft,
   BookOpen,
+  ExternalLink,
   FileText,
   History,
   ShieldCheck,
@@ -13,6 +14,7 @@ import EGLRecordActionControls from "@/components/governance-library/EGLRecordAc
 import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
 import type { PublicationRecord } from "@/data/governanceLibrary";
+import { getPublicationViewerHref } from "@/lib/eglPublicationRecords";
 
 interface EGLRecordDetailShellProps {
   publication: PublicationRecord;
@@ -54,6 +56,7 @@ export default function EGLRecordDetailShell({
   const title = record.title ?? "Untitled Publication";
   const status = record.status ?? "AP";
   const documentState = record.documentState ?? "Active";
+  const viewerHref = getPublicationViewerHref(documentNumber);
 
   return (
     <div className="flex min-h-screen bg-slate-100 text-slate-950">
@@ -244,7 +247,7 @@ export default function EGLRecordDetailShell({
                     <RelationshipCard
                       label="Related Implementation Project"
                       value={
-                        record.relatedImplementationProject ?? "HIEOS-IMP-006H"
+                        record.relatedImplementationProject ?? "HIEOS-IMP-006I"
                       }
                     />
                   </div>
@@ -262,20 +265,31 @@ export default function EGLRecordDetailShell({
                     File Preview
                   </h2>
 
-                  <div className="mt-4 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-5 text-center">
+                  <Link
+                    href={viewerHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    prefetch={false}
+                    className="mt-4 block rounded-lg border border-dashed border-slate-300 bg-slate-50 p-5 text-center transition hover:border-amber-500 hover:bg-amber-50"
+                  >
                     <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-slate-950">
                       <FileText className="h-7 w-7 text-amber-400" />
                     </div>
 
                     <p className="mt-4 text-sm font-bold text-slate-950">
-                      Document viewer pending.
+                      Open document viewer shell.
                     </p>
 
                     <p className="mt-2 text-xs leading-5 text-slate-500">
-                      This shell reserves the frontend space for future PDF,
-                      Office, SharePoint, or internal file preview integration.
+                      Reserved for future PDF, Office, SharePoint, or internal
+                      file preview integration.
                     </p>
-                  </div>
+
+                    <div className="mt-3 inline-flex items-center gap-2 text-xs font-bold text-slate-950">
+                      Open Viewer
+                      <ExternalLink className="h-3.5 w-3.5 text-amber-600" />
+                    </div>
+                  </Link>
                 </section>
 
                 <section className="rounded-lg border border-dashed border-slate-300 bg-white p-5 shadow-sm">
