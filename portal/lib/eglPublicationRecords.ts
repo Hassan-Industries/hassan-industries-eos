@@ -70,6 +70,14 @@ export function getPublicationCertificationHref(documentNumber: string) {
   return `${getPublicationRecordHref(documentNumber)}/certified-copy`;
 }
 
+export function getPublicationRevisionHistoryHref(documentNumber: string) {
+  return `${getPublicationRecordHref(documentNumber)}/revision-history`;
+}
+
+export function getPublicationReviewRequestHref(documentNumber: string) {
+  return `${getPublicationRecordHref(documentNumber)}/request-review`;
+}
+
 export function getPublicationStaticParams() {
   return publications.map((publication) => ({
     documentId: getPublicationDocumentNumber(publication),
@@ -109,7 +117,7 @@ function createFrontendPlaceholderRecord(documentNumber: string) {
     supersedes: "N/A",
     supersededBy: "N/A",
     relatedResolution: "N/A",
-    relatedImplementationProject: "HIEOS-IMP-006J",
+    relatedImplementationProject: "HIEOS-IMP-006K",
     classification: "Internal Governance",
     retentionCategory: "Pending",
     notes:
