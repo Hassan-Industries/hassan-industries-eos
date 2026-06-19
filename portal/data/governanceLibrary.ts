@@ -232,3 +232,117 @@ export const principles = [
 ];
 
 export { BookOpen };
+
+export type PublicationStatus = "Active" | "Draft" | "Pending Review" | "Archived";
+
+export type PublicationClassification =
+  | "Public"
+  | "Internal"
+  | "Confidential"
+  | "Restricted";
+
+export type PublicationCategory =
+  | "Administration"
+  | "Governance"
+  | "Treasury"
+  | "Legal"
+  | "Tax"
+  | "Corporate Records"
+  | "Correspondence";
+
+export interface GovernancePublication {
+  id: string;
+  documentId: string;
+  title: string;
+  summary: string;
+  category: PublicationCategory;
+  status: PublicationStatus;
+  classification: PublicationClassification;
+  owner: string;
+  version: string;
+  effectiveDate: string;
+  lastUpdated: string;
+}
+
+export const governancePublications: GovernancePublication[] = [
+  {
+    id: "hi-adm-001",
+    documentId: "HI-ADM-001",
+    title: "Enterprise Document Control & Information Governance Standard",
+    summary:
+      "Central administrative standard governing document numbering, classifications, formatting, revision control, ownership, retention, and enterprise records management.",
+    category: "Administration",
+    status: "Active",
+    classification: "Internal",
+    owner: "Hassan Industries Administration",
+    version: "v1.0",
+    effectiveDate: "2026-06-01",
+    lastUpdated: "2026-06-18",
+  },
+  {
+    id: "hi-tre-001",
+    documentId: "HI-TRE-001",
+    title: "Enterprise Treasury Policy",
+    summary:
+      "Treasury policy governing banking, internal transfers, approvals, reconciliations, and enterprise financial controls.",
+    category: "Treasury",
+    status: "Active",
+    classification: "Confidential",
+    owner: "Enterprise Treasury",
+    version: "v1.0",
+    effectiveDate: "2026-06-01",
+    lastUpdated: "2026-06-14",
+  },
+  {
+    id: "hi-gov-001",
+    documentId: "HI-GOV-001",
+    title: "Enterprise Governance Library Charter",
+    summary:
+      "Foundational governance charter defining the purpose, structure, authority, and publication standards of the Enterprise Governance Library.",
+    category: "Governance",
+    status: "Draft",
+    classification: "Internal",
+    owner: "Enterprise Governance",
+    version: "v0.1",
+    effectiveDate: "Pending",
+    lastUpdated: "2026-06-18",
+  },
+  {
+    id: "hi-cor-001",
+    documentId: "HI-COR-001",
+    title: "Corporate Records Retention Schedule",
+    summary:
+      "Administrative records schedule defining retention expectations for entity records, governance records, tax records, contracts, and correspondence.",
+    category: "Corporate Records",
+    status: "Pending Review",
+    classification: "Internal",
+    owner: "Corporate Records",
+    version: "v0.1",
+    effectiveDate: "Pending",
+    lastUpdated: "2026-06-18",
+  },
+];
+
+export const publicationStatuses: PublicationStatus[] = [
+  "Active",
+  "Draft",
+  "Pending Review",
+  "Archived",
+];
+
+export const publicationCategories: PublicationCategory[] = [
+  "Administration",
+  "Governance",
+  "Treasury",
+  "Legal",
+  "Tax",
+  "Corporate Records",
+  "Correspondence",
+];
+
+export const publicationClassifications: PublicationClassification[] = [
+  "Public",
+  "Internal",
+  "Confidential",
+  "Restricted",
+];
