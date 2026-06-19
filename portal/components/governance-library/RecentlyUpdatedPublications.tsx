@@ -1,13 +1,14 @@
 "use client";
 
-import Link from "next/link";
-
+import type { Dispatch, SetStateAction } from "react";
 import type { PublicationRecord } from "@/data/governanceLibrary";
+import { getPublicationDocumentNumber } from "@/lib/eglPublicationRecords";
 
 interface RecentlyUpdatedPublicationsProps {
   publications: PublicationRecord[];
-  selectedPublication: PublicationRecord;
-  onSelectPublication: (publication: PublicationRecord) => void;
+  selectedPublication?: PublicationRecord | null;
+  setSelectedPublication?: Dispatch<SetStateAction<PublicationRecord | null>>;
+  onSelectPublication?: (publication: PublicationRecord) => void;
 }
 
 type DisplayPublicationRecord = PublicationRecord & {
@@ -16,168 +17,187 @@ type DisplayPublicationRecord = PublicationRecord & {
   documentNo?: string;
   documentNumber?: string;
   title?: string;
+  name?: string;
+  description?: string;
+  summary?: string;
   series?: string;
   publicationSeries?: string;
-  status?: string;
-  documentState?: string;
-  version?: string;
+  category?: string;
   owner?: string;
+  version?: string | number;
+  status?: string;
   reviewDate?: string;
+  lastUpdated?: string;
+  updatedAt?: string;
 };
 
 export default function RecentlyUpdatedPublications({
   publications,
-  selectedPublication,
+  selectedPublication = null,
+  setSelectedPublication,
   onSelectPublication,
 }: RecentlyUpdatedPublicationsProps) {
-  return (
-    <section className="min-w-0 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-      <div className="mb-3 flex items-center justify-between gap-4">
-        <h2 className="text-[13px] font-bold uppercase tracking-[0.18em] text-slate-950">
-          Recently Updated Publications
-        </h2>
+  const records = publications.filter(isPublicationRecord);
 
-        <Link
+  const selectedKey = selectedPublication
+    ? getPublicationKey(selectedPublication as DisplayPublicationRecord)
+    : null;
+
+  function handleSelect(record: PublicationRecord) {
+    if (setSelectedPublication) {
+      setSelectedPublication(record);
+    }
+
+    if (onSelectPublication) {
+      onSelectPublication(record);
+    }
+  }
+
+  return (
+    <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="mb-4 flex items-start justify-between gap-4">
+        <div>
+          <h2 className="text-[13px] font-bold uppercase tracking-[0.22em] text-slate-950">
+            Recently Updated Publications
+          </h2>
+        </div>
+
+        <a
           href="/governance-library/publications"
-          className="whitespace-nowrap text-[11px] font-semibold text-blue-700 hover:text-blue-900"
+          className="text-xs font-bold text-blue-700 hover:text-amber-700"
         >
           View All Publications →
-        </Link>
+        </a>
       </div>
 
-      <div className="overflow-x-auto rounded-md border border-slate-200">
-        <table className="min-w-[760px] w-full border-collapse text-[11px] leading-tight">
-          <thead className="bg-slate-50">
-            <tr className="border-b border-slate-200 text-left uppercase tracking-[0.1em] text-slate-500">
-              <th className="w-[14%] px-2.5 py-2.5 font-bold">Document No.</th>
-              <th className="w-[30%] px-2.5 py-2.5 font-bold">Title</th>
-              <th className="w-[14%] px-2.5 py-2.5 font-bold">Series</th>
-              <th className="w-[10%] px-2.5 py-2.5 font-bold">Status</th>
-              <th className="w-[8%] px-2.5 py-2.5 font-bold">Version</th>
-              <th className="w-[9%] px-2.5 py-2.5 font-bold">Owner</th>
-              <th className="w-[15%] px-2.5 py-2.5 font-bold">Review Date</th>
+      <div className="overflow-x-auto">
+        <table className="min-w-[760px] w-full border-collapse text-left text-xs">
+          <thead>
+            <tr className="border-b border-slate-200 bg-slate-50 text-[11px] uppercase tracking-[0.14em] text-slate-500">
+              <th className="px-3 py-3 font-extrabold">Document No.</th>
+              <th className="px-3 py-3 font-extrabold">Title</th>
+              <th className="px-3 py-3 font-extrabold">Series</th>
+              <th className="px-3 py-3 font-extrabold">Status</th>
+              <th className="px-3 py-3 font-extrabold">Version</th>
+              <th className="px-3 py-3 font-extrabold">Owner</th>
+              <th className="px-3 py-3 font-extrabold">Review Date</th>
             </tr>
           </thead>
 
           <tbody>
-            {publications.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={7}
-                  className="px-3 py-7 text-center text-xs text-slate-500"
+            {records.map((publication) => {
+              const record = publication as DisplayPublicationRecord;
+              const recordKey = getPublicationKey(record);
+              const isSelected = selectedKey === recordKey;
+
+              return (
+                <tr
+                  key={recordKey}
+                  onClick={() => handleSelect(publication)}
+                  className={`cursor-pointer border-b border-slate-200 transition last:border-b-0 ${
+                    isSelected ? "bg-amber-50" : "bg-white hover:bg-slate-50"
+                  }`}
                 >
-                  No publications match the current search.
-                </td>
-              </tr>
-            ) : (
-              publications.map((publication) => {
-                const isSelected =
-                  getPublicationKey(publication) ===
-                  getPublicationKey(selectedPublication);
+                  <td className="px-3 py-4 align-top font-extrabold text-slate-950">
+                    {getPublicationDocumentNumber(record)}
+                  </td>
 
-                return (
-                  <tr
-                    key={getPublicationKey(publication)}
-                    onClick={() => onSelectPublication(publication)}
-                    className={`cursor-pointer border-b border-slate-200 transition last:border-b-0 ${
-                      isSelected
-                        ? "bg-amber-50"
-                        : "bg-white hover:bg-slate-50"
-                    }`}
-                  >
-                    <td className="px-2.5 py-2.5 font-bold text-slate-950">
-                      {getDocumentNumber(publication)}
-                    </td>
+                  <td className="max-w-[260px] px-3 py-4 align-top">
+                    <p className="font-bold leading-5 text-slate-950">
+                      {getTitle(record)}
+                    </p>
 
-                    <td className="px-2.5 py-2.5 font-medium text-slate-950">
-                      {getTitle(publication)}
-                    </td>
+                    <p className="mt-1 text-[11px] leading-4 text-slate-500">
+                      {getDescription(record)}
+                    </p>
+                  </td>
 
-                    <td className="px-2.5 py-2.5 text-slate-950">
-                      {getSeries(publication)}
-                    </td>
+                  <td className="px-3 py-4 align-top font-semibold text-slate-700">
+                    {getSeries(record)}
+                  </td>
 
-                    <td className="px-2.5 py-2.5">
-                      <span className="rounded bg-emerald-100 px-2 py-1 text-[10px] font-bold text-emerald-700">
-                        {getStatus(publication)}
-                      </span>
-                    </td>
+                  <td className="px-3 py-4 align-top">
+                    <span className="inline-flex min-w-9 items-center justify-center rounded-md bg-emerald-100 px-2 py-1 text-[11px] font-extrabold text-emerald-700">
+                      {getStatus(record)}
+                    </span>
+                  </td>
 
-                    <td className="px-2.5 py-2.5 text-slate-950">
-                      {getVersion(publication)}
-                    </td>
+                  <td className="px-3 py-4 align-top font-semibold text-slate-950">
+                    {String(record.version ?? "1.0")}
+                  </td>
 
-                    <td className="px-2.5 py-2.5 text-slate-950">
-                      {getOwner(publication)}
-                    </td>
+                  <td className="px-3 py-4 align-top font-semibold text-slate-950">
+                    {record.owner ?? "HCA"}
+                  </td>
 
-                    <td className="px-2.5 py-2.5 text-slate-950">
-                      {getReviewDate(publication)}
-                    </td>
-                  </tr>
-                );
-              })
-            )}
+                  <td className="px-3 py-4 align-top font-semibold text-slate-950">
+                    {record.reviewDate ?? record.lastUpdated ?? "Pending"}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
+
+        {records.length === 0 && (
+          <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-6 text-center">
+            <p className="text-sm font-extrabold text-slate-950">
+              No recently updated publications available.
+            </p>
+
+            <p className="mt-2 text-xs text-slate-500">
+              Future backend integration will populate this table from the
+              publication registry and document activity log.
+            </p>
+          </div>
+        )}
       </div>
+
+      <p className="mt-4 text-[11px] leading-4 text-slate-500">
+        Select a publication row to update the Document Profile panel.
+      </p>
     </section>
   );
 }
 
-function getRecord(publication: PublicationRecord) {
-  return publication as DisplayPublicationRecord;
+function isPublicationRecord(
+  record: PublicationRecord | null | undefined,
+): record is PublicationRecord {
+  return Boolean(record);
 }
 
-function getPublicationKey(publication: PublicationRecord) {
-  const record = getRecord(publication);
-
+function getPublicationKey(record: DisplayPublicationRecord) {
   return (
     record.id ??
     record.documentId ??
     record.documentNo ??
     record.documentNumber ??
-    record.title ??
-    "publication-record"
+    getPublicationDocumentNumber(record) ??
+    getTitle(record)
   );
 }
 
-function getDocumentNumber(publication: PublicationRecord) {
-  const record = getRecord(publication);
+function getTitle(record: DisplayPublicationRecord) {
+  return record.title ?? record.name ?? "Untitled Publication";
+}
 
+function getDescription(record: DisplayPublicationRecord) {
   return (
-    record.documentNo ??
-    record.documentNumber ??
-    record.documentId ??
-    record.id ??
-    "N/A"
+    record.description ??
+    record.summary ??
+    "Controlled enterprise publication record."
   );
 }
 
-function getTitle(publication: PublicationRecord) {
-  return getRecord(publication).title ?? "Untitled Publication";
+function getSeries(record: DisplayPublicationRecord) {
+  return (
+    record.series ??
+    record.publicationSeries ??
+    record.category ??
+    "Administration"
+  );
 }
 
-function getSeries(publication: PublicationRecord) {
-  const record = getRecord(publication);
-
-  return record.series ?? record.publicationSeries ?? "Unassigned";
-}
-
-function getStatus(publication: PublicationRecord) {
-  const record = getRecord(publication);
-
-  return record.status ?? record.documentState ?? "AP";
-}
-
-function getVersion(publication: PublicationRecord) {
-  return getRecord(publication).version ?? "1.0";
-}
-
-function getOwner(publication: PublicationRecord) {
-  return getRecord(publication).owner ?? "HCA";
-}
-
-function getReviewDate(publication: PublicationRecord) {
-  return getRecord(publication).reviewDate ?? "2027-06-18";
+function getStatus(record: DisplayPublicationRecord) {
+  return record.status ?? "AP";
 }

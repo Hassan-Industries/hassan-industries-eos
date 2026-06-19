@@ -40,8 +40,8 @@ type SearchablePublicationRecord = PublicationRecord & {
 };
 
 export default function GovernanceLibraryPage() {
-  const [selectedPublication, setSelectedPublication] =
-    useState<PublicationRecord>(publications[0]);
+ const [selectedPublication, setSelectedPublication] =
+  useState<PublicationRecord | null>(null);
 
   const [searchTerm, setSearchTerm] = useState("");
 

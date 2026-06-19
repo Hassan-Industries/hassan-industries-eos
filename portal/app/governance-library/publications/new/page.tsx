@@ -1,0 +1,5 @@
+import EGLCreatePublicationShell from "@/components/governance-library/EGLCreatePublicationShell";
+
+export default function CreatePublicationPage() {
+  return <EGLCreatePublicationShell />;
+}
