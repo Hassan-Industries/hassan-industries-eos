@@ -1,0 +1,752 @@
+"use client";
+
+import Link from "next/link";
+import { useMemo, useState, type ElementType } from "react";
+import {
+  ArrowLeft,
+  BookOpen,
+  ClipboardCheck,
+  ClipboardList,
+  FileCheck2,
+  FilePlus2,
+  FileText,
+  FolderOpen,
+  Search,
+  ShieldCheck,
+} from "lucide-react";
+
+import Sidebar from "@/components/layout/Sidebar";
+import Topbar from "@/components/layout/Topbar";
+import CopyToClipboardButton from "@/components/governance-library/CopyToClipboardButton";
+import {
+  eglFormRecords,
+  eglTemplateRecords,
+  type EGLFormsTemplatesRegistryRecord,
+} from "@/data/eglFormsTemplates";
+
+type RegistryMode = "forms" | "templates";
+
+type RegistryConfig = {
+  mode: RegistryMode;
+  title: string;
+  eyebrow: string;
+  description: string;
+  statusLabel: string;
+  statusSubLabel: string;
+  rightLabel: string;
+  tableTitle: string;
+  tableSubtitle: string;
+  searchLabel: string;
+  searchPlaceholder: string;
+  emptyTitle: string;
+  emptyBody: string;
+  workspaceLabel: string;
+  primaryActionLabel: string;
+  records: EGLFormsTemplatesRegistryRecord[];
+};
+
+const configs: Record<RegistryMode, RegistryConfig> = {
+  forms: {
+    mode: "forms",
+    title: "Forms Registry",
+    eyebrow: "Hassan Industries",
+    description:
+      "Controlled frontend registry for Enterprise Governance Library forms, intake packets, review forms, certification requests, and workflow-ready document-control forms.",
+    statusLabel: "Frontend List",
+    statusSubLabel: "Forms Data Layer",
+    rightLabel: "Controlled Forms",
+    tableTitle: "Forms Registry",
+    tableSubtitle:
+      "Select a form record to preview authority, usage, linked publication, and future workflow controls.",
+    searchLabel: "Search Forms",
+    searchPlaceholder:
+      "Search by form ID, title, owner, series, usage, linked publication, or status...",
+    emptyTitle: "No Form Selected",
+    emptyBody:
+      "Select a controlled form record to open its metadata, authority, lifecycle status, and future form actions.",
+    workspaceLabel: "Controlled Form Workspace",
+    primaryActionLabel: "Prepare New Form",
+    records: eglFormRecords,
+  },
+  templates: {
+    mode: "templates",
+    title: "Templates Registry",
+    eyebrow: "Hassan Industries",
+    description:
+      "Controlled frontend registry for Enterprise Governance Library templates, manual templates, policy templates, resolution templates, certified-copy templates, and executive briefing formats.",
+    statusLabel: "Frontend List",
+    statusSubLabel: "Templates Data Layer",
+    rightLabel: "Controlled Templates",
+    tableTitle: "Templates Registry",
+    tableSubtitle:
+      "Select a template record to preview authority, usage, linked publication, and future generation controls.",
+    searchLabel: "Search Templates",
+    searchPlaceholder:
+      "Search by template ID, title, owner, series, usage, linked publication, or status...",
+    emptyTitle: "No Template Selected",
+    emptyBody:
+      "Select a controlled template record to open its metadata, authority, lifecycle status, and future template actions.",
+    workspaceLabel: "Controlled Template Workspace",
+    primaryActionLabel: "Prepare New Template",
+    records: eglTemplateRecords,
+  },
+};
+
+const statusFilters = ["All Statuses", "AP", "DR", "RV", "OE", "CC", "SP", "AR", "VO"];
+
+export default function EGLFormsTemplatesRegistryShell({
+  moduleType,
+}: {
+  moduleType: RegistryMode;
+}) {
+  const config = configs[moduleType];
+  const records = config.records;
+
+  const ownerFilters = useMemo(() => {
+    const owners = Array.from(new Set(records.map((record) => record.owner)));
+    return ["All Owners", ...owners];
+  }, [records]);
+
+  const seriesFilters = useMemo(() => {
+    const series = Array.from(new Set(records.map((record) => record.series)));
+    return ["All Series", ...series];
+  }, [records]);
+
+  const [searchValue, setSearchValue] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All Statuses");
+  const [ownerFilter, setOwnerFilter] = useState("All Owners");
+  const [seriesFilter, setSeriesFilter] = useState("All Series");
+  const [selectedRecordId, setSelectedRecordId] = useState<string | null>(null);
+
+  const filteredRecords = useMemo(() => {
+    const normalizedSearch = searchValue.trim().toLowerCase();
+
+    return records.filter((record) => {
+      const searchText = [
+        record.recordId,
+        record.title,
+        record.description,
+        record.registryType,
+        record.series,
+        record.status,
+        record.statusLabel,
+        record.owner,
+        record.authority,
+        record.classification,
+        record.linkedPublication,
+        record.usage,
+        record.notes,
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      const matchesSearch =
+        normalizedSearch.length === 0 || searchText.includes(normalizedSearch);
+
+      const matchesStatus =
+        statusFilter === "All Statuses" || record.status === statusFilter;
+
+      const matchesOwner =
+        ownerFilter === "All Owners" || record.owner === ownerFilter;
+
+      const matchesSeries =
+        seriesFilter === "All Series" || record.series === seriesFilter;
+
+      return matchesSearch && matchesStatus && matchesOwner && matchesSeries;
+    });
+  }, [ownerFilter, records, searchValue, seriesFilter, statusFilter]);
+
+  const selectedRecord =
+    selectedRecordId === null
+      ? null
+      : records.find((record) => record.recordId === selectedRecordId) ?? null;
+
+  const draftCount = records.filter((record) => record.status === "DR").length;
+  const governanceCount = records.filter(
+    (record) => record.classification === "Internal Governance",
+  ).length;
+  const permanentCount = records.filter(
+    (record) => record.retention === "Permanent",
+  ).length;
+
+  return (
+    <div className="flex min-h-screen bg-slate-100 text-slate-950">
+      <Sidebar />
+
+      <div className="flex min-h-screen min-w-0 flex-1 flex-col">
+        <Topbar />
+
+        <main className="flex-1 px-5 py-4">
+          <div className="mx-auto max-w-[1500px] space-y-4">
+            <section className="rounded-xl bg-slate-950 px-5 py-5 text-white shadow-sm">
+              <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.36em] text-amber-400">
+                    {config.eyebrow}
+                  </p>
+
+                  <h1 className="mt-2 text-[26px] font-extrabold uppercase leading-none tracking-wide">
+                    {config.title}
+                  </h1>
+
+                  <p className="mt-3 max-w-5xl text-[12px] leading-5 text-slate-200">
+                    {config.description}
+                  </p>
+                </div>
+
+                <div className="rounded-lg border border-amber-500/70 bg-slate-900 px-6 py-4 text-center">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-200">
+                    Registry Status
+                  </p>
+
+                  <p className="mt-2 text-lg font-extrabold text-amber-400">
+                    {config.statusLabel}
+                  </p>
+
+                  <p className="mt-1 text-[11px] text-slate-300">
+                    {config.statusSubLabel}
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <Link
+                href="/governance-library"
+                className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-950 shadow-sm transition hover:border-amber-500 hover:bg-amber-50"
+              >
+                <ArrowLeft className="h-4 w-4 text-amber-600" />
+                Back to EGL Dashboard
+              </Link>
+
+              <p className="hidden text-xs font-semibold uppercase tracking-[0.18em] text-slate-400 md:block">
+                {config.rightLabel}
+              </p>
+            </div>
+
+            <section className="grid gap-3 md:grid-cols-4">
+              <RegistryMetric
+                label="Registry Records"
+                value={records.length.toString()}
+                icon={ClipboardList}
+              />
+
+              <RegistryMetric
+                label="Draft Records"
+                value={draftCount.toString()}
+                icon={FileText}
+              />
+
+              <RegistryMetric
+                label="Governance Controlled"
+                value={governanceCount.toString()}
+                icon={ShieldCheck}
+              />
+
+              <RegistryMetric
+                label="Permanent Retention"
+                value={permanentCount.toString()}
+                icon={BookOpen}
+              />
+            </section>
+
+            <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_180px_180px_180px_auto] xl:items-end">
+                <div className="min-w-0">
+                  <label className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">
+                    {config.searchLabel}
+                  </label>
+
+                  <div className="mt-2 flex overflow-hidden rounded-lg border border-slate-300 bg-white">
+                    <div className="flex w-12 items-center justify-center">
+                      <Search className="h-4 w-4 text-slate-400" />
+                    </div>
+
+                    <input
+                      value={searchValue}
+                      onChange={(event) => setSearchValue(event.target.value)}
+                      placeholder={config.searchPlaceholder}
+                      className="min-w-0 flex-1 px-1 py-3 text-sm outline-none"
+                    />
+                  </div>
+                </div>
+
+                <FilterSelect
+                  label="Status"
+                  value={statusFilter}
+                  options={statusFilters}
+                  onChange={setStatusFilter}
+                />
+
+                <FilterSelect
+                  label="Owner"
+                  value={ownerFilter}
+                  options={ownerFilters}
+                  onChange={setOwnerFilter}
+                />
+
+                <FilterSelect
+                  label="Series"
+                  value={seriesFilter}
+                  options={seriesFilters}
+                  onChange={setSeriesFilter}
+                />
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchValue("");
+                    setStatusFilter("All Statuses");
+                    setOwnerFilter("All Owners");
+                    setSeriesFilter("All Series");
+                    setSelectedRecordId(null);
+                  }}
+                  className="rounded-lg border border-slate-300 bg-white px-4 py-3 text-xs font-bold text-slate-950 shadow-sm transition hover:border-amber-500 hover:bg-amber-50"
+                >
+                  Clear Filters
+                </button>
+              </div>
+            </section>
+
+            <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_390px]">
+              <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
+                <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-200 p-5">
+                  <div>
+                    <p className="text-[11px] font-bold uppercase tracking-[0.26em] text-slate-400">
+                      Enterprise Governance Library
+                    </p>
+
+                    <h2 className="mt-1 text-lg font-extrabold text-slate-950">
+                      {config.tableTitle}
+                    </h2>
+
+                    <p className="mt-1 text-xs leading-5 text-slate-600">
+                      {config.tableSubtitle}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="rounded-full bg-amber-100 px-3 py-1 text-[11px] font-bold text-amber-700">
+                      {filteredRecords.length} shown
+                    </span>
+
+                    <button
+                      type="button"
+                      className="inline-flex items-center gap-2 rounded-lg bg-slate-950 px-3 py-2 text-[11px] font-bold text-white transition hover:bg-slate-800"
+                      title="Frontend shell only. Backend intake workflow will be added later."
+                    >
+                      <FilePlus2 className="h-3.5 w-3.5 text-amber-400" />
+                      {config.primaryActionLabel}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="overflow-x-auto p-5">
+                  <table className="min-w-[980px] w-full border-collapse text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-slate-200 bg-slate-50 text-[11px] uppercase tracking-[0.14em] text-slate-500">
+                        <th className="px-3 py-3 font-extrabold">Record ID</th>
+                        <th className="px-3 py-3 font-extrabold">Title</th>
+                        <th className="px-3 py-3 font-extrabold">Type</th>
+                        <th className="px-3 py-3 font-extrabold">Series</th>
+                        <th className="px-3 py-3 font-extrabold">Status</th>
+                        <th className="px-3 py-3 font-extrabold">Owner</th>
+                        <th className="px-3 py-3 font-extrabold">
+                          Linked Publication
+                        </th>
+                        <th className="px-3 py-3 text-right font-extrabold">
+                          Select
+                        </th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {filteredRecords.map((record) => {
+                        const isSelected = selectedRecordId === record.recordId;
+
+                        return (
+                          <tr
+                            key={record.recordId}
+                            className={`border-b border-slate-200 transition last:border-b-0 ${
+                              isSelected
+                                ? "bg-amber-50"
+                                : "bg-white hover:bg-slate-50"
+                            }`}
+                          >
+                            <td className="px-3 py-4 align-top font-extrabold text-slate-950">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setSelectedRecordId(record.recordId)
+                                }
+                                className="text-left font-extrabold hover:text-amber-700"
+                              >
+                                {record.recordId}
+                              </button>
+                            </td>
+
+                            <td className="max-w-[340px] px-3 py-4 align-top">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setSelectedRecordId(record.recordId)
+                                }
+                                className="block text-left"
+                              >
+                                <span className="block font-bold leading-5 text-slate-950">
+                                  {record.title}
+                                </span>
+
+                                <span className="mt-1 block text-[11px] leading-4 text-slate-500">
+                                  {record.description}
+                                </span>
+                              </button>
+                            </td>
+
+                            <td className="px-3 py-4 align-top font-semibold text-slate-700">
+                              {record.registryType}
+                            </td>
+
+                            <td className="px-3 py-4 align-top font-semibold text-slate-700">
+                              {record.series}
+                            </td>
+
+                            <td className="px-3 py-4 align-top">
+                              <StatusBadge status={record.status} />
+                            </td>
+
+                            <td className="px-3 py-4 align-top font-semibold text-slate-950">
+                              {record.owner}
+                            </td>
+
+                            <td className="px-3 py-4 align-top font-semibold text-slate-950">
+                              {record.linkedPublication}
+                            </td>
+
+                            <td className="px-3 py-4 align-top">
+                              <div className="flex justify-end">
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setSelectedRecordId(record.recordId)
+                                  }
+                                  className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-2 py-1 text-[11px] font-bold text-slate-950 transition hover:border-amber-500 hover:bg-amber-50"
+                                >
+                                  <ClipboardCheck className="h-3.5 w-3.5 text-amber-600" />
+                                  Preview
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+
+                  {filteredRecords.length === 0 && (
+                    <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
+                      <p className="text-sm font-extrabold text-slate-950">
+                        No records match the current filters.
+                      </p>
+
+                      <p className="mt-2 text-xs text-slate-500">
+                        Clear filters or search by another record ID, owner,
+                        series, title, usage, or linked publication.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </section>
+
+              <aside className="space-y-4">
+                {selectedRecord ? (
+                  <RegistryPreviewPanel
+                    record={selectedRecord}
+                    config={config}
+                  />
+                ) : (
+                  <RegistrySelectionPlaceholder config={config} />
+                )}
+
+                <section className="rounded-lg border border-dashed border-slate-300 bg-white p-5 shadow-sm">
+                  <h2 className="text-[13px] font-bold uppercase tracking-[0.18em] text-slate-950">
+                    Backend Readiness
+                  </h2>
+
+                  <p className="mt-3 text-xs leading-5 text-slate-600">
+                    This registry remains frontend-only. Future backend work
+                    should connect these records to document generation,
+                    controlled forms, templates, approval routing, access
+                    controls, certified-copy packages, Microsoft 365, and
+                    SharePoint-backed file locations.
+                  </p>
+                </section>
+              </aside>
+            </section>
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}
+
+function RegistryPreviewPanel({
+  record,
+  config,
+}: {
+  record: EGLFormsTemplatesRegistryRecord;
+  config: RegistryConfig;
+}) {
+  return (
+    <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="mb-4 flex items-start justify-between gap-4">
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-400">
+            Selected {record.registryType}
+          </p>
+
+          <h2 className="mt-2 text-xl font-extrabold text-slate-950">
+            {record.recordId}
+          </h2>
+
+          <p className="mt-2 text-sm font-bold leading-5 text-slate-800">
+            {record.title}
+          </p>
+        </div>
+
+        <StatusBadge status={record.status} />
+      </div>
+
+      <div className="rounded-lg bg-slate-950 p-4 text-white">
+        <div className="flex items-center gap-3">
+          {record.registryType === "Form" ? (
+            <FileText className="h-6 w-6 text-amber-400" />
+          ) : (
+            <BookOpen className="h-6 w-6 text-amber-400" />
+          )}
+
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-300">
+              {config.workspaceLabel}
+            </p>
+
+            <p className="mt-1 text-xs text-slate-200">
+              {record.classification}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <dl className="mt-4 space-y-0">
+        <PreviewField label="Registry Type" value={record.registryType} />
+        <PreviewField label="Series" value={record.series} />
+        <PreviewField label="Owner" value={record.owner} />
+        <PreviewField label="Authority" value={record.authority} />
+        <PreviewField label="Version" value={record.version} />
+        <PreviewField label="Review Date" value={record.reviewDate} />
+        <PreviewField label="Linked Publication" value={record.linkedPublication} />
+        <PreviewField label="Retention" value={record.retention} />
+      </dl>
+
+      <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
+        <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">
+          Controlled Usage
+        </p>
+
+        <p className="mt-2 text-xs leading-5 text-slate-700">
+          {record.usage}
+        </p>
+      </div>
+
+      <div className="mt-4 grid gap-2">
+        <CopyToClipboardButton
+          value={record.recordId}
+          label={`Copy ${record.registryType} ID`}
+          copiedLabel={`${record.registryType} ID Copied`}
+        />
+
+        <button
+          type="button"
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 py-3 text-xs font-bold text-white transition hover:bg-slate-800"
+          title="Frontend shell only. Generation workflow will be added later."
+        >
+          <FolderOpen className="h-4 w-4 text-amber-400" />
+          Open Controlled Workspace
+        </button>
+
+        <button
+          type="button"
+          className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-xs font-bold text-slate-950 transition hover:border-amber-500 hover:bg-amber-50"
+          title="Frontend shell only. Review routing will be added later."
+        >
+          <FileCheck2 className="h-4 w-4 text-amber-600" />
+          Request Review
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function RegistrySelectionPlaceholder({ config }: { config: RegistryConfig }) {
+  return (
+    <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="mb-4 flex items-start justify-between gap-4">
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-400">
+            Registry Preview
+          </p>
+
+          <h2 className="mt-2 text-lg font-extrabold text-slate-950">
+            {config.emptyTitle}
+          </h2>
+
+          <p className="mt-2 text-xs leading-5 text-slate-600">
+            {config.emptyBody}
+          </p>
+        </div>
+
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-950">
+          <BookOpen className="h-5 w-5 text-amber-400" />
+        </div>
+      </div>
+
+      <div className="rounded-lg bg-slate-950 p-4 text-white">
+        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-300">
+          {config.workspaceLabel}
+        </p>
+
+        <p className="mt-2 text-xs leading-5 text-slate-200">
+          Controlled metadata opens only after intentional record selection.
+        </p>
+      </div>
+
+      <div className="mt-4 space-y-3">
+        <PlaceholderStep
+          icon={ClipboardList}
+          title="Select a Record"
+          body="Choose a controlled form or template from the registry table."
+        />
+
+        <PlaceholderStep
+          icon={ShieldCheck}
+          title="Review Authority"
+          body="Verify owner, authority, classification, retention, and linked publication."
+        />
+
+        <PlaceholderStep
+          icon={FileCheck2}
+          title="Prepare Future Workflow"
+          body="Use this area later for generation, completion, routing, approval, and filing controls."
+        />
+      </div>
+
+      <div className="mt-4 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4">
+        <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">
+          Training Note
+        </p>
+
+        <p className="mt-2 text-xs leading-5 text-slate-600">
+          Future employee and executive training should describe this registry
+          as the controlled lookup point before preparing, using, routing, or
+          approving a form or template.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+function RegistryMetric({
+  label,
+  value,
+  icon: Icon,
+}: {
+  label: string;
+  value: string;
+  icon: ElementType;
+}) {
+  return (
+    <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <p className="text-xs font-semibold text-slate-500">{label}</p>
+
+          <p className="mt-2 text-2xl font-extrabold text-slate-950">
+            {value}
+          </p>
+        </div>
+
+        <Icon className="h-6 w-6 text-amber-500" />
+      </div>
+    </section>
+  );
+}
+
+function FilterSelect({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  options: string[];
+  onChange: (value: string) => void;
+}) {
+  return (
+    <div className="min-w-[180px]">
+      <label className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">
+        {label}
+      </label>
+
+      <select
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-3 text-xs font-semibold text-slate-950 outline-none transition focus:border-amber-500"
+      >
+        {options.map((option) => (
+          <option key={option}>{option}</option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+function StatusBadge({ status }: { status: string }) {
+  return (
+    <span className="inline-flex min-w-10 items-center justify-center rounded-md bg-emerald-100 px-2 py-1 text-[11px] font-extrabold text-emerald-700">
+      {status}
+    </span>
+  );
+}
+
+function PreviewField({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex justify-between gap-4 border-b border-slate-200 py-2 text-xs last:border-b-0">
+      <dt className="font-bold text-slate-500">{label}</dt>
+      <dd className="text-right font-semibold text-slate-950">{value}</dd>
+    </div>
+  );
+}
+
+function PlaceholderStep({
+  icon: Icon,
+  title,
+  body,
+}: {
+  icon: ElementType;
+  title: string;
+  body: string;
+}) {
+  return (
+    <div className="flex gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white">
+        <Icon className="h-4 w-4 text-amber-600" />
+      </div>
+
+      <div>
+        <p className="text-xs font-extrabold text-slate-950">{title}</p>
+        <p className="mt-1 text-[11px] leading-4 text-slate-500">{body}</p>
+      </div>
+    </div>
+  );
+}
