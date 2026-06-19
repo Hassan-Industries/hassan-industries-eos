@@ -16,7 +16,9 @@ import {
 } from "lucide-react";
 
 import {
+  getPublicationCertificationHref,
   getPublicationRecordHref,
+  getPublicationUploadHref,
   getPublicationViewerHref,
 } from "@/lib/eglPublicationRecords";
 
@@ -33,6 +35,8 @@ export default function EGLRecordActionControls({
 
   const recordHref = getPublicationRecordHref(documentNumber);
   const viewerHref = getPublicationViewerHref(documentNumber);
+  const uploadHref = getPublicationUploadHref(documentNumber);
+  const certificationHref = getPublicationCertificationHref(documentNumber);
 
   async function handleCopyDocumentNumber() {
     try {
@@ -96,12 +100,14 @@ export default function EGLRecordActionControls({
           href={viewerHref}
           label="View Publication File"
           icon={FileText}
+          newTab
         />
 
         <ActionLink
           href={recordHref}
           label="Open Record in New Tab"
           icon={Eye}
+          newTab
         />
 
         <ActionButton
@@ -111,9 +117,21 @@ export default function EGLRecordActionControls({
         />
 
         <ActionButton label="Download Copy" icon={Download} />
-        <ActionButton label="Upload Replacement" icon={Upload} />
-        <ActionButton label="Create Certified Copy" icon={FileCheck2} />
+
+        <ActionLink
+          href={uploadHref}
+          label="Upload Replacement"
+          icon={Upload}
+        />
+
+        <ActionLink
+          href={certificationHref}
+          label="Create Certified Copy"
+          icon={FileCheck2}
+        />
+
         <ActionButton label="View Revision History" icon={GitBranch} />
+
         <ActionButton label="Request Review" icon={RefreshCcw} />
       </div>
     </section>
@@ -124,14 +142,15 @@ interface ActionLinkProps {
   href: string;
   label: string;
   icon: LucideIcon;
+  newTab?: boolean;
 }
 
-function ActionLink({ href, label, icon: Icon }: ActionLinkProps) {
+function ActionLink({ href, label, icon: Icon, newTab = false }: ActionLinkProps) {
   return (
     <Link
       href={href}
-      target="_blank"
-      rel="noopener noreferrer"
+      target={newTab ? "_blank" : undefined}
+      rel={newTab ? "noopener noreferrer" : undefined}
       prefetch={false}
       className="flex w-full items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 py-3 text-xs font-bold text-white transition hover:bg-slate-800"
     >
