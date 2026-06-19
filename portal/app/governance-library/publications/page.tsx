@@ -1,6 +1,24 @@
-import EGLModuleShell from "@/components/governance-library/EGLModuleShell";
-import { eglModuleConfigs } from "@/data/eglModules";
+import EGLDocumentViewerShell from "@/components/governance-library/EGLDocumentViewerShell";
+import {
+  getPublicationRecordByDocumentNumber,
+  getPublicationStaticParams,
+} from "@/lib/eglPublicationRecords";
 
-export default function PublicationsPage() {
-  return <EGLModuleShell module={eglModuleConfigs.publications} />;
+interface PublicationViewerPageProps {
+  params: Promise<{
+    documentId: string;
+  }>;
+}
+
+export function generateStaticParams() {
+  return getPublicationStaticParams();
+}
+
+export default async function PublicationViewerPage({
+  params,
+}: PublicationViewerPageProps) {
+  const { documentId } = await params;
+  const publication = getPublicationRecordByDocumentNumber(documentId);
+
+  return <EGLDocumentViewerShell publication={publication} />;
 }

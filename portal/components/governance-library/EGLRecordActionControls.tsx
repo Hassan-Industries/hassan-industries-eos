@@ -9,10 +9,16 @@ import {
   Download,
   Eye,
   FileCheck2,
+  FileText,
   GitBranch,
   RefreshCcw,
   Upload,
 } from "lucide-react";
+
+import {
+  getPublicationRecordHref,
+  getPublicationViewerHref,
+} from "@/lib/eglPublicationRecords";
 
 interface EGLRecordActionControlsProps {
   documentNumber: string;
@@ -25,9 +31,8 @@ export default function EGLRecordActionControls({
 }: EGLRecordActionControlsProps) {
   const [copied, setCopied] = useState(false);
 
-  const recordHref = `/governance-library/publications/${encodeURIComponent(
-    documentNumber,
-  )}`;
+  const recordHref = getPublicationRecordHref(documentNumber);
+  const viewerHref = getPublicationViewerHref(documentNumber);
 
   async function handleCopyDocumentNumber() {
     try {
@@ -88,6 +93,12 @@ export default function EGLRecordActionControls({
 
       <div className="grid gap-2">
         <ActionLink
+          href={viewerHref}
+          label="View Publication File"
+          icon={FileText}
+        />
+
+        <ActionLink
           href={recordHref}
           label="Open Record in New Tab"
           icon={Eye}
@@ -100,13 +111,9 @@ export default function EGLRecordActionControls({
         />
 
         <ActionButton label="Download Copy" icon={Download} />
-
         <ActionButton label="Upload Replacement" icon={Upload} />
-
         <ActionButton label="Create Certified Copy" icon={FileCheck2} />
-
         <ActionButton label="View Revision History" icon={GitBranch} />
-
         <ActionButton label="Request Review" icon={RefreshCcw} />
       </div>
     </section>
