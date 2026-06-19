@@ -272,3 +272,22 @@ Added initial front-end interaction to the Enterprise Governance Library workspa
 #### Result
 
 The Enterprise Governance Library now behaves more like an operational workspace instead of a static visual interface.
+
+## HIEOS-IMP-006E Institutional Panel Layout
+
+**Status:** Completed
+
+### Changed
+
+- Moved Document Status Codes, Key Principles, and Relationships beneath the publications and quick actions area.
+- Repositioned Lifecycle Flow and Planned Module Pages into a wider bottom row.
+- Improved table layout handling to prevent word overlap and column crowding.
+- Reduced overly aggressive heading/font treatment outside the Document Profile.
+- Improved lower-page institutional dashboard structure.
+
+### Preserved
+
+- Preserved Document Profile design.
+- Preserved publication search behavior.
+- Preserved selected-publication behavior.
+- Preserved static frontend-only implementation scope.
