@@ -436,3 +436,30 @@ Changes
 Impact
 
 Established the frontend lifecycle and review-routing structure needed before backend revision history, reviewer assignment, comments, workflow queues, notifications, approval decisions, audit trails, Microsoft 365 version history, and SharePoint versioning are introduced.
+
+## HIEOS-IMP-006L
+### EGL Publications Registry Full List & Detail Routing
+
+Status:
+Completed
+
+Summary
+
+Upgraded the Enterprise Governance Library Publications route into a functional frontend registry list with search, filters, selected record preview, and direct routing into publication record workflows.
+
+Changes
+
+- Added EGL publications registry shell component.
+- Replaced Publications route shell with full frontend registry page.
+- Added publication search controls.
+- Added status, series, and classification filters.
+- Added frontend registry metrics.
+- Added full publications table using static publication metadata.
+- Added selected record preview panel.
+- Added direct routing to record detail and document viewer.
+- Added routing to upload replacement, certified copy, revision history, and review request shells.
+- Preserved EGL dashboard, record detail, viewer, upload, certification, revision, and review behavior.
+
+Impact
+
+Established the operational Publications Registry workspace needed before backend publication records, database pagination, role permissions, workflow queues, upload processing, certified-copy issuance, Microsoft 365, and SharePoint integrations are introduced.
