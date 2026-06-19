@@ -1,134 +1,58 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ElementType } from "react";
 import {
   ArrowLeft,
   BookOpen,
   ClipboardList,
   Eye,
   FileCheck2,
-  FilePlus2,
   FileText,
-  GitBranch,
+  Gavel,
   RefreshCcw,
   Search,
-  Upload,
+  ShieldCheck,
 } from "lucide-react";
 
-import EGLSelectionPlaceholder from "@/components/governance-library/EGLSelectionPlaceholder";
 import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
-import type { PublicationRecord } from "@/data/governanceLibrary";
-import { publications } from "@/data/governanceLibrary";
 import {
-  getPublicationCertificationHref,
-  getPublicationDocumentNumber,
-  getPublicationRecordHref,
-  getPublicationReviewRequestHref,
-  getPublicationRevisionHistoryHref,
-  getPublicationUploadHref,
-  getPublicationViewerHref,
-} from "@/lib/eglPublicationRecords";
+  eglResolutionRecords,
+  type EGLResolutionRecord,
+} from "@/data/eglResolutions";
+import {
+  getResolutionRecordHref,
+  getResolutionStatusLabel,
+} from "@/lib/eglResolutionRecords";
 
-type DisplayPublicationRecord = PublicationRecord & {
-  id?: string;
-  documentId?: string;
-  documentNo?: string;
-  documentNumber?: string;
-  title?: string;
-  name?: string;
-  description?: string;
-  summary?: string;
-  series?: string;
-  publicationSeries?: string;
-  category?: string;
-  documentType?: string;
-  owner?: string;
-  authority?: string;
-  version?: string;
-  status?: string;
-  documentState?: string;
-  effectiveDate?: string;
-  reviewDate?: string;
-  originalExecutedLocation?: string;
-  certifiedCopy?: string;
-  supersedes?: string;
-  supersededBy?: string;
-  relatedResolution?: string;
-  relatedImplementationProject?: string;
-  classification?: string;
-  retentionCategory?: string;
-  notes?: string;
-};
+const statusFilters = ["All Statuses", "OE", "DR", "RV", "AP", "VO"];
+const ownerFilters = ["All Owners", "HCP", "HCA"];
 
-const statusFilters = [
-  "All Statuses",
-  "AP",
-  "DR",
-  "RV",
-  "OE",
-  "CC",
-  "SP",
-  "AR",
-  "VO",
-];
-
-const classificationFilters = [
-  "All Classifications",
-  "Internal",
-  "Internal Governance",
-  "Confidential",
-  "Restricted",
-];
-
-export default function EGLPublicationsRegistryShell() {
-  const records = publications as DisplayPublicationRecord[];
-
+export default function EGLResolutionsRegistryShell() {
   const [searchValue, setSearchValue] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Statuses");
-  const [seriesFilter, setSeriesFilter] = useState("All Series");
-  const [classificationFilter, setClassificationFilter] = useState(
-    "All Classifications",
-  );
-  const [selectedDocumentNumber, setSelectedDocumentNumber] = useState<
+  const [ownerFilter, setOwnerFilter] = useState("All Owners");
+  const [selectedResolutionId, setSelectedResolutionId] = useState<
     string | null
   >(null);
-
-  const seriesFilters = useMemo(() => {
-    const seriesValues = records
-      .map((record) => getSeries(record))
-      .filter(Boolean)
-      .sort();
-
-    return ["All Series", ...Array.from(new Set(seriesValues))];
-  }, [records]);
 
   const filteredRecords = useMemo(() => {
     const normalizedSearch = searchValue.trim().toLowerCase();
 
-    return records.filter((record) => {
-      const documentNumber = getPublicationDocumentNumber(record);
-      const title = getTitle(record);
-      const series = getSeries(record);
-      const status = getStatus(record);
-      const classification = getClassification(record);
-      const owner = getOwner(record);
-
+    return eglResolutionRecords.filter((record) => {
       const searchText = [
-        documentNumber,
-        title,
-        series,
-        status,
-        classification,
-        owner,
-        record.documentType,
-        record.authority,
-        record.notes,
-        record.description,
+        record.resolutionId,
+        record.title,
         record.summary,
+        record.status,
+        record.statusLabel,
+        record.owner,
+        record.authority,
+        record.resolutionType,
+        record.classification,
+        record.relatedPublication,
       ]
-        .filter(Boolean)
         .join(" ")
         .toLowerCase();
 
@@ -136,46 +60,28 @@ export default function EGLPublicationsRegistryShell() {
         normalizedSearch.length === 0 || searchText.includes(normalizedSearch);
 
       const matchesStatus =
-        statusFilter === "All Statuses" || status === statusFilter;
+        statusFilter === "All Statuses" || record.status === statusFilter;
 
-      const matchesSeries =
-        seriesFilter === "All Series" || series === seriesFilter;
+      const matchesOwner =
+        ownerFilter === "All Owners" || record.owner === ownerFilter;
 
-      const matchesClassification =
-        classificationFilter === "All Classifications" ||
-        classification === classificationFilter;
-
-      return (
-        matchesSearch &&
-        matchesStatus &&
-        matchesSeries &&
-        matchesClassification
-      );
+      return matchesSearch && matchesStatus && matchesOwner;
     });
-  }, [classificationFilter, records, searchValue, seriesFilter, statusFilter]);
+  }, [ownerFilter, searchValue, statusFilter]);
 
   const selectedRecord =
-    selectedDocumentNumber === null
+    selectedResolutionId === null
       ? null
-      : records.find(
-          (record) =>
-            getPublicationDocumentNumber(record) === selectedDocumentNumber,
+      : eglResolutionRecords.find(
+          (record) => record.resolutionId === selectedResolutionId,
         ) ?? null;
 
-  const activeDocumentNumber =
-    selectedRecord === null
-      ? null
-      : getPublicationDocumentNumber(selectedRecord);
-
-  const approvedCount = records.filter((record) => getStatus(record) === "AP")
-    .length;
-
-  const reviewCount = records.filter((record) =>
-    ["DR", "RV"].includes(getStatus(record)),
+  const executedCount = eglResolutionRecords.filter(
+    (record) => record.status === "OE",
   ).length;
 
-  const originalExecutedCount = records.filter(
-    (record) => getStatus(record) === "OE",
+  const draftCount = eglResolutionRecords.filter(
+    (record) => record.status === "DR",
   ).length;
 
   return (
@@ -195,13 +101,13 @@ export default function EGLPublicationsRegistryShell() {
                   </p>
 
                   <h1 className="mt-2 text-[26px] font-extrabold uppercase leading-none tracking-wide">
-                    Publications Registry
+                    Resolutions Registry
                   </h1>
 
                   <p className="mt-3 max-w-3xl text-[12px] leading-5 text-slate-200">
-                    Controlled frontend registry for Enterprise Governance
-                    Library publications, manuals, standards, resolutions,
-                    policies, templates, and related publication records.
+                    Controlled frontend registry for foundational resolutions,
+                    officer actions, governance decisions, approvals, adoption
+                    records, and related Enterprise Governance Library authority.
                   </p>
                 </div>
 
@@ -215,7 +121,7 @@ export default function EGLPublicationsRegistryShell() {
                   </p>
 
                   <p className="mt-1 text-[11px] text-slate-300">
-                    Static Data Layer
+                    Resolution Data Layer
                   </p>
                 </div>
               </div>
@@ -231,30 +137,33 @@ export default function EGLPublicationsRegistryShell() {
               </Link>
 
               <p className="hidden text-xs font-semibold uppercase tracking-[0.18em] text-slate-400 md:block">
-                Controlled Publication Records
+                Governance Decisions & Formal Actions
               </p>
             </div>
 
             <section className="grid gap-3 md:grid-cols-4">
               <RegistryMetric
-                label="Registry Records"
-                value={records.length.toString()}
+                label="Resolution Records"
+                value={eglResolutionRecords.length.toString()}
                 icon={ClipboardList}
               />
-              <RegistryMetric
-                label="Approved"
-                value={approvedCount.toString()}
-                icon={FileCheck2}
-              />
-              <RegistryMetric
-                label="Review / Draft"
-                value={reviewCount.toString()}
-                icon={RefreshCcw}
-              />
+
               <RegistryMetric
                 label="Original Executed"
-                value={originalExecutedCount.toString()}
+                value={executedCount.toString()}
                 icon={BookOpen}
+              />
+
+              <RegistryMetric
+                label="Draft Resolutions"
+                value={draftCount.toString()}
+                icon={RefreshCcw}
+              />
+
+              <RegistryMetric
+                label="Linked Publications"
+                value="3"
+                icon={FileText}
               />
             </section>
 
@@ -262,7 +171,7 @@ export default function EGLPublicationsRegistryShell() {
               <div className="flex flex-col gap-4 lg:flex-row lg:items-end">
                 <div className="min-w-0 flex-1">
                   <label className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">
-                    Search Registry
+                    Search Resolutions
                   </label>
 
                   <div className="mt-2 flex overflow-hidden rounded-lg border border-slate-300 bg-white">
@@ -273,7 +182,7 @@ export default function EGLPublicationsRegistryShell() {
                     <input
                       value={searchValue}
                       onChange={(event) => setSearchValue(event.target.value)}
-                      placeholder="Search by document number, title, series, owner, status, or classification..."
+                      placeholder="Search by resolution ID, title, owner, authority, related publication, or status..."
                       className="min-w-0 flex-1 px-1 py-3 text-sm outline-none"
                     />
                   </div>
@@ -287,17 +196,10 @@ export default function EGLPublicationsRegistryShell() {
                 />
 
                 <FilterSelect
-                  label="Series"
-                  value={seriesFilter}
-                  options={seriesFilters}
-                  onChange={setSeriesFilter}
-                />
-
-                <FilterSelect
-                  label="Classification"
-                  value={classificationFilter}
-                  options={classificationFilters}
-                  onChange={setClassificationFilter}
+                  label="Owner"
+                  value={ownerFilter}
+                  options={ownerFilters}
+                  onChange={setOwnerFilter}
                 />
 
                 <button
@@ -305,9 +207,8 @@ export default function EGLPublicationsRegistryShell() {
                   onClick={() => {
                     setSearchValue("");
                     setStatusFilter("All Statuses");
-                    setSeriesFilter("All Series");
-                    setClassificationFilter("All Classifications");
-                    setSelectedDocumentNumber(null);
+                    setOwnerFilter("All Owners");
+                    setSelectedResolutionId(null);
                   }}
                   className="rounded-lg border border-slate-300 bg-white px-4 py-3 text-xs font-bold text-slate-950 shadow-sm transition hover:border-amber-500 hover:bg-amber-50"
                 >
@@ -325,43 +226,33 @@ export default function EGLPublicationsRegistryShell() {
                     </p>
 
                     <h2 className="mt-1 text-lg font-extrabold text-slate-950">
-                      Publications Registry
+                      Resolutions Registry
                     </h2>
 
                     <p className="mt-1 text-xs leading-5 text-slate-600">
-                      Select a record to preview metadata or open one of the EGL
-                      action shells.
+                      Select a resolution to preview authority, lifecycle,
+                      related publications, and governance metadata.
                     </p>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-2">
-                      <span className="rounded-full bg-amber-100 px-3 py-1 text-[11px] font-bold text-amber-700">
-                      {filteredRecords.length} shown
-                   </span>
-
-                        <Link
-                          href="/governance-library/publications/new"
-                          className="inline-flex items-center gap-2 rounded-lg bg-slate-950 px-3 py-2 text-[11px] font-bold text-white transition hover:bg-slate-800"
-                        >
-                          <FilePlus2 className="h-3.5 w-3.5 text-amber-400" />
-                          Create New Publication
-                        </Link>
-                      </div>
+                  <span className="rounded-full bg-amber-100 px-3 py-1 text-[11px] font-bold text-amber-700">
+                    {filteredRecords.length} shown
+                  </span>
+                </div>
 
                 <div className="overflow-x-auto p-5">
-                  <table className="min-w-[1060px] w-full border-collapse text-left text-xs">
+                  <table className="min-w-[980px] w-full border-collapse text-left text-xs">
                     <thead>
                       <tr className="border-b border-slate-200 bg-slate-50 text-[11px] uppercase tracking-[0.14em] text-slate-500">
                         <th className="px-3 py-3 font-extrabold">
-                          Document No.
+                          Resolution ID
                         </th>
                         <th className="px-3 py-3 font-extrabold">Title</th>
-                        <th className="px-3 py-3 font-extrabold">Series</th>
+                        <th className="px-3 py-3 font-extrabold">Type</th>
                         <th className="px-3 py-3 font-extrabold">Status</th>
-                        <th className="px-3 py-3 font-extrabold">Version</th>
                         <th className="px-3 py-3 font-extrabold">Owner</th>
                         <th className="px-3 py-3 font-extrabold">
-                          Review Date
+                          Related Publication
                         </th>
                         <th className="px-3 py-3 text-right font-extrabold">
                           Actions
@@ -371,14 +262,12 @@ export default function EGLPublicationsRegistryShell() {
 
                     <tbody>
                       {filteredRecords.map((record) => {
-                        const documentNumber =
-                          getPublicationDocumentNumber(record);
                         const isSelected =
-                          documentNumber === activeDocumentNumber;
+                          record.resolutionId === selectedResolutionId;
 
                         return (
                           <tr
-                            key={documentNumber}
+                            key={record.resolutionId}
                             className={`border-b border-slate-200 transition last:border-b-0 ${
                               isSelected
                                 ? "bg-amber-50"
@@ -389,68 +278,56 @@ export default function EGLPublicationsRegistryShell() {
                               <button
                                 type="button"
                                 onClick={() =>
-                                  setSelectedDocumentNumber(documentNumber)
+                                  setSelectedResolutionId(record.resolutionId)
                                 }
                                 className="text-left font-extrabold text-slate-950 hover:text-amber-700"
                               >
-                                {documentNumber}
+                                {record.resolutionId}
                               </button>
                             </td>
 
-                            <td className="max-w-[310px] px-3 py-4 align-top">
+                            <td className="max-w-[330px] px-3 py-4 align-top">
                               <button
                                 type="button"
                                 onClick={() =>
-                                  setSelectedDocumentNumber(documentNumber)
+                                  setSelectedResolutionId(record.resolutionId)
                                 }
                                 className="block text-left"
                               >
                                 <span className="block font-bold leading-5 text-slate-950">
-                                  {getTitle(record)}
+                                  {record.title}
                                 </span>
 
                                 <span className="mt-1 block text-[11px] leading-4 text-slate-500">
-                                  {getDescription(record)}
+                                  {record.summary}
                                 </span>
                               </button>
                             </td>
 
                             <td className="px-3 py-4 align-top font-semibold text-slate-700">
-                              {getSeries(record)}
+                              {record.resolutionType}
                             </td>
 
                             <td className="px-3 py-4 align-top">
-                              <StatusBadge status={getStatus(record)} />
+                              <StatusBadge status={record.status} />
                             </td>
 
-                            <td className="px-3 py-4 align-top font-semibold">
-                              {record.version ?? "1.0"}
+                            <td className="px-3 py-4 align-top font-semibold text-slate-950">
+                              {record.owner}
                             </td>
 
-                            <td className="px-3 py-4 align-top font-semibold">
-                              {getOwner(record)}
-                            </td>
-
-                            <td className="px-3 py-4 align-top font-semibold">
-                              {record.reviewDate ?? "Pending"}
+                            <td className="px-3 py-4 align-top font-semibold text-slate-950">
+                              {record.relatedPublication}
                             </td>
 
                             <td className="px-3 py-4 align-top">
-                              <div className="flex justify-end gap-2">
+                              <div className="flex justify-end">
                                 <SmallActionLink
-                                  href={getPublicationRecordHref(
-                                    documentNumber,
+                                  href={getResolutionRecordHref(
+                                    record.resolutionId,
                                   )}
                                   label="Record"
                                   icon={Eye}
-                                  newTab
-                                />
-                                <SmallActionLink
-                                  href={getPublicationViewerHref(
-                                    documentNumber,
-                                  )}
-                                  label="Viewer"
-                                  icon={FileText}
                                   newTab
                                 />
                               </div>
@@ -464,12 +341,12 @@ export default function EGLPublicationsRegistryShell() {
                   {filteredRecords.length === 0 && (
                     <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
                       <p className="text-sm font-extrabold text-slate-950">
-                        No publication records match the current filters.
+                        No resolution records match the current filters.
                       </p>
 
                       <p className="mt-2 text-xs text-slate-500">
-                        Clear filters or search by another document number,
-                        title, owner, series, or status.
+                        Clear filters or search by another resolution ID, owner,
+                        authority, title, or related publication.
                       </p>
                     </div>
                   )}
@@ -478,9 +355,9 @@ export default function EGLPublicationsRegistryShell() {
 
               <aside className="space-y-4">
                 {selectedRecord ? (
-                  <PublicationPreviewPanel record={selectedRecord} />
+                  <ResolutionPreviewPanel record={selectedRecord} />
                 ) : (
-                  <EGLSelectionPlaceholder context="registry" />
+                  <ResolutionSelectionPlaceholder />
                 )}
 
                 <section className="rounded-lg border border-dashed border-slate-300 bg-white p-5 shadow-sm">
@@ -489,11 +366,10 @@ export default function EGLPublicationsRegistryShell() {
                   </h2>
 
                   <p className="mt-3 text-xs leading-5 text-slate-600">
-                    This registry page is frontend-only. It prepares the
-                    operating pattern for future backend records, role-based
-                    access, workflow queues, document storage, employee
-                    training, approval routing, Microsoft 365, and SharePoint
-                    integrations.
+                    This registry is frontend-only. Future work should connect
+                    resolutions to executed documents, approval workflows,
+                    officer records, board actions, certified copies, audit
+                    trails, and controlled publication relationships.
                   </p>
                 </section>
               </aside>
@@ -505,104 +381,130 @@ export default function EGLPublicationsRegistryShell() {
   );
 }
 
-function PublicationPreviewPanel({
+function ResolutionPreviewPanel({
   record,
 }: {
-  record: DisplayPublicationRecord;
+  record: EGLResolutionRecord;
 }) {
-  const documentNumber = getPublicationDocumentNumber(record);
-
   return (
     <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
       <div className="mb-4 flex items-start justify-between gap-4">
         <div>
           <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-400">
-            Selected Record
+            Selected Resolution
           </p>
 
           <h2 className="mt-2 text-xl font-extrabold text-slate-950">
-            {documentNumber}
+            {record.resolutionId}
           </h2>
 
           <p className="mt-2 text-sm font-bold leading-5 text-slate-800">
-            {getTitle(record)}
+            {record.title}
           </p>
         </div>
 
-        <StatusBadge status={getStatus(record)} />
+        <StatusBadge status={record.status} />
       </div>
 
       <div className="rounded-lg bg-slate-950 p-4 text-white">
         <div className="flex items-center gap-3">
-          <BookOpen className="h-6 w-6 text-amber-400" />
+          <Gavel className="h-6 w-6 text-amber-400" />
 
           <div>
             <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-300">
-              Controlled Publication
+              Controlled Resolution
             </p>
+
             <p className="mt-1 text-xs text-slate-200">
-              {getClassification(record)}
+              {record.classification}
             </p>
           </div>
         </div>
       </div>
 
       <dl className="mt-4 space-y-0">
-        <PreviewField label="Series" value={getSeries(record)} />
+        <PreviewField label="Type" value={record.resolutionType} />
+        <PreviewField label="Owner" value={record.owner} />
+        <PreviewField label="Authority" value={record.authority} />
+        <PreviewField label="Status" value={getResolutionStatusLabel(record)} />
+        <PreviewField label="Version" value={record.version} />
+        <PreviewField label="Effective Date" value={record.effectiveDate} />
         <PreviewField
-          label="Document Type"
-          value={record.documentType ?? "Manual"}
-        />
-        <PreviewField label="Owner" value={getOwner(record)} />
-        <PreviewField
-          label="Authority"
-          value={record.authority ?? "Hassan Capital Partners, LLC"}
-        />
-        <PreviewField label="Version" value={record.version ?? "1.0"} />
-        <PreviewField
-          label="Review Date"
-          value={record.reviewDate ?? "Pending"}
+          label="Related Publication"
+          value={record.relatedPublication}
         />
         <PreviewField
           label="Retention"
-          value={record.retentionCategory ?? "Permanent"}
+          value={record.retentionCategory}
         />
       </dl>
 
       <div className="mt-4 grid gap-2">
         <ActionLink
-          href={getPublicationRecordHref(documentNumber)}
-          label="View Record"
+          href={getResolutionRecordHref(record.resolutionId)}
+          label="View Resolution Record"
           icon={Eye}
-          newTab
           primary
+          newTab
         />
+
         <ActionLink
-          href={getPublicationViewerHref(documentNumber)}
-          label="Open Viewer"
+          href={`/governance-library/publications/${encodeURIComponent(
+            record.relatedPublication,
+          )}`}
+          label="Open Related Publication"
           icon={FileText}
           newTab
         />
-        <ActionLink
-          href={getPublicationUploadHref(documentNumber)}
-          label="Upload Replacement"
-          icon={Upload}
-        />
-        <ActionLink
-          href={getPublicationCertificationHref(documentNumber)}
-          label="Create Certified Copy"
-          icon={FileCheck2}
-        />
-        <ActionLink
-          href={getPublicationRevisionHistoryHref(documentNumber)}
-          label="Revision History"
-          icon={GitBranch}
-        />
-        <ActionLink
-          href={getPublicationReviewRequestHref(documentNumber)}
-          label="Request Review"
-          icon={RefreshCcw}
-        />
+      </div>
+    </section>
+  );
+}
+
+function ResolutionSelectionPlaceholder() {
+  return (
+    <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="mb-4 flex items-start justify-between gap-4">
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-400">
+            Resolution Preview
+          </p>
+
+          <h2 className="mt-2 text-lg font-extrabold text-slate-950">
+            No Resolution Selected
+          </h2>
+
+          <p className="mt-2 text-xs leading-5 text-slate-600">
+            Select a resolution record to review authority, lifecycle status,
+            executed location, related publication, and governance metadata.
+          </p>
+        </div>
+
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-950">
+          <Gavel className="h-5 w-5 text-amber-400" />
+        </div>
+      </div>
+
+      <div className="rounded-lg bg-slate-950 p-4 text-white">
+        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-300">
+          Resolution Workspace
+        </p>
+
+        <p className="mt-2 text-xs leading-5 text-slate-200">
+          Resolution records open only after intentional selection.
+        </p>
+      </div>
+
+      <div className="mt-4 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4">
+        <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">
+          Training Note
+        </p>
+
+        <p className="mt-2 text-xs leading-5 text-slate-600">
+          Future training materials should describe this registry as the formal
+          lookup point for resolutions, approvals, officer actions, and
+          governance decisions connected to controlled publications.
+        </p>
       </div>
     </section>
   );
@@ -615,7 +517,7 @@ function RegistryMetric({
 }: {
   label: string;
   value: string;
-  icon: React.ElementType;
+  icon: ElementType;
 }) {
   return (
     <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
@@ -689,7 +591,7 @@ function ActionLink({
 }: {
   href: string;
   label: string;
-  icon: React.ElementType;
+  icon: ElementType;
   primary?: boolean;
   newTab?: boolean;
 }) {
@@ -719,7 +621,7 @@ function SmallActionLink({
 }: {
   href: string;
   label: string;
-  icon: React.ElementType;
+  icon: ElementType;
   newTab?: boolean;
 }) {
   return (
@@ -734,38 +636,4 @@ function SmallActionLink({
       {label}
     </Link>
   );
-}
-
-function getTitle(record: DisplayPublicationRecord) {
-  return record.title ?? record.name ?? "Untitled Publication";
-}
-
-function getDescription(record: DisplayPublicationRecord) {
-  return (
-    record.description ??
-    record.summary ??
-    record.notes ??
-    "Controlled enterprise publication record."
-  );
-}
-
-function getSeries(record: DisplayPublicationRecord) {
-  return (
-    record.series ??
-    record.publicationSeries ??
-    record.category ??
-    "Administration"
-  );
-}
-
-function getOwner(record: DisplayPublicationRecord) {
-  return record.owner ?? "HCA";
-}
-
-function getStatus(record: DisplayPublicationRecord) {
-  return record.status ?? "AP";
-}
-
-function getClassification(record: DisplayPublicationRecord) {
-  return record.classification ?? "Internal Governance";
 }
