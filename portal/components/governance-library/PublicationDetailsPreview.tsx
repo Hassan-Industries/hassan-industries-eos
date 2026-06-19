@@ -1,6 +1,6 @@
-import Link from "next/link";
-import { BookOpen, Download, Eye } from "lucide-react";
+import { BookOpen } from "lucide-react";
 
+import EGLRecordActionControls from "@/components/governance-library/EGLRecordActionControls";
 import type { PublicationRecord } from "@/data/governanceLibrary";
 
 interface PublicationDetailsPreviewProps {
@@ -122,7 +122,7 @@ export default function PublicationDetailsPreview({
             />
             <ProfileRow
               label="Related Implementation Project"
-              value={record.relatedImplementationProject ?? "HIEOS-IMP-006G"}
+              value={record.relatedImplementationProject ?? "HIEOS-IMP-006H"}
             />
             <ProfileRow
               label="Classification"
@@ -140,25 +140,10 @@ export default function PublicationDetailsPreview({
         </details>
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-3">
-        <Link
-          href={`/governance-library/publications/${encodeURIComponent(
-            documentNumber,
-          )}`}
-          className="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 py-3 text-sm font-bold text-white transition hover:bg-slate-800"
-        >
-          <Eye className="h-4 w-4" />
-          View Record
-        </Link>
-
-        <button
-          type="button"
-          className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-bold text-slate-950 transition hover:border-slate-950"
-        >
-          Download
-          <Download className="h-4 w-4" />
-        </button>
-      </div>
+      <EGLRecordActionControls
+        documentNumber={documentNumber}
+        context="profile"
+      />
     </aside>
   );
 }

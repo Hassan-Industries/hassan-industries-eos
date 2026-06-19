@@ -3,7 +3,6 @@ import type { ElementType, ReactNode } from "react";
 import {
   ArrowLeft,
   BookOpen,
-  ExternalLink,
   FileText,
   History,
   ShieldCheck,
@@ -55,9 +54,6 @@ export default function EGLRecordDetailShell({
   const title = record.title ?? "Untitled Publication";
   const status = record.status ?? "AP";
   const documentState = record.documentState ?? "Active";
-  const viewerHref = `/governance-library/publications/${encodeURIComponent(
-    documentNumber,
-  )}/viewer`;
 
   return (
     <div className="flex min-h-screen bg-slate-100 text-slate-950">
@@ -248,7 +244,7 @@ export default function EGLRecordDetailShell({
                     <RelationshipCard
                       label="Related Implementation Project"
                       value={
-                        record.relatedImplementationProject ?? "HIEOS-IMP-006I"
+                        record.relatedImplementationProject ?? "HIEOS-IMP-006H"
                       }
                     />
                   </div>
@@ -266,30 +262,20 @@ export default function EGLRecordDetailShell({
                     File Preview
                   </h2>
 
-                  <Link
-                    href={viewerHref}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-4 block rounded-lg border border-dashed border-slate-300 bg-slate-50 p-5 text-center transition hover:border-amber-500 hover:bg-amber-50"
-                  >
+                  <div className="mt-4 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-5 text-center">
                     <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-slate-950">
                       <FileText className="h-7 w-7 text-amber-400" />
                     </div>
 
                     <p className="mt-4 text-sm font-bold text-slate-950">
-                      Open document viewer shell.
+                      Document viewer pending.
                     </p>
 
                     <p className="mt-2 text-xs leading-5 text-slate-500">
-                      Reserved for future PDF, Office, SharePoint, or internal
-                      file preview integration.
+                      This shell reserves the frontend space for future PDF,
+                      Office, SharePoint, or internal file preview integration.
                     </p>
-
-                    <div className="mt-3 inline-flex items-center gap-2 text-xs font-bold text-slate-950">
-                      Open Viewer
-                      <ExternalLink className="h-3.5 w-3.5 text-amber-600" />
-                    </div>
-                  </Link>
+                  </div>
                 </section>
 
                 <section className="rounded-lg border border-dashed border-slate-300 bg-white p-5 shadow-sm">
