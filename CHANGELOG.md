@@ -338,3 +338,26 @@ Changes
 Impact
 
 Established the frontend destination for controlled publication record review before backend registry, file viewing, revision history, upload, download, workflow, and Microsoft 365 integrations are introduced.
+
+## HIEOS-IMP-006H
+### EGL Record Action Controls
+
+Status:
+Completed
+
+Summary
+
+Added frontend record action controls for Enterprise Governance Library publication records and updated the Document Profile View Record action to open the record detail route in a new browser tab.
+
+Changes
+
+- Added reusable EGL record action controls component.
+- Updated Document Profile actions to use shared record controls.
+- Changed View Record to open in a new browser tab.
+- Added frontend-only controls for copying document ID, downloading copy, uploading replacement, creating certified copy, viewing revision history, and requesting review.
+- Updated the EGL Record Detail shell to display the new action controls.
+- Reconfirmed the dynamic publication record route for controlled publication records.
+
+Impact
+
+Established the frontend action-control layer needed before backend file handling, workflow routing, revision history, certified-copy processing, upload/download services, and Microsoft 365 or SharePoint integrations are introduced.
