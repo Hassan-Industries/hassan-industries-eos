@@ -316,3 +316,25 @@ Changes
 Impact
 
 Established the frontend route structure needed before backend registry, document record, workflow, storage, and Microsoft 365 integrations.
+
+## HIEOS-IMP-006G
+### EGL Record Detail Page Shell
+
+Status:
+Completed
+
+Summary
+
+Created a frontend record detail page shell for Enterprise Governance Library publication records and connected the Document Profile "View Full Record" action to the new dynamic route.
+
+Changes
+
+- Added EGL record detail shell component.
+- Created dynamic publication record route at `/governance-library/publications/[documentId]`.
+- Connected Document Profile "View Full Record" action to the record detail page.
+- Added frontend-only sections for record authority, lifecycle metadata, relationships, record actions, file preview, and backend readiness.
+- Preserved the restored EGL dashboard layout and selected-publication behavior.
+
+Impact
+
+Established the frontend destination for controlled publication record review before backend registry, file viewing, revision history, upload, download, workflow, and Microsoft 365 integrations are introduced.

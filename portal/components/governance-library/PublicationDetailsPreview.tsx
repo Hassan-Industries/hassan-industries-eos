@@ -148,7 +148,7 @@ export default function PublicationDetailsPreview({
           className="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 py-3 text-sm font-bold text-white transition hover:bg-slate-800"
         >
           <Eye className="h-4 w-4" />
-          View Full Record
+          View Record
         </Link>
 
         <button
