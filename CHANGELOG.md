@@ -515,3 +515,31 @@ Changes
 Impact
 
 Expanded the Enterprise Governance Library from publication control into formal governance decision tracking by introducing a controlled frontend registry for resolutions. Improved publication intake access by placing Create New Publication directly inside the Publications Registry where applicable users would reasonably expect it.
+
+---
+
+## HIEOS-IMP-006O
+### EGL Forms & Templates Registry Shells
+
+Status:
+Completed
+
+Summary
+
+Added frontend registry shells for Enterprise Governance Library forms and templates.
+
+Changes
+
+- Added static frontend records for EGL forms and templates.
+- Added controlled Forms Registry shell.
+- Added controlled Templates Registry shell.
+- Added no-default-selection registry behavior.
+- Added selected record preview panels for forms and templates.
+- Added search, owner, status, and series filters.
+- Added frontend-safe action controls that do not route to missing pages.
+- Added copy ID support for form and template records.
+- Replaced forms and templates route pages with institutional EGL registry screens.
+
+Impact
+
+Expanded the EGL frontend foundation beyond publications and resolutions by preparing controlled registry workspaces for future forms, templates, document generation, workflow routing, training manuals, employee use, and executive review.

@@ -1,10 +1,11 @@
+"use client";
+
 import Link from "next/link";
 import {
-  ClipboardList,
+  BookOpen,
   FileCheck2,
   FilePlus2,
   FolderOpen,
-  PackagePlus,
   ScrollText,
   Upload,
 } from "lucide-react";
@@ -35,9 +36,9 @@ const quickActions = [
     primary: false,
   },
   {
-    label: "Create Implementation Packet",
-    href: "/governance-library/templates",
-    icon: PackagePlus,
+    label: "Forms & Templates",
+    href: "/governance-library/forms-templates",
+    icon: BookOpen,
     primary: false,
   },
   {
@@ -51,19 +52,23 @@ const quickActions = [
 export default function EGLQuickActions() {
   return (
     <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="mb-4 flex items-start justify-between gap-4">
+      <div className="mb-4 flex items-start justify-between gap-3">
         <div>
-          <h2 className="text-[13px] font-bold uppercase tracking-[0.18em] text-slate-950">
-            Quick Actions
+          <h2 className="text-[15px] font-extrabold uppercase leading-5 tracking-[0.22em] text-slate-950">
+            Quick
+            <br />
+            Actions
           </h2>
         </div>
 
-        <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">
-          HCA Controls
+        <p className="text-right text-[11px] font-bold uppercase tracking-[0.28em] text-slate-400">
+          HCA
+          <br />
+          Controls
         </p>
       </div>
 
-      <div className="grid gap-2">
+      <div className="space-y-2">
         {quickActions.map((action) => {
           const Icon = action.icon;
 
@@ -71,33 +76,32 @@ export default function EGLQuickActions() {
             <Link
               key={action.label}
               href={action.href}
-              className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 text-xs font-bold transition ${
+              className={[
+                "flex w-full items-center gap-3 rounded-lg border px-4 py-3 text-xs font-bold transition",
                 action.primary
-                  ? "bg-slate-950 text-white hover:bg-slate-800"
-                  : "border border-slate-300 bg-white text-slate-950 hover:border-amber-500 hover:bg-amber-50"
-              }`}
+                  ? "border-slate-950 bg-slate-950 text-white hover:bg-slate-800"
+                  : "border-slate-300 bg-white text-slate-950 hover:border-amber-500 hover:bg-amber-50",
+              ].join(" ")}
             >
               <Icon
-                className={`h-4 w-4 ${
-                  action.primary ? "text-amber-400" : "text-amber-600"
-                }`}
+                className={[
+                  "h-4 w-4 shrink-0",
+                  action.primary ? "text-amber-400" : "text-amber-600",
+                ].join(" ")}
               />
-              {action.label}
+
+              <span>{action.label}</span>
             </Link>
           );
         })}
       </div>
 
-      <div className="mt-4 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-3">
-        <div className="flex gap-3">
-          <ClipboardList className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
-
-          <p className="text-[11px] leading-4 text-slate-600">
-            Quick actions are frontend routing controls. Backend authority,
-            workflow submission, and recordkeeping will be added in later EGL
-            phases.
-          </p>
-        </div>
+      <div className="mt-4 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4">
+        <p className="text-[11px] leading-5 text-slate-600">
+          Quick actions are frontend routing controls. Backend authority,
+          workflow submission, document storage, approval routing, and
+          recordkeeping will be added in later EGL phases.
+        </p>
       </div>
     </section>
   );
