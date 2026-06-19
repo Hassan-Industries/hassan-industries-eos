@@ -387,3 +387,27 @@ Changes
 Impact
 
 Established a testable frontend document viewing workspace before PDF preview, Office document preview, upload/download handling, access controls, Microsoft 365, SharePoint, and backend file storage integrations are introduced.
+
+## HIEOS-IMP-006J
+### EGL Upload & Certification Workflow Shells
+
+Status:
+Completed
+
+Summary
+
+Created frontend workflow shells for Enterprise Governance Library upload replacement and certified-copy actions.
+
+Changes
+
+- Added shared EGL workflow shell component.
+- Created Upload Replacement route for controlled publication records.
+- Created Certified Copy route for controlled publication records.
+- Added route helpers for upload and certification workflows.
+- Connected Record Detail actions to workflow shell routes.
+- Added frontend-only workflow steps, control checklists, workspace placeholders, control notes, and training notes.
+- Preserved EGL dashboard, record detail, viewer, and route reliability behavior.
+
+Impact
+
+Established the frontend workflow structure needed before real file upload processing, certified-copy generation, approval routing, backend persistence, audit trails, Microsoft 365 integration, and SharePoint storage are introduced.
