@@ -3,7 +3,8 @@
 All notable changes to the Hassan Industries Enterprise Operating System (HIEOS) are documented in this file.
 
 This project follows enterprise change management principles.
-
+---
+## UNRELEASED: ##
 ---
 
 ## HIEOS-IMP-005
@@ -628,3 +629,21 @@ Added a frontend-only EGL upload document intake shell and aligned the Upload Do
 
 #### Result
 The EGL now has a dedicated upload intake shell instead of routing the Upload Document quick action back to the Publications Registry.
+
+## HIEOS-IMP-006T
+### EGL Creation Route Stabilization
+**Status:** Completed
+
+#### Summary
+Added explicit frontend creation routes for Upload Document and New Resolution so creation actions no longer resolve into dynamic record detail shells.
+
+#### Deliverables
+- Created `/governance-library/publications/upload`.
+- Created `/governance-library/resolutions/new`.
+- Updated EGL Quick Actions so Upload Document routes to the upload intake shell.
+- Updated EGL Quick Actions so New Resolution routes to the resolution intake shell.
+- Preserved Create New Publication, Create Certified Copy, Forms & Templates, and View Registers routing.
+- Preserved frontend-only implementation scope.
+
+#### Result
+EGL creation actions now route to intentional static intake shells instead of being interpreted as dynamic record IDs.
