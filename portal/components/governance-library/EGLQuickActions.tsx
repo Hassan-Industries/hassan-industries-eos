@@ -27,7 +27,7 @@ const quickActions: QuickAction[] = [
   },
   {
     label: "New Resolution",
-    href: "/governance-library/resolutions",
+    href: "/governance-library/resolutions/new",
     icon: ScrollText,
     primary: false,
   },
