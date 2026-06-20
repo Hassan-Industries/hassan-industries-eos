@@ -1,6 +1,5 @@
-import EGLModuleShell from "@/components/governance-library/EGLModuleShell";
-import { eglModuleConfigs } from "@/data/eglModules";
+import EGLFormsTemplatesRegistryShell from "@/components/governance-library/EGLFormsTemplatesRegistryShell";
 
-export default function FormsPage() {
-  return <EGLModuleShell module={eglModuleConfigs.forms} />;
+export default function FormsRegistryPage() {
+  return <EGLFormsTemplatesRegistryShell moduleType="forms" />;
 }
