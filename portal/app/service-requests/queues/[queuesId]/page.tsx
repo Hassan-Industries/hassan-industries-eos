@@ -139,7 +139,7 @@ export default async function ServiceRequestQueueDetailPage({
               </Link>
 
               <Link
-                href="/service-requests/new"
+              href={`/service-requests/new?queue=${queue.id}`}
                 className="inline-flex items-center gap-2 rounded-lg border border-slate-950 bg-slate-950 px-4 py-3 text-sm font-black text-white shadow-sm transition hover:bg-slate-800"
               >
                 <Plus className="h-4 w-4 text-amber-400" />

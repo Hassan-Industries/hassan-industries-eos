@@ -740,3 +740,36 @@ Establishes Service Requests as the universal intake and routing desk for HIEOS 
 - Updated `portal/app/service-requests/page.tsx` with queue navigation and assigned queue links.
 - Added direct navigation from each selected service request to its assigned queue.
 - Preserved frontend-only implementation scope; no backend routing, authentication, assignment, notifications, comments, attachments, or approval logic was introduced.
+
+## HIEOS-IMP-007D ADDED, HOWEVER CHANGELOG NOT IMPLEMENTED: REFER TO REPO ##
+
+## HIEOS-IMP-007E
+### Service Request Intake Record Lookup & Evidence Controls
+**Status:** Completed
+
+Enhanced the Service Request intake workspace with controlled frontend preparation controls for related records, references, evidence, and attachment planning.
+
+#### Changes
+- Added controlled related-record/reference dropdown selection.
+- Added frontend evidence and attachment preparation controls.
+- Added filtered reference options based on department, category, owner, and classification.
+- Added selected reference preview.
+- Added evidence planning cards for draft documents, executed copies, screenshots, correspondence, source records, supporting notes, and other evidence.
+- Added request package readiness tracking.
+- Added draft packet copy action.
+- Added clearer frontend-only control language.
+- Strengthened training language so Service Requests remain governed, purposeful, and operationally useful.
+
+#### Validation
+- Ran `npm run lint`.
+- Ran `npm run build`.
+- Tested `/service-requests`.
+- Tested `/service-requests/new`.
+- Tested `/service-requests/queues`.
+- Tested `/service-requests/queues/governance-library-intake`.
+- Tested `/service-requests/queues/corporate-records-review`.
+- Tested `/service-requests/queues/treasury-review`.
+- Tested `/service-requests/queues/restricted-hca-review`.
+- Tested `/service-requests/queues/hcp-restricted-review`.
+- Confirmed controlled lookup and evidence controls update the draft package preview.
+- Confirmed no backend submission, storage, upload, authentication, assignment, notification, or approval logic was introduced.
