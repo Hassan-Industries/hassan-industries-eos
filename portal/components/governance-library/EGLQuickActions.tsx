@@ -31,7 +31,7 @@ const quickActions = [
   },
   {
     label: "Create Certified Copy",
-    href: "/governance-library/certified-copies",
+    href: "/governance-library/certified-copies/new",
     icon: FileCheck2,
     primary: false,
   },
@@ -89,7 +89,6 @@ export default function EGLQuickActions() {
                   action.primary ? "text-amber-400" : "text-amber-600",
                 ].join(" ")}
               />
-
               <span>{action.label}</span>
             </Link>
           );
