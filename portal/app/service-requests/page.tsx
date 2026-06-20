@@ -157,6 +157,14 @@ export default function ServiceRequestsPage() {
                 <Plus className="h-4 w-4 text-amber-400" />
                 Create Service Request
               </Link>
+
+              <Link
+                href="/service-requests/queues"
+                className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-black text-slate-950 shadow-sm transition hover:border-amber-500 hover:bg-amber-50"
+              >
+                <Route className="h-4 w-4 text-amber-500" />
+                Routing Queues
+              </Link>
             </nav>
 
             <p className="text-right text-[12px] font-black uppercase tracking-[0.45em] text-slate-400">
@@ -283,7 +291,7 @@ export default function ServiceRequestsPage() {
                 </div>
 
                 <div className="overflow-x-auto p-5">
-                  <table className="min-w-[980px] w-full border-collapse">
+                  <table className="min-w-[1060px] w-full border-collapse">
                     <thead>
                       <tr className="bg-slate-50 text-left text-[11px] font-black uppercase tracking-[0.35em] text-slate-500">
                         <th className="px-4 py-4">Request ID</th>
@@ -292,6 +300,7 @@ export default function ServiceRequestsPage() {
                         <th className="px-4 py-4">Status</th>
                         <th className="px-4 py-4">Priority</th>
                         <th className="px-4 py-4">Owner</th>
+                        <th className="px-4 py-4">Queue</th>
                         <th className="px-4 py-4">Actions</th>
                       </tr>
                     </thead>
@@ -349,6 +358,15 @@ export default function ServiceRequestsPage() {
                             </td>
                             <td className="px-4 py-5 align-top">
                               <Link
+                                href={`/service-requests/queues/${request.routingQueueId}`}
+                                onClick={(event) => event.stopPropagation()}
+                                className="text-xs font-black text-blue-700 hover:text-amber-600"
+                              >
+                                {request.assignedQueue}
+                              </Link>
+                            </td>
+                            <td className="px-4 py-5 align-top">
+                              <Link
                                 href={`/service-requests/${request.id}`}
                                 onClick={(event) => event.stopPropagation()}
                                 className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-black text-slate-950 transition hover:border-amber-500 hover:bg-amber-50"
@@ -387,12 +405,10 @@ export default function ServiceRequestsPage() {
                       </h3>
                       <ul className="mt-4 space-y-3 text-sm leading-6 text-slate-600">
                         <li>• Service requests serve as universal intake.</li>
+                        <li>• Every request should have an assigned queue.</li>
                         <li>• HCA review remains separated from execution.</li>
                         <li>
                           • Restricted matters require controlled visibility.
-                        </li>
-                        <li>
-                          • Backend routing, approval, and records follow later.
                         </li>
                       </ul>
                     </div>
@@ -410,10 +426,9 @@ export default function ServiceRequestsPage() {
                       </h3>
                       <p className="mt-4 text-sm leading-6 text-slate-600">
                         Future work should connect this desk to authenticated
-                        request submission, role-based assignment, approval
-                        routing, department queues, service-level tracking,
-                        comments, attachments, audit logs, and permanent
-                        records.
+                        request submission, role-based assignment, department
+                        queues, service-level tracking, comments, attachments,
+                        audit logs, approval routing, and permanent records.
                       </p>
                     </div>
                   </div>
@@ -512,6 +527,7 @@ function SelectedRequestPanel({
           ["Category", request.category],
           ["Priority", request.priority],
           ["Stage", request.stage],
+          ["Assigned Queue", request.assignedQueue],
           ["Due Date", request.dueDate],
           ["Related Record", request.relatedRecord],
         ].map(([label, value]) => (
@@ -544,6 +560,14 @@ function SelectedRequestPanel({
         >
           Open Detail Workspace
           <ArrowRight className="h-4 w-4 text-amber-400" />
+        </Link>
+
+        <Link
+          href={`/service-requests/queues/${request.routingQueueId}`}
+          className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-black text-slate-950 transition hover:border-amber-500 hover:bg-amber-50"
+        >
+          Open Assigned Queue
+          <Route className="h-4 w-4 text-amber-500" />
         </Link>
 
         <Link
