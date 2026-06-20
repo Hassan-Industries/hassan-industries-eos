@@ -56,7 +56,7 @@ const publicationSeries: PublicationSeriesCard[] = [
   {
     title: "Records",
     count: "18 Publications",
-    href: "/governance-library/publications?series=Corporate Records",
+    href: "/governance-library/publications?series=Corporate%20Records",
     icon: FolderOpen,
   },
   {

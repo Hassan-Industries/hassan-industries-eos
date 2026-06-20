@@ -31,7 +31,7 @@ const quickActions = [
   },
   {
     label: "Create Certified Copy",
-    href: "/governance-library/certified-copies",
+    href: "/governance-library/certified-copies/new",
     icon: FileCheck2,
     primary: false,
   },

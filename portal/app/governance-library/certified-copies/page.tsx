@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   ArrowLeft,
   BookOpen,
@@ -13,8 +13,7 @@ import {
   FileText,
   FolderOpen,
   History,
-  Landmark,
-  RefreshCcw,
+  RefreshCw,
   ShieldCheck,
 } from "lucide-react";
 
@@ -70,14 +69,14 @@ const certifiedCopyRecords: CertifiedCopyRecord[] = [
     sourceViewerHref: "/governance-library/publications/HI-ADM-002/viewer",
     status: "CC",
     owner: "HCA",
-    authority: "Hassan Corporate Agents",
+    authority: "Hassan Capital Partners, LLC",
     classification: "Internal Governance",
     version: "1.0",
     issueDate: "2026-06-18",
     sourceLocation: "HCA Vault / Originals",
     retention: "Permanent",
     certificationUse:
-      "Certified reference copy for document numbering, classification, revision control, and records governance.",
+      "Controlled copy available for document-control verification and enterprise records training.",
   },
   {
     id: "CC-HCP-RES-2026-001",
@@ -96,7 +95,7 @@ const certifiedCopyRecords: CertifiedCopyRecord[] = [
     sourceLocation: "HCA Vault / Originals",
     retention: "Permanent",
     certificationUse:
-      "Certified governance copy evidencing adoption of foundational treasury authority and control structure.",
+      "Controlled copy available for governance evidence and treasury authority reference.",
   },
   {
     id: "CC-HI-TRE-001",
@@ -115,31 +114,31 @@ const certifiedCopyRecords: CertifiedCopyRecord[] = [
     sourceLocation: "HCA Vault / Originals",
     retention: "Permanent",
     certificationUse:
-      "Pending certified-copy issuance for treasury operations reference and governance review.",
+      "Certified copy request pending future backend certification workflow.",
   },
 ];
 
 export default function CertifiedCopiesRegistryPage() {
   const [selectedCopy, setSelectedCopy] =
     useState<CertifiedCopyRecord | null>(null);
+
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  const certifiedCount = useMemo(
-    () =>
-      certifiedCopyRecords.filter((record) => record.status === "CC").length,
-    []
-  );
+  const certifiedCount = certifiedCopyRecords.filter(
+    (record) => record.status === "CC",
+  ).length;
 
-  const pendingCount = useMemo(
-    () =>
-      certifiedCopyRecords.filter((record) => record.status === "Pending")
-        .length,
-    []
-  );
+  const pendingCount = certifiedCopyRecords.filter(
+    (record) => record.status === "Pending",
+  ).length;
 
-  function handleCopyId(record: CertifiedCopyRecord) {
-    void navigator.clipboard?.writeText(record.id);
-    setCopiedId(record.id);
+  async function copyCertifiedCopyId(copyId: string) {
+    await navigator.clipboard.writeText(copyId);
+    setCopiedId(copyId);
+
+    window.setTimeout(() => {
+      setCopiedId(null);
+    }, 1800);
   }
 
   return (
@@ -151,18 +150,18 @@ export default function CertifiedCopiesRegistryPage() {
 
         <main className="flex-1 px-5 py-4">
           <div className="mx-auto max-w-[1500px] space-y-4">
-            <section className="rounded-xl bg-slate-950 px-5 py-5 text-white shadow-sm">
-              <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <section className="rounded-xl bg-slate-950 p-6 text-white shadow-sm">
+              <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-center">
                 <div>
-                  <p className="text-[11px] font-bold uppercase tracking-[0.36em] text-amber-400">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.48em] text-amber-400">
                     Hassan Industries
                   </p>
 
-                  <h1 className="mt-2 text-[26px] font-extrabold uppercase leading-none tracking-wide">
+                  <h1 className="mt-3 text-3xl font-black uppercase tracking-tight">
                     Certified Copies Registry
                   </h1>
 
-                  <p className="mt-3 max-w-5xl text-[12px] leading-5 text-slate-200">
+                  <p className="mt-3 max-w-4xl text-sm leading-6 text-slate-200">
                     Controlled frontend registry for certified copies of
                     enterprise publications, executed records, resolutions,
                     official governance documents, and future certification
@@ -170,16 +169,16 @@ export default function CertifiedCopiesRegistryPage() {
                   </p>
                 </div>
 
-                <div className="rounded-lg border border-amber-500/70 bg-slate-900 px-6 py-4 text-center">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-200">
+                <div className="rounded-lg border border-amber-500 bg-slate-900 px-8 py-5 text-center">
+                  <p className="text-[11px] font-black uppercase tracking-[0.42em] text-slate-200">
                     Registry Status
                   </p>
 
-                  <p className="mt-2 text-lg font-extrabold text-amber-400">
+                  <p className="mt-3 text-2xl font-black text-amber-400">
                     Frontend List
                   </p>
 
-                  <p className="mt-1 text-[11px] text-slate-300">
+                  <p className="mt-1 text-xs text-slate-200">
                     Certified Copy Data Layer
                   </p>
                 </div>
@@ -195,131 +194,125 @@ export default function CertifiedCopiesRegistryPage() {
                 Back to EGL Dashboard
               </Link>
 
-              <p className="hidden text-xs font-semibold uppercase tracking-[0.18em] text-slate-400 md:block">
+              <p className="text-[12px] font-bold uppercase tracking-[0.34em] text-slate-400">
                 Controlled Certified Copies
               </p>
             </div>
 
-            <section className="grid gap-3 md:grid-cols-4">
-              <MetricCard
+            <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+              <RegistryStat
                 label="Certified Copy Records"
-                value={certifiedCopyRecords.length.toString()}
-                icon={<FileCheck2 className="h-6 w-6 text-amber-500" />}
+                value={String(certifiedCopyRecords.length)}
+                icon={FileCheck2}
               />
 
-              <MetricCard
+              <RegistryStat
                 label="Certified Copies"
-                value={certifiedCount.toString()}
-                icon={<CheckCircle2 className="h-6 w-6 text-amber-500" />}
+                value={String(certifiedCount)}
+                icon={CheckCircle2}
               />
 
-              <MetricCard
+              <RegistryStat
                 label="Pending Certification"
-                value={pendingCount.toString()}
-                icon={<RefreshCcw className="h-6 w-6 text-amber-500" />}
+                value={String(pendingCount)}
+                icon={RefreshCw}
               />
 
-              <MetricCard
+              <RegistryStat
                 label="Permanent Retention"
                 value="4"
-                icon={<BookOpen className="h-6 w-6 text-amber-500" />}
+                icon={BookOpen}
               />
             </section>
 
-            <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_390px]">
-              <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
-                <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-200 p-5">
+            <section className="grid gap-4 xl:grid-cols-[1fr_430px]">
+              <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-5 py-4">
                   <div>
-                    <p className="text-[11px] font-bold uppercase tracking-[0.32em] text-slate-400">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.36em] text-slate-400">
                       Enterprise Governance Library
                     </p>
 
-                    <h2 className="mt-2 text-xl font-extrabold text-slate-950">
+                    <h2 className="mt-2 text-2xl font-black text-slate-950">
                       Certified Copies Registry
                     </h2>
 
-                    <p className="mt-2 text-xs leading-5 text-slate-600">
+                    <p className="mt-2 text-sm text-slate-600">
                       Select a certified copy record to preview source
                       authority, lifecycle status, source location, and future
                       issuance controls.
                     </p>
                   </div>
 
-                  <div className="rounded-full bg-amber-100 px-4 py-2 text-xs font-bold text-amber-700">
-                    {certifiedCopyRecords.length} shown
+                  <div className="flex items-center gap-3">
+                    <span className="rounded-full bg-amber-100 px-4 py-2 text-xs font-bold text-amber-700">
+                      {certifiedCopyRecords.length} shown
+                    </span>
+
+                    <Link
+                      href="/governance-library/certified-copies/new"
+                      className="inline-flex items-center gap-2 rounded-lg border border-slate-950 bg-slate-950 px-4 py-3 text-xs font-bold text-white transition hover:bg-slate-800"
+                    >
+                      <FileCheck2 className="h-4 w-4 text-amber-400" />
+                      Create Certified Copy
+                    </Link>
                   </div>
                 </div>
 
                 <div className="overflow-x-auto p-5">
-                  <table className="min-w-[1040px] w-full border-collapse text-left text-sm">
+                  <table className="min-w-[980px] w-full border-collapse text-left text-sm">
                     <thead>
-                      <tr className="border-b border-slate-200 bg-slate-50 text-[11px] font-bold uppercase tracking-[0.24em] text-slate-500">
+                      <tr className="bg-slate-50 text-[11px] font-black uppercase tracking-[0.32em] text-slate-500">
                         <th className="px-4 py-4">Copy ID</th>
                         <th className="px-4 py-4">Source Record</th>
                         <th className="px-4 py-4">Source Type</th>
                         <th className="px-4 py-4">Status</th>
                         <th className="px-4 py-4">Owner</th>
                         <th className="px-4 py-4">Issue Date</th>
-                        <th className="px-4 py-4">Retention</th>
                       </tr>
                     </thead>
 
                     <tbody>
                       {certifiedCopyRecords.map((record) => {
-                        const selected = selectedCopy?.id === record.id;
+                        const isSelected = selectedCopy?.id === record.id;
 
                         return (
                           <tr
                             key={record.id}
                             onClick={() => setSelectedCopy(record)}
                             className={[
-                              "cursor-pointer border-b border-slate-200 transition",
-                              selected
-                                ? "bg-amber-50"
-                                : "bg-white hover:bg-slate-50",
+                              "cursor-pointer border-b border-slate-200 transition hover:bg-amber-50",
+                              isSelected ? "bg-amber-50" : "bg-white",
                             ].join(" ")}
                           >
-                            <td className="px-4 py-5 align-top text-xs font-extrabold text-slate-950">
+                            <td className="px-4 py-5 align-top font-black">
                               {record.id}
                             </td>
 
                             <td className="px-4 py-5 align-top">
-                              <p className="font-extrabold text-slate-950">
+                              <p className="font-black">
                                 {record.sourceRecordId}
                               </p>
 
-                              <p className="mt-1 max-w-[280px] text-xs leading-5 text-slate-600">
+                              <p className="mt-2 max-w-[320px] text-sm leading-5 text-slate-600">
                                 {record.sourceRecordTitle}
                               </p>
                             </td>
 
-                            <td className="px-4 py-5 align-top text-xs font-semibold text-slate-700">
+                            <td className="px-4 py-5 align-top font-bold">
                               {record.sourceType}
                             </td>
 
                             <td className="px-4 py-5 align-top">
-                              <span
-                                className={[
-                                  "rounded-md px-3 py-1 text-xs font-extrabold",
-                                  record.status === "CC"
-                                    ? "bg-emerald-100 text-emerald-700"
-                                    : "bg-amber-100 text-amber-700",
-                                ].join(" ")}
-                              >
-                                {record.status}
-                              </span>
+                              <StatusBadge status={record.status} />
                             </td>
 
-                            <td className="px-4 py-5 align-top text-xs font-semibold text-slate-700">
+                            <td className="px-4 py-5 align-top font-bold">
                               {record.owner}
                             </td>
 
-                            <td className="px-4 py-5 align-top text-xs font-semibold text-slate-700">
+                            <td className="px-4 py-5 align-top font-bold">
                               {record.issueDate}
-                            </td>
-
-                            <td className="px-4 py-5 align-top text-xs font-semibold text-slate-700">
-                              {record.retention}
                             </td>
                           </tr>
                         );
@@ -327,25 +320,195 @@ export default function CertifiedCopiesRegistryPage() {
                     </tbody>
                   </table>
                 </div>
-              </section>
+              </div>
 
               <aside className="space-y-4">
                 {selectedCopy ? (
-                  <SelectedCopyPanel
-                    record={selectedCopy}
-                    copiedId={copiedId}
-                    onCopyId={() => handleCopyId(selectedCopy)}
-                  />
+                  <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                    <div className="mb-4 flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-[11px] font-bold uppercase tracking-[0.36em] text-slate-400">
+                          Selected Certified Copy
+                        </p>
+
+                        <h2 className="mt-3 text-2xl font-black text-slate-950">
+                          {selectedCopy.id}
+                        </h2>
+
+                        <p className="mt-2 text-sm font-bold text-slate-950">
+                          {selectedCopy.title}
+                        </p>
+                      </div>
+
+                      <StatusBadge status={selectedCopy.status} />
+                    </div>
+
+                    <div className="rounded-lg bg-slate-950 p-4 text-white">
+                      <div className="flex items-center gap-3">
+                        <FileCheck2 className="h-7 w-7 text-amber-400" />
+
+                        <div>
+                          <p className="text-[11px] font-black uppercase tracking-[0.34em] text-white">
+                            Controlled Certified Copy
+                          </p>
+
+                          <p className="text-xs text-slate-200">
+                            {selectedCopy.classification}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-5 space-y-3 text-sm">
+                      <MetadataRow
+                        label="Source Record"
+                        value={selectedCopy.sourceRecordId}
+                      />
+                      <MetadataRow
+                        label="Source Type"
+                        value={selectedCopy.sourceType}
+                      />
+                      <MetadataRow label="Owner" value={selectedCopy.owner} />
+                      <MetadataRow
+                        label="Authority"
+                        value={selectedCopy.authority}
+                      />
+                      <MetadataRow
+                        label="Version"
+                        value={selectedCopy.version}
+                      />
+                      <MetadataRow
+                        label="Issue Date"
+                        value={selectedCopy.issueDate}
+                      />
+                      <MetadataRow
+                        label="Source Location"
+                        value={selectedCopy.sourceLocation}
+                      />
+                      <MetadataRow
+                        label="Retention"
+                        value={selectedCopy.retention}
+                      />
+                    </div>
+
+                    <div className="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-4">
+                      <p className="text-[11px] font-bold uppercase tracking-[0.32em] text-slate-500">
+                        Certification Use
+                      </p>
+
+                      <p className="mt-2 text-sm leading-6 text-slate-700">
+                        {selectedCopy.certificationUse}
+                      </p>
+                    </div>
+
+                    <div className="mt-5 space-y-2">
+                      <Link
+                        href={selectedCopy.sourceHref}
+                        className="flex items-center justify-center gap-2 rounded-lg border border-slate-950 bg-slate-950 px-4 py-3 text-xs font-bold text-white transition hover:bg-slate-800"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                        Open Source Record
+                      </Link>
+
+                      <Link
+                        href={selectedCopy.sourceViewerHref}
+                        className="flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-xs font-bold text-slate-950 transition hover:border-amber-500 hover:bg-amber-50"
+                      >
+                        <FileText className="h-4 w-4 text-amber-600" />
+                        View Source File
+                      </Link>
+
+                      <button
+                        type="button"
+                        onClick={() => copyCertifiedCopyId(selectedCopy.id)}
+                        className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-xs font-bold text-slate-950 transition hover:border-amber-500 hover:bg-amber-50"
+                      >
+                        <Copy className="h-4 w-4 text-amber-600" />
+                        {copiedId === selectedCopy.id
+                          ? "Certified Copy ID Copied"
+                          : "Copy Certified Copy ID"}
+                      </button>
+
+                      <button
+                        type="button"
+                        className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-xs font-bold text-slate-950 transition hover:border-amber-500 hover:bg-amber-50"
+                      >
+                        <Download className="h-4 w-4 text-amber-600" />
+                        Download Copy
+                      </button>
+
+                      <Link
+                        href="/governance-library/certified-copies/history"
+                        className="flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-xs font-bold text-slate-950 transition hover:border-amber-500 hover:bg-amber-50"
+                      >
+                        <History className="h-4 w-4 text-amber-600" />
+                        View Certification History
+                      </Link>
+                    </div>
+                  </section>
                 ) : (
-                  <EmptySelectionPanel />
+                  <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-[11px] font-bold uppercase tracking-[0.36em] text-slate-400">
+                          Registry Preview
+                        </p>
+
+                        <h2 className="mt-3 text-2xl font-black text-slate-950">
+                          No Certified Copy Selected
+                        </h2>
+
+                        <p className="mt-3 text-sm leading-6 text-slate-600">
+                          Select a certified copy record to open source
+                          authority, certification metadata, lifecycle status,
+                          and available certified-copy actions.
+                        </p>
+                      </div>
+
+                      <div className="rounded-lg bg-slate-950 p-3">
+                        <FileCheck2 className="h-6 w-6 text-amber-400" />
+                      </div>
+                    </div>
+
+                    <div className="mt-5 rounded-lg bg-slate-950 p-4 text-white">
+                      <p className="text-[11px] font-black uppercase tracking-[0.34em]">
+                        Certified Copy Workspace
+                      </p>
+
+                      <p className="mt-2 text-xs leading-5 text-slate-200">
+                        Certified-copy controls open only after intentional
+                        certified-copy record selection.
+                      </p>
+                    </div>
+
+                    <div className="mt-5 space-y-3">
+                      <PreviewInstruction
+                        icon={FolderOpen}
+                        title="Select a Certified Copy"
+                        text="Choose a certified-copy record from the registry table."
+                      />
+
+                      <PreviewInstruction
+                        icon={ShieldCheck}
+                        title="Review Authority"
+                        text="Verify source record, authority, classification, and issue status."
+                      />
+
+                      <PreviewInstruction
+                        icon={History}
+                        title="Use Certification Controls"
+                        text="Open the source record, view source file, copy certified-copy ID, or review certification history."
+                      />
+                    </div>
+                  </section>
                 )}
 
-                <section className="rounded-lg border border-dashed border-slate-300 bg-white p-5 shadow-sm">
-                  <h2 className="text-[13px] font-bold uppercase tracking-[0.18em] text-slate-950">
+                <section className="rounded-lg border border-dashed border-slate-300 bg-white p-5">
+                  <p className="text-[15px] font-black uppercase tracking-[0.28em] text-slate-950">
                     Training Note
-                  </h2>
+                  </p>
 
-                  <p className="mt-3 text-xs leading-5 text-slate-600">
+                  <p className="mt-4 text-sm leading-6 text-slate-600">
                     Employees and executives should treat certified copies as
                     controlled evidence copies. Future backend work should
                     connect this registry to original executed locations,
@@ -355,28 +518,6 @@ export default function CertifiedCopiesRegistryPage() {
                 </section>
               </aside>
             </section>
-
-            <section className="rounded-lg border border-dashed border-slate-300 bg-white p-5 shadow-sm">
-              <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-950">
-                  <ShieldCheck className="h-5 w-5 text-amber-400" />
-                </div>
-
-                <div>
-                  <h2 className="text-[15px] font-extrabold uppercase tracking-[0.18em] text-slate-950">
-                    Backend Readiness
-                  </h2>
-
-                  <p className="mt-2 text-xs leading-5 text-slate-600">
-                    This certified copies registry is frontend-only. Later EGL
-                    releases should connect it to document storage,
-                    certification logs, generated certified-copy packets, source
-                    file verification, issuing authority, employee/executive
-                    access controls, and permanent recordkeeping.
-                  </p>
-                </div>
-              </div>
-            </section>
           </div>
         </main>
       </div>
@@ -384,248 +525,71 @@ export default function CertifiedCopiesRegistryPage() {
   );
 }
 
-function MetricCard({
+function RegistryStat({
   label,
   value,
-  icon,
+  icon: Icon,
 }: {
   label: string;
   value: string;
-  icon: React.ReactNode;
+  icon: typeof FileCheck2;
 }) {
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <p className="text-xs font-semibold text-slate-500">{label}</p>
+    <div className="flex min-h-[90px] items-center justify-between rounded-lg border border-slate-200 bg-white px-5 py-4 shadow-sm">
+      <div>
+        <p className="text-[12px] text-slate-500">{label}</p>
 
-          <p className="mt-2 text-2xl font-extrabold text-slate-950">
-            {value}
-          </p>
-        </div>
-
-        {icon}
-      </div>
-    </section>
-  );
-}
-
-function EmptySelectionPanel() {
-  return (
-    <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-[11px] font-bold uppercase tracking-[0.32em] text-slate-400">
-            Registry Preview
-          </p>
-
-          <h2 className="mt-2 text-xl font-extrabold text-slate-950">
-            No Certified Copy Selected
-          </h2>
-
-          <p className="mt-3 text-xs leading-5 text-slate-600">
-            Select a certified copy record to review source record authority,
-            issue status, source location, retention, and available frontend
-            actions.
-          </p>
-        </div>
-
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-950">
-          <FileCheck2 className="h-5 w-5 text-amber-400" />
-        </div>
+        <p className="mt-2 text-3xl font-black text-slate-950">{value}</p>
       </div>
 
-      <div className="mt-5 rounded-lg bg-slate-950 p-5 text-white">
-        <div className="flex items-center gap-3">
-          <BookOpen className="h-6 w-6 text-amber-400" />
-
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-200">
-              Certified Copy Workspace
-            </p>
-
-            <p className="mt-1 text-xs text-slate-300">
-              Record actions open only after intentional selection.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-5 space-y-3">
-        <InstructionCard
-          icon={<FolderOpen className="h-4 w-4 text-amber-600" />}
-          title="Select a Certified Copy"
-          body="Choose a record from the registry table to open its controlled metadata preview."
-        />
-
-        <InstructionCard
-          icon={<ShieldCheck className="h-4 w-4 text-amber-600" />}
-          title="Review Authority"
-          body="Confirm source record, owner, authority, certification use, and retention."
-        />
-
-        <InstructionCard
-          icon={<ExternalLink className="h-4 w-4 text-amber-600" />}
-          title="Open Source Records"
-          body="Use the selected record actions to open the original record or source viewer shell."
-        />
-      </div>
-    </section>
-  );
-}
-
-function SelectedCopyPanel({
-  record,
-  copiedId,
-  onCopyId,
-}: {
-  record: CertifiedCopyRecord;
-  copiedId: string | null;
-  onCopyId: () => void;
-}) {
-  return (
-    <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-[11px] font-bold uppercase tracking-[0.32em] text-slate-400">
-            Selected Certified Copy
-          </p>
-
-          <h2 className="mt-2 text-xl font-extrabold text-slate-950">
-            {record.id}
-          </h2>
-
-          <p className="mt-2 text-sm font-bold text-slate-950">
-            {record.title}
-          </p>
-        </div>
-
-        <span
-          className={[
-            "rounded-md px-3 py-1 text-xs font-extrabold",
-            record.status === "CC"
-              ? "bg-emerald-100 text-emerald-700"
-              : "bg-amber-100 text-amber-700",
-          ].join(" ")}
-        >
-          {record.status}
-        </span>
-      </div>
-
-      <div className="mt-5 rounded-lg bg-slate-950 p-5 text-white">
-        <div className="flex items-center gap-3">
-          <FileCheck2 className="h-6 w-6 text-amber-400" />
-
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-200">
-              Controlled Certified Copy
-            </p>
-
-            <p className="mt-1 text-xs text-slate-300">
-              {record.classification}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-5 space-y-2 text-sm">
-        <DetailRow label="Source Record" value={record.sourceRecordId} />
-        <DetailRow label="Source Type" value={record.sourceType} />
-        <DetailRow label="Owner" value={record.owner} />
-        <DetailRow label="Authority" value={record.authority} />
-        <DetailRow label="Version" value={record.version} />
-        <DetailRow label="Issue Date" value={record.issueDate} />
-        <DetailRow label="Source Location" value={record.sourceLocation} />
-        <DetailRow label="Retention" value={record.retention} />
-      </div>
-
-      <div className="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-4">
-        <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-500">
-          Certification Use
-        </p>
-
-        <p className="mt-2 text-xs leading-5 text-slate-600">
-          {record.certificationUse}
-        </p>
-      </div>
-
-      <div className="mt-5 space-y-2">
-        <Link
-          href={record.sourceHref}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 py-3 text-xs font-bold text-white transition hover:bg-slate-800"
-        >
-          <ExternalLink className="h-4 w-4" />
-          Open Source Record
-        </Link>
-
-        <Link
-          href={record.sourceViewerHref}
-          className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-xs font-bold text-slate-950 transition hover:border-amber-500 hover:bg-amber-50"
-        >
-          <FileText className="h-4 w-4 text-amber-600" />
-          View Source File
-        </Link>
-
-        <button
-          type="button"
-          onClick={onCopyId}
-          className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-xs font-bold text-slate-950 transition hover:border-amber-500 hover:bg-amber-50"
-        >
-          <Copy className="h-4 w-4 text-amber-600" />
-          {copiedId === record.id ? "Certified Copy ID Copied" : "Copy Certified Copy ID"}
-        </button>
-
-        <button
-          type="button"
-          className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-xs font-bold text-slate-950 transition hover:border-amber-500 hover:bg-amber-50"
-        >
-          <Download className="h-4 w-4 text-amber-600" />
-          Download Copy
-        </button>
-
-        <button
-          type="button"
-          className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-xs font-bold text-slate-950 transition hover:border-amber-500 hover:bg-amber-50"
-        >
-          <History className="h-4 w-4 text-amber-600" />
-          View Certification History
-        </button>
-      </div>
-    </section>
-  );
-}
-
-function DetailRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between gap-4 border-b border-slate-200 py-2">
-      <span className="text-xs font-semibold text-slate-500">{label}</span>
-
-      <span className="text-right text-xs font-bold text-slate-950">
-        {value}
-      </span>
+      <Icon className="h-6 w-6 text-amber-500" />
     </div>
   );
 }
 
-function InstructionCard({
-  icon,
+function StatusBadge({ status }: { status: "CC" | "Pending" }) {
+  if (status === "CC") {
+    return (
+      <span className="rounded-md bg-emerald-100 px-3 py-1 text-xs font-black text-emerald-700">
+        CC
+      </span>
+    );
+  }
+
+  return (
+    <span className="rounded-md bg-amber-100 px-3 py-1 text-xs font-black text-amber-700">
+      Pending
+    </span>
+  );
+}
+
+function MetadataRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between gap-4 border-b border-slate-200 pb-2">
+      <span className="font-bold text-slate-500">{label}</span>
+      <span className="text-right font-black text-slate-950">{value}</span>
+    </div>
+  );
+}
+
+function PreviewInstruction({
+  icon: Icon,
   title,
-  body,
+  text,
 }: {
-  icon: React.ReactNode;
+  icon: typeof FolderOpen;
   title: string;
-  body: string;
+  text: string;
 }) {
   return (
     <div className="flex gap-3 rounded-lg border border-slate-200 bg-slate-50 p-4">
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white">
-        {icon}
+      <div className="rounded-lg border border-slate-200 bg-white p-2">
+        <Icon className="h-5 w-5 text-amber-600" />
       </div>
 
       <div>
-        <p className="text-sm font-extrabold text-slate-950">{title}</p>
-
-        <p className="mt-1 text-xs leading-5 text-slate-600">{body}</p>
+        <p className="text-sm font-black text-slate-950">{title}</p>
+        <p className="mt-1 text-xs leading-5 text-slate-600">{text}</p>
       </div>
     </div>
   );
