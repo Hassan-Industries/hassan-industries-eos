@@ -721,3 +721,12 @@ Changes:
 
 Impact:
 Establishes Service Requests as the universal intake and routing desk for HIEOS before backend request submission, workflow routing, reviewer assignment, attachment handling, audit history, role permissions, and permanent recordkeeping are introduced.
+
+## HIEOS-IMP-007B: Service Request Detail & Routing Workspace
+
+- Added shared Service Requests data layer at `portal/data/serviceRequests.ts`.
+- Rewired `portal/app/service-requests/page.tsx` to use the shared service request records.
+- Added direct request detail routes at `/service-requests/[requestId]`.
+- Added frontend request detail workspace with request authority, routing metadata, relationships, checklist, timeline, actions, backend readiness, and training notes.
+- Added row-level open action from the Service Requests Desk to each request detail workspace.
+- Preserved frontend-only implementation scope; no backend submission, authentication, assignment, upload, or approval logic was introduced.
