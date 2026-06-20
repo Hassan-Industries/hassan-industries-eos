@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
@@ -40,8 +41,10 @@ type SearchablePublicationRecord = PublicationRecord & {
 };
 
 export default function GovernanceLibraryPage() {
- const [selectedPublication, setSelectedPublication] =
-  useState<PublicationRecord | null>(null);
+  const router = useRouter();
+
+  const [selectedPublication, setSelectedPublication] =
+    useState<PublicationRecord | null>(null);
 
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -58,11 +61,8 @@ export default function GovernanceLibraryPage() {
   }, [searchTerm]);
 
   function handleSearchSubmit() {
-    const firstResult = filteredPublications[0];
-
-    if (firstResult) {
-      setSelectedPublication(firstResult);
-    }
+    const route = getDashboardSearchRoute(searchTerm);
+    router.push(route);
   }
 
   return (
@@ -84,7 +84,7 @@ export default function GovernanceLibraryPage() {
 
             <EGLStats />
 
-            <section className="grid gap-4 2xl:grid-cols-[minmax(0,1fr)_390px]">
+            <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_390px]">
               <div className="min-w-0 space-y-4">
                 <PublicationSeriesGrid />
 
@@ -92,7 +92,7 @@ export default function GovernanceLibraryPage() {
                   <RecentlyUpdatedPublications
                     publications={filteredPublications}
                     selectedPublication={selectedPublication}
-                    onSelectPublication={setSelectedPublication}
+                    setSelectedPublication={setSelectedPublication}
                   />
 
                   <EGLQuickActions />
@@ -143,4 +143,107 @@ function getSearchablePublicationText(publication: PublicationRecord) {
     .filter(Boolean)
     .join(" ")
     .toLowerCase();
+}
+
+function getDashboardSearchRoute(searchTerm: string) {
+  const normalizedSearch = searchTerm.trim().toLowerCase();
+
+  if (!normalizedSearch) {
+    return "/governance-library/publications";
+  }
+
+  if (
+    includesAny(normalizedSearch, [
+      "register",
+      "registers",
+      "registry hub",
+      "registry",
+      "controlled registers",
+    ])
+  ) {
+    return "/governance-library/registers";
+  }
+
+  if (
+    includesAny(normalizedSearch, [
+      "form",
+      "forms",
+      "template",
+      "templates",
+      "forms templates",
+      "forms & templates",
+      "intake form",
+    ])
+  ) {
+    return "/governance-library/forms-templates";
+  }
+
+  if (
+    includesAny(normalizedSearch, [
+      "certified",
+      "certified copy",
+      "certified copies",
+      "certification",
+      "copy records",
+    ])
+  ) {
+    return "/governance-library/certified-copies";
+  }
+
+  if (
+    includesAny(normalizedSearch, [
+      "resolution",
+      "resolutions",
+      "governance decision",
+      "formal action",
+      "officer action",
+      "board decision",
+    ])
+  ) {
+    return "/governance-library/resolutions";
+  }
+
+  if (
+    includesAny(normalizedSearch, [
+      "pending review",
+      "review queue",
+      "review",
+      "awaiting review",
+    ])
+  ) {
+    return "/governance-library/pending-review";
+  }
+
+  if (
+    includesAny(normalizedSearch, [
+      "pending execution",
+      "execution",
+      "signature",
+      "awaiting signature",
+      "awaiting filing",
+      "filing",
+    ])
+  ) {
+    return "/governance-library/pending-execution";
+  }
+
+  if (
+    includesAny(normalizedSearch, [
+      "upload",
+      "upload document",
+      "replacement",
+      "source file",
+      "document upload",
+    ])
+  ) {
+    return "/governance-library/publications/upload";
+  }
+
+  return `/governance-library/publications?search=${encodeURIComponent(
+    searchTerm.trim(),
+  )}`;
+}
+
+function includesAny(value: string, terms: string[]) {
+  return terms.some((term) => value.includes(term));
 }

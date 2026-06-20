@@ -15,20 +15,19 @@ export default function EGLSearchBar({
 }: EGLSearchBarProps) {
   return (
     <form
-      className="flex h-10 overflow-hidden rounded-lg border border-slate-900 bg-white shadow-sm"
       onSubmit={(event) => {
         event.preventDefault();
         onSubmit();
       }}
+      className="flex h-[48px] overflow-hidden rounded-lg border border-slate-300 bg-white shadow-sm focus-within:border-amber-500"
     >
       <div className="flex flex-1 items-center gap-3 px-4">
-        <Search className="h-4 w-4 text-slate-400" />
+        <Search className="h-4 w-4 shrink-0 text-slate-400" />
 
         <input
-          type="search"
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          placeholder="Search by document number, title, series, status, owner, or classification..."
+          placeholder="Search EGL records, registries, queues, forms, templates, certified copies, or classifications..."
           className="h-full w-full bg-transparent text-xs text-slate-950 outline-none placeholder:text-slate-400"
         />
 
@@ -46,7 +45,7 @@ export default function EGLSearchBar({
 
       <button
         type="submit"
-        className="bg-slate-950 px-7 text-xs font-bold text-white transition hover:bg-slate-800"
+        className="w-[96px] bg-slate-950 text-xs font-extrabold text-white transition hover:bg-slate-800"
       >
         Search
       </button>
