@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import type { ElementType } from "react";
 import {
@@ -11,35 +13,39 @@ import {
 type EGLStat = {
   label: string;
   value: string;
+  href: string;
   icon: ElementType;
-  href?: string;
 };
 
 const stats: EGLStat[] = [
   {
     label: "Active Publications",
     value: "241",
+    href: "/governance-library/publications",
     icon: BookOpen,
   },
   {
     label: "Pending Review",
     value: "23",
+    href: "/governance-library/pending-review",
     icon: Clock3,
   },
   {
     label: "Pending Execution",
     value: "17",
+    href: "/governance-library/pending-execution",
     icon: ClipboardCheck,
   },
   {
     label: "Certified Copies",
     value: "89",
-    icon: FileCheck2,
     href: "/governance-library/certified-copies",
+    icon: FileCheck2,
   },
   {
     label: "Active Policies",
     value: "64",
+    href: "/governance-library/publications?type=Policy",
     icon: FileText,
   },
 ];
@@ -50,8 +56,12 @@ export default function EGLStats() {
       {stats.map((stat) => {
         const Icon = stat.icon;
 
-        const card = (
-          <div className="flex min-h-[78px] items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm transition hover:border-amber-500 hover:bg-amber-50">
+        return (
+          <Link
+            key={stat.label}
+            href={stat.href}
+            className="flex min-h-[78px] items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm transition hover:border-amber-500 hover:bg-amber-50 focus:outline-none focus:ring-2 focus:ring-amber-500"
+          >
             <div>
               <p className="text-[11px] text-slate-500">{stat.label}</p>
               <p className="mt-1 text-[25px] font-extrabold leading-none text-slate-950">
@@ -60,22 +70,8 @@ export default function EGLStats() {
             </div>
 
             <Icon className="h-6 w-6 text-amber-500" />
-          </div>
+          </Link>
         );
-
-        if (stat.href) {
-          return (
-            <Link
-              key={stat.label}
-              href={stat.href}
-              aria-label={`Open ${stat.label}`}
-            >
-              {card}
-            </Link>
-          );
-        }
-
-        return <div key={stat.label}>{card}</div>;
       })}
     </section>
   );

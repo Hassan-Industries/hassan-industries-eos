@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { ElementType } from "react";
 import {
   BookOpen,
   FileCheck2,
@@ -10,7 +11,14 @@ import {
   Upload,
 } from "lucide-react";
 
-const quickActions = [
+type QuickAction = {
+  label: string;
+  href: string;
+  icon: ElementType;
+  primary: boolean;
+};
+
+const quickActions: QuickAction[] = [
   {
     label: "Create New Publication",
     href: "/governance-library/publications/new",
@@ -43,7 +51,7 @@ const quickActions = [
   },
   {
     label: "View Registers",
-    href: "/governance-library/publications",
+    href: "/governance-library/registers",
     icon: FolderOpen,
     primary: false,
   },
