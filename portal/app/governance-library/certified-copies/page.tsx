@@ -222,8 +222,8 @@ export default function CertifiedCopiesRegistryPage() {
               />
             </section>
 
-            <section className="grid gap-4 xl:grid-cols-[1fr_430px]">
-              <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
+            <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_380px]">
+              <div className="min-w-0 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
                 <div className="flex flex-col gap-4 border-b border-slate-200 px-5 py-5 md:flex-row md:items-start md:justify-between">
                   <div>
                     <p className="text-[11px] font-extrabold uppercase tracking-[0.42em] text-slate-400">
@@ -254,8 +254,8 @@ export default function CertifiedCopiesRegistryPage() {
                   </div>
                 </div>
 
-                <div className="overflow-x-auto p-5">
-                  <table className="min-w-[980px] w-full border-collapse text-left text-sm">
+                <div className="max-w-full overflow-x-auto p-5">
+                 <table className="min-w-[820px] w-full border-collapse text-left text-sm">
                     <thead>
                       <tr className="bg-slate-50 text-[11px] font-extrabold uppercase tracking-[0.35em] text-slate-500">
                         <th className="px-4 py-4">Copy ID</th>
@@ -328,7 +328,7 @@ export default function CertifiedCopiesRegistryPage() {
               )}
             </section>
 
-            <section className="grid gap-4 xl:grid-cols-[1fr_430px]">
+            <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_380px]">
               <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
                 <div className="flex items-start gap-4">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-slate-950">
@@ -410,7 +410,7 @@ function StatusBadge({ status }: { status: CertifiedCopyRecord["status"] }) {
 
 function EmptySelectionPanel() {
   return (
-    <aside className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+    <aside className="min-w-0 overflow-hidden rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-[11px] font-extrabold uppercase tracking-[0.42em] text-slate-400">
@@ -472,7 +472,7 @@ function SelectedCopyPanel({
   onCopyId: () => void;
 }) {
   return (
-    <aside className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+    <aside className="min-w-0 overflow-hidden rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-[11px] font-extrabold uppercase tracking-[0.42em] text-slate-400">
@@ -581,7 +581,9 @@ function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between gap-4 border-b border-slate-200 py-2 text-sm">
       <span className="font-bold text-slate-500">{label}</span>
-      <span className="text-right font-black text-slate-950">{value}</span>
+      <span className="max-w-[210px] break-words text-right font-black text-slate-950">
+  {value}
+</span>
     </div>
   );
 }
