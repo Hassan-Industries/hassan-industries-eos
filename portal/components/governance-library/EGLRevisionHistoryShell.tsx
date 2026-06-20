@@ -5,7 +5,6 @@ import {
   Clock3,
   FileCheck2,
   GitBranch,
-  History,
   ShieldCheck,
 } from "lucide-react";
 

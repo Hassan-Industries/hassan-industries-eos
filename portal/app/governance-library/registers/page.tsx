@@ -5,7 +5,6 @@ import type { ElementType, ReactNode } from "react";
 import {
   ArrowLeft,
   BookOpen,
-  CheckCircle2,
   ClipboardCheck,
   FileCheck2,
   FilePlus2,
@@ -14,7 +13,6 @@ import {
   Gavel,
   Layers3,
   RefreshCcw,
-  ScrollText,
   ShieldCheck,
 } from "lucide-react";
 

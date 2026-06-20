@@ -5,7 +5,6 @@ import {
   ArrowLeft,
   CheckCircle2,
   FileArchive,
-  FilePlus2,
   FolderOpen,
   LockKeyhole,
   ShieldCheck,
