@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState, type ElementType } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
   BookOpen,
@@ -49,7 +50,26 @@ type DisplayPublicationRecord = PublicationRecord & {
   notes?: string;
 };
 
-const statusFilters = ["All Statuses", "AP", "DR", "RV", "OE", "CC", "SP", "AR", "VO"];
+type InitialRegistryFilters = {
+  searchValue: string;
+  statusFilter: string;
+  seriesFilter: string;
+  classificationFilter: string;
+  documentTypeFilter: string;
+};
+
+const statusFilters = [
+  "All Statuses",
+  "AP",
+  "DR",
+  "RV",
+  "OE",
+  "CC",
+  "SP",
+  "AR",
+  "VO",
+];
+
 const seriesFilters = [
   "All Series",
   "Administration",
@@ -60,28 +80,59 @@ const seriesFilters = [
   "Legal",
   "Tax",
 ];
+
 const classificationFilters = [
   "All Classifications",
   "Internal Governance",
   "Internal",
   "Confidential",
   "Restricted",
+  "Internal Draft",
 ];
 
 export default function EGLPublicationsRegistryShell() {
-  const records = publications.filter(Boolean) as DisplayPublicationRecord[];
+  const searchParams = useSearchParams();
+  const queryKey = searchParams.toString();
 
-  const [searchValue, setSearchValue] = useState("");
-  const [statusFilter, setStatusFilter] = useState("All Statuses");
-  const [seriesFilter, setSeriesFilter] = useState("All Series");
-  const [classificationFilter, setClassificationFilter] =
-    useState("All Classifications");
+  const initialFilters = useMemo(
+    () => getInitialFiltersFromQueryKey(queryKey),
+    [queryKey],
+  );
+
+  return (
+    <PublicationsRegistryContent
+      key={queryKey}
+      initialFilters={initialFilters}
+    />
+  );
+}
+
+function PublicationsRegistryContent({
+  initialFilters,
+}: {
+  initialFilters: InitialRegistryFilters;
+}) {
+  const records = useMemo(
+    () => publications.filter(Boolean) as DisplayPublicationRecord[],
+    [],
+  );
+
+  const [searchValue, setSearchValue] = useState(initialFilters.searchValue);
+  const [statusFilter, setStatusFilter] = useState(initialFilters.statusFilter);
+  const [seriesFilter, setSeriesFilter] = useState(initialFilters.seriesFilter);
+  const [classificationFilter, setClassificationFilter] = useState(
+    initialFilters.classificationFilter,
+  );
+  const [documentTypeFilter, setDocumentTypeFilter] = useState(
+    initialFilters.documentTypeFilter,
+  );
   const [selectedDocumentNumber, setSelectedDocumentNumber] = useState<
     string | null
   >(null);
 
   const filteredRecords = useMemo(() => {
     const normalizedSearch = searchValue.trim().toLowerCase();
+    const normalizedDocumentType = documentTypeFilter.trim().toLowerCase();
 
     return records.filter((record) => {
       const searchText = [
@@ -93,6 +144,7 @@ export default function EGLPublicationsRegistryShell() {
         getOwner(record),
         getAuthority(record),
         getClassification(record),
+        getDocumentType(record),
       ]
         .join(" ")
         .toLowerCase();
@@ -110,14 +162,26 @@ export default function EGLPublicationsRegistryShell() {
         classificationFilter === "All Classifications" ||
         getClassification(record) === classificationFilter;
 
+      const matchesDocumentType =
+        normalizedDocumentType.length === 0 ||
+        getDocumentType(record).toLowerCase().includes(normalizedDocumentType);
+
       return (
         matchesSearch &&
         matchesStatus &&
         matchesSeries &&
-        matchesClassification
+        matchesClassification &&
+        matchesDocumentType
       );
     });
-  }, [classificationFilter, records, searchValue, seriesFilter, statusFilter]);
+  }, [
+    classificationFilter,
+    documentTypeFilter,
+    records,
+    searchValue,
+    seriesFilter,
+    statusFilter,
+  ]);
 
   const selectedRecord =
     selectedDocumentNumber === null
@@ -137,6 +201,15 @@ export default function EGLPublicationsRegistryShell() {
     (record) => getStatus(record) === "OE",
   ).length;
 
+  function clearFilters() {
+    setSearchValue("");
+    setStatusFilter("All Statuses");
+    setSeriesFilter("All Series");
+    setClassificationFilter("All Classifications");
+    setDocumentTypeFilter("");
+    setSelectedDocumentNumber(null);
+  }
+
   return (
     <div className="flex min-h-screen bg-slate-100 text-slate-950">
       <Sidebar />
@@ -146,34 +219,30 @@ export default function EGLPublicationsRegistryShell() {
 
         <main className="flex-1 px-5 py-4">
           <div className="mx-auto max-w-[1500px] space-y-4">
-            <section className="rounded-xl bg-slate-950 px-5 py-5 text-white shadow-sm">
-              <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <section className="rounded-xl bg-slate-950 p-6 text-white shadow-sm">
+              <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                  <p className="text-[11px] font-bold uppercase tracking-[0.36em] text-amber-400">
+                  <p className="text-[11px] font-extrabold uppercase tracking-[0.42em] text-amber-400">
                     Hassan Industries
                   </p>
-
-                  <h1 className="mt-2 text-[26px] font-extrabold uppercase leading-none tracking-wide">
+                  <h1 className="mt-3 text-3xl font-black uppercase tracking-tight">
                     Publications Registry
                   </h1>
-
-                  <p className="mt-3 max-w-4xl text-[12px] leading-5 text-slate-200">
+                  <p className="mt-3 max-w-4xl text-sm leading-6 text-slate-100">
                     Controlled frontend registry for Enterprise Governance
                     Library publications, manuals, standards, resolutions,
                     policies, templates, and related publication records.
                   </p>
                 </div>
 
-                <div className="rounded-lg border border-amber-500/70 bg-slate-900 px-6 py-4 text-center">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-200">
+                <div className="rounded-lg border border-amber-500 bg-white/5 px-7 py-5 text-center">
+                  <p className="text-[11px] font-extrabold uppercase tracking-[0.35em] text-slate-100">
                     Registry Status
                   </p>
-
-                  <p className="mt-2 text-lg font-extrabold text-amber-400">
+                  <p className="mt-3 text-2xl font-black text-amber-400">
                     Frontend List
                   </p>
-
-                  <p className="mt-1 text-[11px] text-slate-300">
+                  <p className="mt-1 text-xs font-semibold text-slate-100">
                     Static Data Layer
                   </p>
                 </div>
@@ -189,49 +258,42 @@ export default function EGLPublicationsRegistryShell() {
                 Back to EGL Dashboard
               </Link>
 
-              <p className="hidden text-xs font-semibold uppercase tracking-[0.18em] text-slate-400 md:block">
+              <p className="hidden text-[11px] font-extrabold uppercase tracking-[0.35em] text-slate-400 lg:block">
                 Controlled Publication Records
               </p>
             </div>
 
-            <section className="grid gap-3 md:grid-cols-4">
+            <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
               <RegistryMetric
                 label="Registry Records"
-                value={records.length.toString()}
+                value={String(records.length)}
                 icon={ClipboardList}
               />
-
               <RegistryMetric
                 label="Approved"
-                value={approvedCount.toString()}
+                value={String(approvedCount)}
                 icon={FileText}
               />
-
               <RegistryMetric
                 label="Review / Draft"
-                value={reviewDraftCount.toString()}
+                value={String(reviewDraftCount)}
                 icon={RefreshCcw}
               />
-
               <RegistryMetric
                 label="Original Executed"
-                value={originalExecutedCount.toString()}
+                value={String(originalExecutedCount)}
                 icon={BookOpen}
               />
             </section>
 
             <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-              <div className="flex flex-col gap-4 xl:flex-row xl:items-end">
-                <div className="min-w-0 flex-1">
-                  <label className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">
+              <div className="grid gap-4 xl:grid-cols-[1fr_180px_180px_280px_104px]">
+                <label>
+                  <span className="text-[11px] font-extrabold uppercase tracking-[0.35em] text-slate-500">
                     Search Registry
-                  </label>
-
-                  <div className="mt-2 flex overflow-hidden rounded-lg border border-slate-300 bg-white">
-                    <div className="flex w-12 items-center justify-center">
-                      <Search className="h-4 w-4 text-slate-400" />
-                    </div>
-
+                  </span>
+                  <div className="mt-2 flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 transition focus-within:border-amber-500">
+                    <Search className="h-4 w-4 text-slate-400" />
                     <input
                       value={searchValue}
                       onChange={(event) => setSearchValue(event.target.value)}
@@ -239,7 +301,7 @@ export default function EGLPublicationsRegistryShell() {
                       className="min-w-0 flex-1 px-1 py-3 text-sm outline-none"
                     />
                   </div>
-                </div>
+                </label>
 
                 <FilterSelect
                   label="Status"
@@ -264,71 +326,57 @@ export default function EGLPublicationsRegistryShell() {
 
                 <button
                   type="button"
-                  onClick={() => {
-                    setSearchValue("");
-                    setStatusFilter("All Statuses");
-                    setSeriesFilter("All Series");
-                    setClassificationFilter("All Classifications");
-                    setSelectedDocumentNumber(null);
-                  }}
-                  className="rounded-lg border border-slate-300 bg-white px-4 py-3 text-xs font-bold text-slate-950 shadow-sm transition hover:border-amber-500 hover:bg-amber-50"
+                  onClick={clearFilters}
+                  className="self-end rounded-lg border border-slate-300 bg-white px-4 py-3 text-xs font-bold text-slate-950 shadow-sm transition hover:border-amber-500 hover:bg-amber-50"
                 >
                   Clear Filters
                 </button>
               </div>
             </section>
 
-            <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_390px]">
-              <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
-                <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-200 p-5">
+            <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+              <section className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                <div className="flex flex-col gap-4 border-b border-slate-200 p-5 lg:flex-row lg:items-start lg:justify-between">
                   <div>
-                    <p className="text-[11px] font-bold uppercase tracking-[0.26em] text-slate-400">
+                    <p className="text-[11px] font-extrabold uppercase tracking-[0.35em] text-slate-400">
                       Enterprise Governance Library
                     </p>
-
-                    <h2 className="mt-1 text-lg font-extrabold text-slate-950">
+                    <h2 className="mt-2 text-2xl font-black">
                       Publications Registry
                     </h2>
-
-                    <p className="mt-1 text-xs leading-5 text-slate-600">
+                    <p className="mt-2 text-sm text-slate-600">
                       Select a record to preview metadata or open one of the EGL
                       action shells.
                     </p>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="rounded-full bg-amber-100 px-3 py-1 text-[11px] font-bold text-amber-700">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <span className="rounded-full bg-amber-100 px-4 py-2 text-xs font-extrabold text-amber-700">
                       {filteredRecords.length} shown
                     </span>
 
                     <Link
                       href="/governance-library/publications/new"
-                      className="inline-flex items-center gap-2 rounded-lg bg-slate-950 px-3 py-2 text-[11px] font-bold text-white transition hover:bg-slate-800"
+                      className="inline-flex items-center gap-2 rounded-lg bg-slate-950 px-4 py-3 text-xs font-bold text-white shadow-sm transition hover:bg-slate-800"
                     >
-                      <FilePlus2 className="h-3.5 w-3.5 text-amber-400" />
+                      <FilePlus2 className="h-4 w-4 text-amber-400" />
                       Create New Publication
                     </Link>
                   </div>
                 </div>
 
                 <div className="overflow-x-auto p-5">
-                  <table className="min-w-[980px] w-full border-collapse text-left text-xs">
+                  <table className="min-w-[980px] w-full text-left text-sm">
                     <thead>
-                      <tr className="border-b border-slate-200 bg-slate-50 text-[11px] uppercase tracking-[0.14em] text-slate-500">
-                        <th className="px-3 py-3 font-extrabold">
-                          Document No.
-                        </th>
-                        <th className="px-3 py-3 font-extrabold">Title</th>
-                        <th className="px-3 py-3 font-extrabold">Series</th>
-                        <th className="px-3 py-3 font-extrabold">Status</th>
-                        <th className="px-3 py-3 font-extrabold">Version</th>
-                        <th className="px-3 py-3 font-extrabold">Owner</th>
-                        <th className="px-3 py-3 font-extrabold">
-                          Review Date
-                        </th>
-                        <th className="px-3 py-3 text-right font-extrabold">
-                          Actions
-                        </th>
+                      <tr className="bg-slate-50 text-[11px] font-extrabold uppercase tracking-[0.25em] text-slate-500">
+                        <th className="px-3 py-4">Document No.</th>
+                        <th className="px-3 py-4">Title</th>
+                        <th className="px-3 py-4">Series</th>
+                        <th className="px-3 py-4">Status</th>
+                        <th className="px-3 py-4">Version</th>
+                        <th className="px-3 py-4">Owner</th>
+                        <th className="px-3 py-4">Review Date</th>
+                        <th className="px-3 py-4 text-right">Actions</th>
                       </tr>
                     </thead>
 
@@ -341,13 +389,12 @@ export default function EGLPublicationsRegistryShell() {
                         return (
                           <tr
                             key={documentNumber}
-                            className={`border-b border-slate-200 transition last:border-b-0 ${
-                              isSelected
-                                ? "bg-amber-50"
-                                : "bg-white hover:bg-slate-50"
-                            }`}
+                            className={[
+                              "border-b border-slate-200 transition hover:bg-amber-50/70",
+                              isSelected ? "bg-amber-50" : "bg-white",
+                            ].join(" ")}
                           >
-                            <td className="px-3 py-4 align-top font-extrabold text-slate-950">
+                            <td className="px-3 py-4 align-top">
                               <button
                                 type="button"
                                 onClick={() =>
@@ -359,7 +406,7 @@ export default function EGLPublicationsRegistryShell() {
                               </button>
                             </td>
 
-                            <td className="max-w-[330px] px-3 py-4 align-top">
+                            <td className="px-3 py-4 align-top">
                               <button
                                 type="button"
                                 onClick={() =>
@@ -367,11 +414,10 @@ export default function EGLPublicationsRegistryShell() {
                                 }
                                 className="block text-left"
                               >
-                                <span className="block font-bold leading-5 text-slate-950">
+                                <span className="font-extrabold text-slate-950">
                                   {getTitle(record)}
                                 </span>
-
-                                <span className="mt-1 block text-[11px] leading-4 text-slate-500">
+                                <span className="mt-2 block max-w-[360px] text-xs leading-5 text-slate-500">
                                   {getDescription(record)}
                                 </span>
                               </button>
@@ -385,27 +431,26 @@ export default function EGLPublicationsRegistryShell() {
                               <StatusBadge status={getStatus(record)} />
                             </td>
 
-                            <td className="px-3 py-4 align-top font-semibold text-slate-950">
+                            <td className="px-3 py-4 align-top font-bold">
                               {String(record.version ?? "1.0")}
                             </td>
 
-                            <td className="px-3 py-4 align-top font-semibold text-slate-950">
+                            <td className="px-3 py-4 align-top font-bold">
                               {getOwner(record)}
                             </td>
 
-                            <td className="px-3 py-4 align-top font-semibold text-slate-950">
+                            <td className="px-3 py-4 align-top font-bold">
                               {getReviewDate(record)}
                             </td>
 
-                            <td className="px-3 py-4 align-top">
-                              <div className="flex justify-end">
-                                <SmallActionLink
-                                  href={getRecordHref(record)}
-                                  label="Record"
-                                  icon={Eye}
-                                  newTab
-                                />
-                              </div>
+                            <td className="px-3 py-4 align-top text-right">
+                              <Link
+                                href={getRecordHref(record)}
+                                className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-950 transition hover:border-amber-500 hover:bg-amber-50"
+                              >
+                                <Eye className="h-4 w-4 text-amber-500" />
+                                View
+                              </Link>
                             </td>
                           </tr>
                         );
@@ -418,8 +463,7 @@ export default function EGLPublicationsRegistryShell() {
                       <p className="text-sm font-extrabold text-slate-950">
                         No publication records match the current filters.
                       </p>
-
-                      <p className="mt-2 text-xs text-slate-500">
+                      <p className="mt-2 text-sm text-slate-500">
                         Clear filters or search by another document number,
                         owner, series, title, or classification.
                       </p>
@@ -436,11 +480,10 @@ export default function EGLPublicationsRegistryShell() {
                 )}
 
                 <section className="rounded-lg border border-dashed border-slate-300 bg-white p-5 shadow-sm">
-                  <h2 className="text-[13px] font-bold uppercase tracking-[0.18em] text-slate-950">
+                  <h3 className="text-[15px] font-black uppercase tracking-[0.28em]">
                     Backend Readiness
-                  </h2>
-
-                  <p className="mt-3 text-xs leading-5 text-slate-600">
+                  </h3>
+                  <p className="mt-3 text-sm leading-6 text-slate-600">
                     This registry remains frontend-only. Future backend work
                     should connect this list to stored publication records,
                     upload workflows, approval routing, audit logs, certified
@@ -464,17 +507,15 @@ function PublicationPreviewPanel({
 }) {
   return (
     <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="mb-4 flex items-start justify-between gap-4">
+      <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-400">
+          <p className="text-[11px] font-extrabold uppercase tracking-[0.35em] text-slate-400">
             Selected Record
           </p>
-
-          <h2 className="mt-2 text-xl font-extrabold text-slate-950">
+          <h2 className="mt-2 text-2xl font-black">
             {getDocumentNumber(record)}
           </h2>
-
-          <p className="mt-2 text-sm font-bold leading-5 text-slate-800">
+          <p className="mt-2 text-sm font-extrabold text-slate-950">
             {getTitle(record)}
           </p>
         </div>
@@ -482,28 +523,23 @@ function PublicationPreviewPanel({
         <StatusBadge status={getStatus(record)} />
       </div>
 
-      <div className="rounded-lg bg-slate-950 p-4 text-white">
+      <div className="mt-5 rounded-lg bg-slate-950 p-5 text-white">
         <div className="flex items-center gap-3">
           <BookOpen className="h-6 w-6 text-amber-400" />
-
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-300">
+            <p className="text-[11px] font-extrabold uppercase tracking-[0.35em]">
               Controlled Publication
             </p>
-
-            <p className="mt-1 text-xs text-slate-200">
+            <p className="mt-1 text-xs font-semibold">
               {getClassification(record)}
             </p>
           </div>
         </div>
       </div>
 
-      <dl className="mt-4 space-y-0">
+      <div className="mt-5 space-y-2">
         <PreviewField label="Series" value={getSeries(record)} />
-        <PreviewField
-          label="Document Type"
-          value={record.documentType ?? "Manual"}
-        />
+        <PreviewField label="Document Type" value={getDocumentType(record)} />
         <PreviewField label="Owner" value={getOwner(record)} />
         <PreviewField label="Authority" value={getAuthority(record)} />
         <PreviewField label="Version" value={String(record.version ?? "1.0")} />
@@ -512,50 +548,40 @@ function PublicationPreviewPanel({
           label="Retention"
           value={record.retentionCategory ?? "Permanent"}
         />
-      </dl>
+      </div>
 
-      <div className="mt-4 grid gap-2">
+      <div className="mt-5 space-y-2">
         <ActionLink
           href={getRecordHref(record)}
           label="View Record"
           icon={Eye}
           primary
-          newTab
         />
-
         <ActionLink
           href={`${getRecordHref(record)}/viewer`}
           label="Open Viewer"
           icon={FileText}
           newTab
         />
-
         <ActionLink
           href={`${getRecordHref(record)}/upload-replacement`}
           label="Upload Replacement"
           icon={Upload}
-          newTab
         />
-
         <ActionLink
           href={`${getRecordHref(record)}/certified-copy`}
           label="Create Certified Copy"
-          icon={FileText}
-          newTab
+          icon={FilePlus2}
         />
-
         <ActionLink
           href={`${getRecordHref(record)}/revision-history`}
           label="Revision History"
           icon={GitBranch}
-          newTab
         />
-
         <ActionLink
           href={`${getRecordHref(record)}/request-review`}
           label="Request Review"
           icon={RefreshCcw}
-          newTab
         />
       </div>
     </section>
@@ -565,49 +591,89 @@ function PublicationPreviewPanel({
 function PublicationSelectionPlaceholder() {
   return (
     <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="mb-4 flex items-start justify-between gap-4">
+      <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-400">
+          <p className="text-[11px] font-extrabold uppercase tracking-[0.35em] text-slate-400">
             Registry Preview
           </p>
-
-          <h2 className="mt-2 text-lg font-extrabold text-slate-950">
-            No Record Selected
-          </h2>
-
-          <p className="mt-2 text-xs leading-5 text-slate-600">
-            Select a controlled publication record to open its profile,
-            metadata, authority, lifecycle status, and available EGL actions.
-          </p>
+          <h2 className="mt-2 text-2xl font-black">No Record Selected</h2>
         </div>
 
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-950">
-          <BookOpen className="h-5 w-5 text-amber-400" />
+        <div className="rounded-lg bg-slate-950 p-3">
+          <BookOpen className="h-6 w-6 text-amber-400" />
         </div>
       </div>
 
-      <div className="rounded-lg bg-slate-950 p-4 text-white">
-        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-300">
-          Controlled Publication Workspace
-        </p>
+      <p className="mt-4 text-sm leading-6 text-slate-600">
+        Select a controlled publication record to open its profile, metadata,
+        authority, lifecycle status, and available EGL actions.
+      </p>
 
-        <p className="mt-2 text-xs leading-5 text-slate-200">
-          Profiles open only after intentional record selection.
-        </p>
+      <div className="mt-5 rounded-lg bg-slate-950 p-5 text-white">
+        <div className="flex items-center gap-3">
+          <BookOpen className="h-6 w-6 text-amber-400" />
+          <div>
+            <p className="text-[11px] font-extrabold uppercase tracking-[0.35em]">
+              Controlled Publication Workspace
+            </p>
+            <p className="mt-1 text-xs font-semibold">
+              Profiles open only after intentional record selection.
+            </p>
+          </div>
+        </div>
       </div>
 
-      <div className="mt-4 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4">
-        <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">
+      <div className="mt-5 space-y-3">
+        <PlaceholderInstruction
+          title="Select a Record"
+          body="Choose a publication from the registry table before using record-level actions."
+          icon={ClipboardList}
+        />
+        <PlaceholderInstruction
+          title="Review Authority"
+          body="Verify owner, authority, classification, status, and lifecycle metadata."
+          icon={BookOpen}
+        />
+        <PlaceholderInstruction
+          title="Use Record Actions"
+          body="Open the viewer, upload replacement, certify a copy, request review, or view revision history."
+          icon={FileText}
+        />
+      </div>
+
+      <div className="mt-5 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4">
+        <p className="text-[11px] font-extrabold uppercase tracking-[0.3em] text-slate-400">
           Training Note
         </p>
-
-        <p className="mt-2 text-xs leading-5 text-slate-600">
+        <p className="mt-3 text-sm leading-6 text-slate-600">
           Future training materials should describe this registry as the
           controlled lookup point for publication records before employees or
           executives perform document actions.
         </p>
       </div>
     </section>
+  );
+}
+
+function PlaceholderInstruction({
+  title,
+  body,
+  icon: Icon,
+}: {
+  title: string;
+  body: string;
+  icon: ElementType;
+}) {
+  return (
+    <div className="flex gap-3 rounded-lg border border-slate-200 bg-slate-50 p-4">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white">
+        <Icon className="h-4 w-4 text-amber-500" />
+      </div>
+      <div>
+        <p className="text-sm font-extrabold text-slate-950">{title}</p>
+        <p className="mt-1 text-xs leading-5 text-slate-600">{body}</p>
+      </div>
+    </div>
   );
 }
 
@@ -621,18 +687,16 @@ function RegistryMetric({
   icon: ElementType;
 }) {
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <p className="text-xs font-semibold text-slate-500">{label}</p>
-          <p className="mt-2 text-2xl font-extrabold text-slate-950">
-            {value}
-          </p>
-        </div>
-
-        <Icon className="h-6 w-6 text-amber-500" />
+    <div className="flex min-h-[88px] items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm">
+      <div>
+        <p className="text-[11px] text-slate-500">{label}</p>
+        <p className="mt-2 text-[25px] font-black leading-none text-slate-950">
+          {value}
+        </p>
       </div>
-    </section>
+
+      <Icon className="h-6 w-6 text-amber-500" />
+    </div>
   );
 }
 
@@ -648,10 +712,10 @@ function FilterSelect({
   onChange: (value: string) => void;
 }) {
   return (
-    <div className="min-w-[180px]">
-      <label className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">
+    <label>
+      <span className="text-[11px] font-extrabold uppercase tracking-[0.35em] text-slate-500">
         {label}
-      </label>
+      </span>
 
       <select
         value={value}
@@ -662,13 +726,13 @@ function FilterSelect({
           <option key={option}>{option}</option>
         ))}
       </select>
-    </div>
+    </label>
   );
 }
 
 function StatusBadge({ status }: { status: string }) {
   return (
-    <span className="inline-flex min-w-10 items-center justify-center rounded-md bg-emerald-100 px-2 py-1 text-[11px] font-extrabold text-emerald-700">
+    <span className="inline-flex rounded-md bg-emerald-100 px-3 py-1 text-xs font-extrabold text-emerald-700">
       {status}
     </span>
   );
@@ -676,9 +740,9 @@ function StatusBadge({ status }: { status: string }) {
 
 function PreviewField({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between gap-4 border-b border-slate-200 py-2 text-xs last:border-b-0">
-      <dt className="font-bold text-slate-500">{label}</dt>
-      <dd className="text-right font-semibold text-slate-950">{value}</dd>
+    <div className="flex items-center justify-between gap-4 border-b border-slate-200 py-2 text-sm">
+      <span className="font-semibold text-slate-500">{label}</span>
+      <span className="text-right font-extrabold text-slate-950">{value}</span>
     </div>
   );
 }
@@ -700,43 +764,86 @@ function ActionLink({
     <Link
       href={href}
       target={newTab ? "_blank" : undefined}
-      rel={newTab ? "noopener noreferrer" : undefined}
-      prefetch={false}
-      className={`flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-xs font-bold transition ${
+      rel={newTab ? "noreferrer" : undefined}
+      className={[
+        "flex w-full items-center justify-center gap-2 rounded-lg border px-4 py-3 text-xs font-bold transition",
         primary
-          ? "bg-slate-950 text-white hover:bg-slate-800"
-          : "border border-slate-300 bg-white text-slate-950 hover:border-amber-500 hover:bg-amber-50"
-      }`}
+          ? "border-slate-950 bg-slate-950 text-white hover:bg-slate-800"
+          : "border-slate-300 bg-white text-slate-950 hover:border-amber-500 hover:bg-amber-50",
+      ].join(" ")}
     >
-      <Icon className={`h-4 w-4 ${primary ? "" : "text-amber-600"}`} />
+      <Icon
+        className={[
+          "h-4 w-4",
+          primary ? "text-white" : "text-amber-500",
+        ].join(" ")}
+      />
       {label}
     </Link>
   );
 }
 
-function SmallActionLink({
-  href,
-  label,
-  icon: Icon,
-  newTab = false,
-}: {
-  href: string;
-  label: string;
-  icon: ElementType;
-  newTab?: boolean;
-}) {
+function getInitialFiltersFromQueryKey(queryKey: string): InitialRegistryFilters {
+  const params = new URLSearchParams(queryKey);
+
+  const querySearch = params.get("search") ?? params.get("q") ?? "";
+  const queryStatus = params.get("status");
+  const querySeries = params.get("series");
+  const queryClassification = params.get("classification");
+  const queryDocumentType =
+    params.get("documentType") ?? params.get("type") ?? "";
+
+  return {
+    searchValue: querySearch,
+    statusFilter: getMatchedFilterOption(
+      queryStatus,
+      statusFilters,
+      "All Statuses",
+    ),
+    seriesFilter: getMatchedFilterOption(
+      querySeries,
+      seriesFilters,
+      "All Series",
+    ),
+    classificationFilter: getMatchedFilterOption(
+      queryClassification,
+      classificationFilters,
+      "All Classifications",
+    ),
+    documentTypeFilter: queryDocumentType.trim(),
+  };
+}
+
+function getMatchedFilterOption(
+  rawValue: string | null,
+  options: string[],
+  defaultValue: string,
+) {
+  if (!rawValue) {
+    return defaultValue;
+  }
+
+  const normalizedRawValue = normalizeFilterValue(rawValue);
+
   return (
-    <Link
-      href={href}
-      target={newTab ? "_blank" : undefined}
-      rel={newTab ? "noopener noreferrer" : undefined}
-      prefetch={false}
-      className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-2 py-1 text-[11px] font-bold text-slate-950 transition hover:border-amber-500 hover:bg-amber-50"
-    >
-      <Icon className="h-3.5 w-3.5 text-amber-600" />
-      {label}
-    </Link>
+    options.find((option) => normalizeFilterValue(option) === normalizedRawValue) ??
+    defaultValue
   );
+}
+
+function normalizeFilterValue(value: string) {
+  return safeDecodeURIComponent(value)
+    .replace(/[_-]+/g, " ")
+    .trim()
+    .toLowerCase();
+}
+
+function safeDecodeURIComponent(value: string) {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
 }
 
 function getDocumentNumber(record: DisplayPublicationRecord) {
@@ -763,6 +870,7 @@ function getDescription(record: DisplayPublicationRecord) {
   return (
     record.description ??
     record.summary ??
+    record.notes ??
     "Controlled enterprise publication record."
   );
 }
@@ -790,6 +898,10 @@ function getAuthority(record: DisplayPublicationRecord) {
 
 function getClassification(record: DisplayPublicationRecord) {
   return record.classification ?? "Internal Governance";
+}
+
+function getDocumentType(record: DisplayPublicationRecord) {
+  return record.documentType ?? "Publication";
 }
 
 function getReviewDate(record: DisplayPublicationRecord) {
