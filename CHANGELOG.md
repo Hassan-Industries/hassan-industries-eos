@@ -730,3 +730,13 @@ Establishes Service Requests as the universal intake and routing desk for HIEOS 
 - Added frontend request detail workspace with request authority, routing metadata, relationships, checklist, timeline, actions, backend readiness, and training notes.
 - Added row-level open action from the Service Requests Desk to each request detail workspace.
 - Preserved frontend-only implementation scope; no backend submission, authentication, assignment, upload, or approval logic was introduced.
+
+## HIEOS-IMP-007C: Service Request Routing Queues
+
+- Added controlled Service Request Routing Queues at `/service-requests/queues`.
+- Added queue detail workspaces at `/service-requests/queues/[queueId]`.
+- Expanded `portal/data/serviceRequests.ts` with routing queue records, queue ownership, access scope, routing standards, escalation paths, queue controls, and workflow stages.
+- Added queue assignment metadata to service request records.
+- Updated `portal/app/service-requests/page.tsx` with queue navigation and assigned queue links.
+- Added direct navigation from each selected service request to its assigned queue.
+- Preserved frontend-only implementation scope; no backend routing, authentication, assignment, notifications, comments, attachments, or approval logic was introduced.

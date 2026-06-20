@@ -40,6 +40,7 @@ export type ServiceRequestRecord = {
   relatedRecordHref: string;
   intakeChannel: string;
   assignedQueue: string;
+  routingQueueId: string;
   accessScope: string;
   requestedAction: string;
   submittedDate: string;
@@ -48,6 +49,28 @@ export type ServiceRequestRecord = {
   restrictedReview: boolean;
   checklist: string[];
   timeline: ServiceRequestTimelineItem[];
+};
+
+export type ServiceRequestQueueStatus =
+  | "Active Queue"
+  | "Department Queue"
+  | "Restricted Queue";
+
+export type ServiceRequestQueueRecord = {
+  id: string;
+  title: string;
+  department: string;
+  owner: string;
+  status: ServiceRequestQueueStatus;
+  purpose: string;
+  summary: string;
+  accessScope: string;
+  routingStandard: string;
+  escalationPath: string;
+  serviceLevel: string;
+  requestIds: string[];
+  controls: string[];
+  workflowStages: string[];
 };
 
 export const serviceRequestRecords: ServiceRequestRecord[] = [
@@ -73,6 +96,7 @@ export const serviceRequestRecords: ServiceRequestRecord[] = [
     relatedRecordHref: "/governance-library/publications/HI-ADM-001",
     intakeChannel: "Internal EOS Intake",
     assignedQueue: "Governance Library Intake",
+    routingQueueId: "governance-library-intake",
     accessScope: "HCA + Authorized Governance Library Staff",
     requestedAction: "Prepare publication intake and registration review.",
     submittedDate: "2026-06-20",
@@ -136,6 +160,7 @@ export const serviceRequestRecords: ServiceRequestRecord[] = [
     relatedRecordHref: "/governance-library/certified-copies",
     intakeChannel: "Internal EOS Intake",
     assignedQueue: "Corporate Records Review",
+    routingQueueId: "corporate-records-review",
     accessScope: "Corporate Records + HCA",
     requestedAction: "Verify certification authority and prepare certified-copy issuance.",
     submittedDate: "2026-06-20",
@@ -199,6 +224,7 @@ export const serviceRequestRecords: ServiceRequestRecord[] = [
     relatedRecordHref: "/governance-library/publications/HI-TRE-001",
     intakeChannel: "Internal EOS Intake",
     assignedQueue: "Treasury Review",
+    routingQueueId: "treasury-review",
     accessScope: "Treasury + HCA",
     requestedAction: "Route treasury replacement request for controlled review.",
     submittedDate: "2026-06-20",
@@ -262,6 +288,7 @@ export const serviceRequestRecords: ServiceRequestRecord[] = [
     relatedRecordHref: "/service-requests",
     intakeChannel: "Internal Restricted Intake",
     assignedQueue: "Restricted HCA Review",
+    routingQueueId: "restricted-hca-review",
     accessScope: "HCA + Executive Authorization",
     requestedAction: "Prepare restricted governance review routing.",
     submittedDate: "2026-06-20",
@@ -325,6 +352,7 @@ export const serviceRequestRecords: ServiceRequestRecord[] = [
     relatedRecordHref: "/administration",
     intakeChannel: "Internal EOS Intake",
     assignedQueue: "Administration Desk",
+    routingQueueId: "administration-desk",
     accessScope: "Administration + Assigned Owner",
     requestedAction: "Clarify workflow and determine whether escalation is required.",
     submittedDate: "2026-06-20",
@@ -368,6 +396,159 @@ export const serviceRequestRecords: ServiceRequestRecord[] = [
   },
 ];
 
+export const serviceRequestQueues: ServiceRequestQueueRecord[] = [
+  {
+    id: "governance-library-intake",
+    title: "Governance Library Intake",
+    department: "Governance Library",
+    owner: "HCA",
+    status: "Active Queue",
+    purpose: "Publication, register, and EGL-controlled intake routing.",
+    summary:
+      "Routes requests involving publication creation, document numbering, EGL record preparation, and controlled publication intake.",
+    accessScope: "HCA + Authorized Governance Library Staff",
+    routingStandard:
+      "Confirm document-control authority before creating, revising, or registering a controlled publication.",
+    escalationPath: "Escalate to HCA governance review if authority, classification, or approval path is unclear.",
+    serviceLevel: "Initial review target: 2 business days after backend workflow is introduced.",
+    requestIds: ["SR-2026-001"],
+    controls: [
+      "Publication purpose must be documented.",
+      "Series and document type must be identified.",
+      "Owner and authority must be confirmed before registration.",
+      "Recordkeeping location must be reserved before final publication.",
+    ],
+    workflowStages: [
+      "Request received",
+      "Intake review",
+      "Authority verification",
+      "Publication routing",
+      "Record preparation",
+      "Close or escalate",
+    ],
+  },
+  {
+    id: "corporate-records-review",
+    title: "Corporate Records Review",
+    department: "Corporate Records",
+    owner: "Corporate Records",
+    status: "Department Queue",
+    purpose: "Certified-copy, filing, originals, and permanent record review.",
+    summary:
+      "Routes certified copy requests, source-record verification, retention review, original-location confirmation, and filing preparation.",
+    accessScope: "Corporate Records + HCA",
+    routingStandard:
+      "Confirm source authority and original location before any certified-copy issuance or records filing action.",
+    escalationPath: "Escalate to HCA if source authority, ownership, or retention status is disputed.",
+    serviceLevel: "Initial review target: 2 business days after backend workflow is introduced.",
+    requestIds: ["SR-2026-002"],
+    controls: [
+      "Source record must be verified.",
+      "Original location must be confirmed.",
+      "Certification authority must be identified.",
+      "Issuance history must be preserved.",
+    ],
+    workflowStages: [
+      "Request received",
+      "Source verification",
+      "Authority verification",
+      "Certified-copy preparation",
+      "Issuance log",
+      "Permanent filing",
+    ],
+  },
+  {
+    id: "treasury-review",
+    title: "Treasury Review",
+    department: "Treasury",
+    owner: "Treasury",
+    status: "Department Queue",
+    purpose: "Treasury-controlled document and finance-support request routing.",
+    summary:
+      "Routes requests involving treasury documents, payment-control references, financial authority records, and treasury-governed replacement requests.",
+    accessScope: "Treasury + HCA",
+    routingStandard:
+      "Confirm Treasury ownership, confidentiality, and approval path before document replacement or publication change.",
+    escalationPath: "Escalate to HCA and Executive Operations if treasury authority or restricted finance controls are implicated.",
+    serviceLevel: "High-priority review target: 1 business day after backend workflow is introduced.",
+    requestIds: ["SR-2026-003"],
+    controls: [
+      "Treasury owner must be identified.",
+      "Confidential classification must be reviewed.",
+      "Replacement purpose must be documented.",
+      "HCA review must occur before controlled replacement.",
+    ],
+    workflowStages: [
+      "Request received",
+      "Routing assignment",
+      "Treasury owner review",
+      "HCA document-control review",
+      "Approval routing",
+      "Close or file",
+    ],
+  },
+  {
+    id: "restricted-hca-review",
+    title: "Restricted HCA Review",
+    department: "HCA Review",
+    owner: "HCA",
+    status: "Restricted Queue",
+    purpose: "Restricted governance, due-diligence, and sensitive routing control.",
+    summary:
+      "Routes restricted matters requiring separation between visibility, drafting, review, approval, execution, and recordkeeping authority.",
+    accessScope: "HCA + Executive Authorization",
+    routingStandard:
+      "Restrict visibility and preserve role separation before any review, approval, or recordkeeping action.",
+    escalationPath: "Escalate only through Executive Operations or approved HCA restricted review authority.",
+    serviceLevel: "Restricted review target: determined by matter sensitivity after backend workflow is introduced.",
+    requestIds: ["SR-2026-004"],
+    controls: [
+      "Restricted classification must be confirmed.",
+      "Visibility must be separated from authority.",
+      "Review and approval authority must be separated.",
+      "Permanent restricted recordkeeping path must be reserved.",
+    ],
+    workflowStages: [
+      "Request received",
+      "Restricted access check",
+      "HCA review",
+      "Executive escalation if required",
+      "Controlled decision",
+      "Restricted filing",
+    ],
+  },
+  {
+    id: "administration-desk",
+    title: "Administration Desk",
+    department: "Administration",
+    owner: "Administration",
+    status: "Department Queue",
+    purpose: "General administrative workflow clarification and support routing.",
+    summary:
+      "Routes administrative support requests, workflow clarifications, record questions, and operational requests that may require department ownership.",
+    accessScope: "Administration + Assigned Owner",
+    routingStandard:
+      "Resolve administratively when possible and escalate to HCA only when governance or document-control authority is implicated.",
+    escalationPath: "Escalate to HCA for governance, records, classification, or controlled publication questions.",
+    serviceLevel: "Initial review target: 3 business days after backend workflow is introduced.",
+    requestIds: ["SR-2026-005"],
+    controls: [
+      "Administrative purpose must be documented.",
+      "Responsible department must be identified.",
+      "Escalation need must be reviewed.",
+      "Closeout or routing decision must be recorded.",
+    ],
+    workflowStages: [
+      "Request received",
+      "Administrative review",
+      "Department assignment",
+      "Escalation check",
+      "Response prepared",
+      "Close request",
+    ],
+  },
+];
+
 export const serviceRequestStatusFilters = [
   "All Statuses",
   "Open",
@@ -394,6 +575,20 @@ export function getServiceRequestById(requestId: string) {
   );
 }
 
+export function getServiceRequestQueueById(queueId: string) {
+  const decodedQueueId = decodeURIComponent(queueId);
+
+  return serviceRequestQueues.find(
+    (queue) => queue.id.toLowerCase() === decodedQueueId.toLowerCase(),
+  );
+}
+
+export function getRequestsForQueue(queueId: string) {
+  return serviceRequestRecords.filter(
+    (request) => request.routingQueueId === queueId,
+  );
+}
+
 export function getServiceRequestSearchText(request: ServiceRequestRecord) {
   return [
     request.id,
@@ -410,7 +605,29 @@ export function getServiceRequestSearchText(request: ServiceRequestRecord) {
     request.relatedRecord,
     request.relatedRecordTitle,
     request.assignedQueue,
+    request.routingQueueId,
     request.accessScope,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+}
+
+export function getServiceRequestQueueSearchText(
+  queue: ServiceRequestQueueRecord,
+) {
+  return [
+    queue.id,
+    queue.title,
+    queue.department,
+    queue.owner,
+    queue.status,
+    queue.purpose,
+    queue.summary,
+    queue.accessScope,
+    queue.routingStandard,
+    queue.escalationPath,
+    queue.serviceLevel,
   ]
     .filter(Boolean)
     .join(" ")
