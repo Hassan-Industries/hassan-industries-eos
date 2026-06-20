@@ -13,6 +13,11 @@ export type ServiceRequestTimelineStatus =
   | "Pending"
   | "Restricted";
 
+export type ServiceRequestQueueStatus =
+  | "Active Queue"
+  | "Department Queue"
+  | "Restricted Queue";
+
 export type ServiceRequestTimelineItem = {
   label: string;
   status: ServiceRequestTimelineStatus;
@@ -51,11 +56,6 @@ export type ServiceRequestRecord = {
   timeline: ServiceRequestTimelineItem[];
 };
 
-export type ServiceRequestQueueStatus =
-  | "Active Queue"
-  | "Department Queue"
-  | "Restricted Queue";
-
 export type ServiceRequestQueueRecord = {
   id: string;
   title: string;
@@ -67,8 +67,6 @@ export type ServiceRequestQueueRecord = {
   accessScope: string;
   routingStandard: string;
   escalationPath: string;
-  serviceLevel: string;
-  requestIds: string[];
   controls: string[];
   workflowStages: string[];
 };
@@ -91,7 +89,8 @@ export const serviceRequestRecords: ServiceRequestRecord[] = [
     routingNote:
       "Route through HCA document-control review before publication numbering, approval, or repository filing.",
     relatedRecord: "HI-ADM-001",
-    relatedRecordTitle: "Enterprise Administration & Enterprise Services Manual",
+    relatedRecordTitle:
+      "Enterprise Administration & Enterprise Services Manual",
     relatedRecordType: "Publication",
     relatedRecordHref: "/governance-library/publications/HI-ADM-001",
     intakeChannel: "Internal EOS Intake",
@@ -162,7 +161,8 @@ export const serviceRequestRecords: ServiceRequestRecord[] = [
     assignedQueue: "Corporate Records Review",
     routingQueueId: "corporate-records-review",
     accessScope: "Corporate Records + HCA",
-    requestedAction: "Verify certification authority and prepare certified-copy issuance.",
+    requestedAction:
+      "Verify certification authority and prepare certified-copy issuance.",
     submittedDate: "2026-06-20",
     lastUpdated: "2026-06-20",
     retention: "Permanent",
@@ -354,7 +354,8 @@ export const serviceRequestRecords: ServiceRequestRecord[] = [
     assignedQueue: "Administration Desk",
     routingQueueId: "administration-desk",
     accessScope: "Administration + Assigned Owner",
-    requestedAction: "Clarify workflow and determine whether escalation is required.",
+    requestedAction:
+      "Clarify workflow and determine whether escalation is required.",
     submittedDate: "2026-06-20",
     lastUpdated: "2026-06-20",
     retention: "Operational",
@@ -394,6 +395,71 @@ export const serviceRequestRecords: ServiceRequestRecord[] = [
       },
     ],
   },
+  {
+    id: "SR-2026-006",
+    title: "HCP Restricted Parent-Level Review",
+    requester: "Executive Operations",
+    department: "HCP Restricted",
+    owner: "HCP",
+    status: "Restricted Review",
+    priority: "Restricted",
+    category: "Parent-Level Review",
+    classification: "Restricted Internal",
+    dueDate: "Pending",
+    stage: "Parent-Level Restricted Review",
+    summary:
+      "Restricted parent-level service request for matters requiring Hassan Capital Partners visibility, authority review, or executive-level handling.",
+    routingNote:
+      "Route through HCP restricted review only. Preserve separation from general intake, department desks, and normal HCA review until role-based controls are enforced.",
+    relatedRecord: "HCP-RESTRICTED",
+    relatedRecordTitle: "HCP Restricted Review Layer",
+    relatedRecordType: "Restricted Review",
+    relatedRecordHref: "/service-requests/queues/hcp-restricted-review",
+    intakeChannel: "Internal Restricted Intake",
+    assignedQueue: "HCP Restricted Review",
+    routingQueueId: "hcp-restricted-review",
+    accessScope: "HCP + Executive Authorization",
+    requestedAction:
+      "Prepare restricted parent-level review routing and authority confirmation.",
+    submittedDate: "2026-06-20",
+    lastUpdated: "2026-06-20",
+    retention: "Permanent",
+    restrictedReview: true,
+    checklist: [
+      "Parent-level authority identified",
+      "Restricted classification confirmed",
+      "Executive visibility reviewed",
+      "HCP review path prepared",
+      "Access separation reserved",
+      "Permanent recordkeeping path reserved",
+    ],
+    timeline: [
+      {
+        label: "Request received",
+        status: "Complete",
+        date: "2026-06-20",
+        note: "Parent-level restricted request entered into the Service Requests Desk.",
+      },
+      {
+        label: "Restricted parent review",
+        status: "Restricted",
+        date: "Pending",
+        note: "Future role-based controls should limit visibility to HCP-authorized parties.",
+      },
+      {
+        label: "Executive decision",
+        status: "Pending",
+        date: "Pending",
+        note: "Future backend should support executive approval, deferral, escalation, or closure.",
+      },
+      {
+        label: "Controlled filing",
+        status: "Pending",
+        date: "Pending",
+        note: "Final outcome should be filed under restricted parent-level records controls.",
+      },
+    ],
+  },
 ];
 
 export const serviceRequestQueues: ServiceRequestQueueRecord[] = [
@@ -403,28 +469,28 @@ export const serviceRequestQueues: ServiceRequestQueueRecord[] = [
     department: "Governance Library",
     owner: "HCA",
     status: "Active Queue",
-    purpose: "Publication, register, and EGL-controlled intake routing.",
+    purpose:
+      "Routes requests involving publication creation, document numbering, EGL record preparation, and controlled publication intake.",
     summary:
       "Routes requests involving publication creation, document numbering, EGL record preparation, and controlled publication intake.",
     accessScope: "HCA + Authorized Governance Library Staff",
     routingStandard:
-      "Confirm document-control authority before creating, revising, or registering a controlled publication.",
-    escalationPath: "Escalate to HCA governance review if authority, classification, or approval path is unclear.",
-    serviceLevel: "Initial review target: 2 business days after backend workflow is introduced.",
-    requestIds: ["SR-2026-001"],
+      "Requests entering this queue should confirm publication purpose, ownership, authority, classification, related records, and review path before any controlled record is created.",
+    escalationPath:
+      "Escalate to Executive Operations or HCA leadership if authority, classification, or publication ownership is unclear.",
     controls: [
-      "Publication purpose must be documented.",
-      "Series and document type must be identified.",
-      "Owner and authority must be confirmed before registration.",
-      "Recordkeeping location must be reserved before final publication.",
+      "Confirm publication or record purpose.",
+      "Verify document-control authority.",
+      "Confirm owner and classification.",
+      "Identify related EGL records.",
+      "Reserve recordkeeping path before completion.",
     ],
     workflowStages: [
-      "Request received",
-      "Intake review",
-      "Authority verification",
-      "Publication routing",
-      "Record preparation",
-      "Close or escalate",
+      "Receive request",
+      "Confirm publication need",
+      "Verify document-control authority",
+      "Prepare controlled record path",
+      "Route to review or close request",
     ],
   },
   {
@@ -433,28 +499,28 @@ export const serviceRequestQueues: ServiceRequestQueueRecord[] = [
     department: "Corporate Records",
     owner: "Corporate Records",
     status: "Department Queue",
-    purpose: "Certified-copy, filing, originals, and permanent record review.",
+    purpose:
+      "Routes certified copy requests, source-record verification, retention review, original-location confirmation, and filing preparation.",
     summary:
       "Routes certified copy requests, source-record verification, retention review, original-location confirmation, and filing preparation.",
     accessScope: "Corporate Records + HCA",
     routingStandard:
-      "Confirm source authority and original location before any certified-copy issuance or records filing action.",
-    escalationPath: "Escalate to HCA if source authority, ownership, or retention status is disputed.",
-    serviceLevel: "Initial review target: 2 business days after backend workflow is introduced.",
-    requestIds: ["SR-2026-002"],
+      "Requests entering this queue should verify source record identity, original executed location, retention class, certification authority, and filing destination.",
+    escalationPath:
+      "Escalate to HCA if the source authority, certification relationship, or original executed record location is unclear.",
     controls: [
-      "Source record must be verified.",
-      "Original location must be confirmed.",
-      "Certification authority must be identified.",
-      "Issuance history must be preserved.",
+      "Verify source record.",
+      "Confirm original executed location.",
+      "Confirm retention and filing category.",
+      "Prepare certified-copy or records action.",
+      "Reserve audit history path.",
     ],
     workflowStages: [
-      "Request received",
-      "Source verification",
-      "Authority verification",
-      "Certified-copy preparation",
-      "Issuance log",
-      "Permanent filing",
+      "Receive records request",
+      "Verify source record",
+      "Confirm records authority",
+      "Prepare certification or filing action",
+      "File or route for further review",
     ],
   },
   {
@@ -463,28 +529,28 @@ export const serviceRequestQueues: ServiceRequestQueueRecord[] = [
     department: "Treasury",
     owner: "Treasury",
     status: "Department Queue",
-    purpose: "Treasury-controlled document and finance-support request routing.",
+    purpose:
+      "Routes requests involving treasury documents, payment-control references, financial authority records, and treasury-governed replacement requests.",
     summary:
       "Routes requests involving treasury documents, payment-control references, financial authority records, and treasury-governed replacement requests.",
     accessScope: "Treasury + HCA",
     routingStandard:
-      "Confirm Treasury ownership, confidentiality, and approval path before document replacement or publication change.",
-    escalationPath: "Escalate to HCA and Executive Operations if treasury authority or restricted finance controls are implicated.",
-    serviceLevel: "High-priority review target: 1 business day after backend workflow is introduced.",
-    requestIds: ["SR-2026-003"],
+      "Requests entering this queue should confirm treasury owner, financial authority, confidentiality class, related treasury record, and approval path before replacement, publication, or filing.",
+    escalationPath:
+      "Escalate to HCP or Executive Operations if the request affects treasury authority, payment controls, banking authority, or enterprise financial governance.",
     controls: [
-      "Treasury owner must be identified.",
-      "Confidential classification must be reviewed.",
-      "Replacement purpose must be documented.",
-      "HCA review must occur before controlled replacement.",
+      "Confirm treasury record relationship.",
+      "Confirm confidentiality classification.",
+      "Identify treasury owner.",
+      "Prepare HCA review path.",
+      "Reserve approval or filing path.",
     ],
     workflowStages: [
-      "Request received",
-      "Routing assignment",
-      "Treasury owner review",
-      "HCA document-control review",
-      "Approval routing",
-      "Close or file",
+      "Receive treasury request",
+      "Confirm treasury record relationship",
+      "Assign treasury owner",
+      "Route to HCA review if required",
+      "Prepare approval or closure action",
     ],
   },
   {
@@ -493,28 +559,58 @@ export const serviceRequestQueues: ServiceRequestQueueRecord[] = [
     department: "HCA Review",
     owner: "HCA",
     status: "Restricted Queue",
-    purpose: "Restricted governance, due-diligence, and sensitive routing control.",
+    purpose:
+      "Routes restricted matters requiring separation between visibility, drafting, review, approval, execution, and recordkeeping authority.",
     summary:
       "Routes restricted matters requiring separation between visibility, drafting, review, approval, execution, and recordkeeping authority.",
     accessScope: "HCA + Executive Authorization",
     routingStandard:
-      "Restrict visibility and preserve role separation before any review, approval, or recordkeeping action.",
-    escalationPath: "Escalate only through Executive Operations or approved HCA restricted review authority.",
-    serviceLevel: "Restricted review target: determined by matter sensitivity after backend workflow is introduced.",
-    requestIds: ["SR-2026-004"],
+      "Restricted HCA matters should not move through general intake once classified. Visibility, drafting, review, approval, execution, and recordkeeping authority must remain separated.",
+    escalationPath:
+      "Escalate to Executive Operations when restricted review requires leadership direction, parent authority, or special access approval.",
     controls: [
-      "Restricted classification must be confirmed.",
-      "Visibility must be separated from authority.",
-      "Review and approval authority must be separated.",
-      "Permanent restricted recordkeeping path must be reserved.",
+      "Confirm restricted classification.",
+      "Separate visibility from execution.",
+      "Confirm review authority.",
+      "Confirm approval authority.",
+      "Reserve restricted recordkeeping path.",
     ],
     workflowStages: [
-      "Request received",
-      "Restricted access check",
-      "HCA review",
-      "Executive escalation if required",
-      "Controlled decision",
-      "Restricted filing",
+      "Receive restricted request",
+      "Confirm restricted classification",
+      "Assign HCA review layer",
+      "Escalate if executive authorization is needed",
+      "Prepare restricted filing outcome",
+    ],
+  },
+  {
+    id: "hcp-restricted-review",
+    title: "HCP Restricted Review",
+    department: "HCP Restricted",
+    owner: "HCP",
+    status: "Restricted Queue",
+    purpose:
+      "Routes parent-level restricted matters requiring Hassan Capital Partners authority, executive visibility, or enterprise control review.",
+    summary:
+      "Routes parent-level restricted matters requiring Hassan Capital Partners authority, executive visibility, or enterprise control review.",
+    accessScope: "HCP + Executive Authorization",
+    routingStandard:
+      "HCP restricted matters must remain separated from general service intake, operating department queues, and standard HCA review unless parent-level authority permits routing.",
+    escalationPath:
+      "Escalate only through authorized HCP or Executive Operations review paths.",
+    controls: [
+      "Confirm HCP authority requirement.",
+      "Confirm restricted parent-level classification.",
+      "Limit visibility to authorized HCP or executive roles.",
+      "Separate review from execution.",
+      "Reserve parent-level restricted recordkeeping path.",
+    ],
+    workflowStages: [
+      "Receive HCP restricted request",
+      "Confirm parent-level authority",
+      "Assign restricted HCP review path",
+      "Route for executive decision if required",
+      "Prepare controlled parent-level filing outcome",
     ],
   },
   {
@@ -523,27 +619,27 @@ export const serviceRequestQueues: ServiceRequestQueueRecord[] = [
     department: "Administration",
     owner: "Administration",
     status: "Department Queue",
-    purpose: "General administrative workflow clarification and support routing.",
+    purpose:
+      "Routes administrative support requests, workflow clarifications, record questions, and operational requests that may require department ownership.",
     summary:
       "Routes administrative support requests, workflow clarifications, record questions, and operational requests that may require department ownership.",
     accessScope: "Administration + Assigned Owner",
     routingStandard:
-      "Resolve administratively when possible and escalate to HCA only when governance or document-control authority is implicated.",
-    escalationPath: "Escalate to HCA for governance, records, classification, or controlled publication questions.",
-    serviceLevel: "Initial review target: 3 business days after backend workflow is introduced.",
-    requestIds: ["SR-2026-005"],
+      "Administrative requests should be reviewed for owner, purpose, urgency, and whether HCA or governance escalation is required before closure.",
+    escalationPath:
+      "Escalate to HCA only when document-control, governance authority, records control, or restricted review is implicated.",
     controls: [
-      "Administrative purpose must be documented.",
-      "Responsible department must be identified.",
-      "Escalation need must be reviewed.",
-      "Closeout or routing decision must be recorded.",
+      "Confirm administrative purpose.",
+      "Identify department owner.",
+      "Determine escalation need.",
+      "Prepare response or routing path.",
+      "Consider operational recordkeeping need.",
     ],
     workflowStages: [
-      "Request received",
-      "Administrative review",
-      "Department assignment",
-      "Escalation check",
-      "Response prepared",
+      "Receive administrative request",
+      "Confirm owner",
+      "Determine escalation need",
+      "Respond or route",
       "Close request",
     ],
   },
@@ -565,27 +661,50 @@ export const serviceRequestDepartmentFilters = [
   "Corporate Records",
   "Administration",
   "HCA Review",
+  "HCP Restricted",
 ];
 
 export function getServiceRequestById(requestId: string) {
-  const decodedRequestId = decodeURIComponent(requestId);
+  const decodedRequestId = safeDecodeURIComponent(requestId);
 
   return serviceRequestRecords.find(
-    (request) => request.id.toLowerCase() === decodedRequestId.toLowerCase(),
+    (request) =>
+      request.id.toLowerCase() === decodedRequestId.toLowerCase() ||
+      normalizeQueueLookup(request.id) === normalizeQueueLookup(decodedRequestId),
   );
 }
 
 export function getServiceRequestQueueById(queueId: string) {
-  const decodedQueueId = decodeURIComponent(queueId);
+  const normalizedQueueId = normalizeQueueLookup(queueId);
+
+  const queueAliases: Record<string, string> = {
+    "corp-records-review": "corporate-records-review",
+    "records-review": "corporate-records-review",
+    "hca-review": "restricted-hca-review",
+    "restricted-review": "restricted-hca-review",
+    "hcp-restricted": "hcp-restricted-review",
+    "parent-restricted-review": "hcp-restricted-review",
+    "admin-desk": "administration-desk",
+    administration: "administration-desk",
+  };
+
+  const resolvedQueueId = queueAliases[normalizedQueueId] ?? normalizedQueueId;
 
   return serviceRequestQueues.find(
-    (queue) => queue.id.toLowerCase() === decodedQueueId.toLowerCase(),
+    (queue) =>
+      queue.id === resolvedQueueId ||
+      normalizeQueueLookup(queue.title) === resolvedQueueId,
   );
 }
 
 export function getRequestsForQueue(queueId: string) {
+  const queue = getServiceRequestQueueById(queueId);
+  const resolvedQueueId = queue?.id ?? normalizeQueueLookup(queueId);
+
   return serviceRequestRecords.filter(
-    (request) => request.routingQueueId === queueId,
+    (request) =>
+      normalizeQueueLookup(request.routingQueueId) === resolvedQueueId ||
+      normalizeQueueLookup(request.assignedQueue) === resolvedQueueId,
   );
 }
 
@@ -613,23 +732,19 @@ export function getServiceRequestSearchText(request: ServiceRequestRecord) {
     .toLowerCase();
 }
 
-export function getServiceRequestQueueSearchText(
-  queue: ServiceRequestQueueRecord,
-) {
-  return [
-    queue.id,
-    queue.title,
-    queue.department,
-    queue.owner,
-    queue.status,
-    queue.purpose,
-    queue.summary,
-    queue.accessScope,
-    queue.routingStandard,
-    queue.escalationPath,
-    queue.serviceLevel,
-  ]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
+function normalizeQueueLookup(value: string) {
+  return safeDecodeURIComponent(value)
+    .trim()
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function safeDecodeURIComponent(value: string) {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
 }
