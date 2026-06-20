@@ -6,10 +6,6 @@ This project follows enterprise change management principles.
 
 ---
 
-## Unreleased
-
----
-
 ## HIEOS-IMP-005
 ### Enterprise Routing & Module Shells
 
@@ -597,3 +593,38 @@ Improves EGL navigation consistency and separates certified-copy registry review
 - Converted EGL dashboard stat cards into navigable dashboard controls.
 - Added direct navigation to Publications, Pending Review, Pending Execution, Certified Copies, and Active Policies.
 - Preserved frontend-only backend readiness language for later workflow, storage, authority, approval, and recordkeeping integration.
+
+## HIEOS-IMP-006R
+### EGL Resolution Intake Shell
+**Status:** Completed
+
+#### Summary
+Added a frontend-only resolution intake shell and aligned the EGL New Resolution quick action with its named task.
+
+#### Deliverables
+- Created `/governance-library/resolutions/new`.
+- Updated the EGL Quick Actions panel so New Resolution routes to the resolution intake shell.
+- Preserved the existing Resolutions Registry route.
+- Preserved existing resolution detail routing.
+- Preserved frontend-only implementation scope.
+
+#### Result
+The EGL now has a dedicated resolution creation/intake shell instead of routing the New Resolution quick action back to the Resolutions Registry.
+
+
+## HIEOS-IMP-006S
+### EGL Upload Document Intake Shell
+**Status:** Completed
+
+#### Summary
+Added a frontend-only EGL upload document intake shell and aligned the Upload Document quick action with its named task.
+
+#### Deliverables
+- Created `/governance-library/publications/upload`.
+- Updated the EGL Quick Actions panel so Upload Document routes to the upload intake shell.
+- Preserved the existing Publications Registry route.
+- Preserved Create New Publication, New Resolution, Create Certified Copy, Forms & Templates, and View Registers quick-action routing.
+- Preserved frontend-only implementation scope.
+
+#### Result
+The EGL now has a dedicated upload intake shell instead of routing the Upload Document quick action back to the Publications Registry.
