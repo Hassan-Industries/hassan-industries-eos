@@ -647,3 +647,20 @@ Added explicit frontend creation routes for Upload Document and New Resolution s
 
 #### Result
 EGL creation actions now route to intentional static intake shells instead of being interpreted as dynamic record IDs.
+
+
+## HIEOS-IMP-006U
+### EGL Lint Navigation Cleanup
+**Status:** Completed
+
+#### Summary
+Cleaned the EGL Dashboard recently updated publications navigation to use the Next.js `Link` component instead of an internal HTML anchor.
+
+#### Deliverables
+- Replaced internal `<a>` navigation in `RecentlyUpdatedPublications.tsx`.
+- Preserved recently updated publication row selection behavior.
+- Preserved selected-record highlighting.
+- Preserved EGL Dashboard layout and registry navigation behavior.
+
+#### Result
+The EGL Dashboard no longer triggers the Next.js `no-html-link-for-pages` lint error for the View All Publications action.

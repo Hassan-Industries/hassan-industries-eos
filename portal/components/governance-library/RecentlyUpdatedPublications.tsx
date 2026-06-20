@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import type { Dispatch, SetStateAction } from "react";
+
 import type { PublicationRecord } from "@/data/governanceLibrary";
 import { getPublicationDocumentNumber } from "@/lib/eglPublicationRecords";
 
@@ -38,7 +40,6 @@ export default function RecentlyUpdatedPublications({
   onSelectPublication,
 }: RecentlyUpdatedPublicationsProps) {
   const records = publications.filter(isPublicationRecord);
-
   const selectedKey = selectedPublication
     ? getPublicationKey(selectedPublication as DisplayPublicationRecord)
     : null;
@@ -54,33 +55,37 @@ export default function RecentlyUpdatedPublications({
   }
 
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="mb-4 flex items-start justify-between gap-4">
+    <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
+      <div className="flex items-start justify-between gap-4 border-b border-slate-200 p-5">
         <div>
-          <h2 className="text-[13px] font-bold uppercase tracking-[0.22em] text-slate-950">
+          <p className="text-[11px] font-black uppercase tracking-[0.35em] text-slate-400">
+            Enterprise Governance Library
+          </p>
+
+          <h2 className="mt-2 text-xl font-black text-slate-950">
             Recently Updated Publications
           </h2>
         </div>
 
-        <a
+        <Link
           href="/governance-library/publications"
-          className="text-xs font-bold text-blue-700 hover:text-amber-700"
+          className="text-xs font-black text-blue-700 transition hover:text-amber-600"
         >
           View All Publications →
-        </a>
+        </Link>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="min-w-[760px] w-full border-collapse text-left text-xs">
+      <div className="overflow-x-auto p-5">
+        <table className="w-full min-w-[760px] text-left text-sm">
           <thead>
-            <tr className="border-b border-slate-200 bg-slate-50 text-[11px] uppercase tracking-[0.14em] text-slate-500">
-              <th className="px-3 py-3 font-extrabold">Document No.</th>
-              <th className="px-3 py-3 font-extrabold">Title</th>
-              <th className="px-3 py-3 font-extrabold">Series</th>
-              <th className="px-3 py-3 font-extrabold">Status</th>
-              <th className="px-3 py-3 font-extrabold">Version</th>
-              <th className="px-3 py-3 font-extrabold">Owner</th>
-              <th className="px-3 py-3 font-extrabold">Review Date</th>
+            <tr className="border-b border-slate-200 bg-slate-50 text-[11px] font-black uppercase tracking-[0.25em] text-slate-500">
+              <th className="px-3 py-3">Document No.</th>
+              <th className="px-3 py-3">Title</th>
+              <th className="px-3 py-3">Series</th>
+              <th className="px-3 py-3">Status</th>
+              <th className="px-3 py-3">Version</th>
+              <th className="px-3 py-3">Owner</th>
+              <th className="px-3 py-3">Review Date</th>
             </tr>
           </thead>
 
@@ -93,69 +98,82 @@ export default function RecentlyUpdatedPublications({
               return (
                 <tr
                   key={recordKey}
+                  tabIndex={0}
+                  role="button"
                   onClick={() => handleSelect(publication)}
-                  className={`cursor-pointer border-b border-slate-200 transition last:border-b-0 ${
-                    isSelected ? "bg-amber-50" : "bg-white hover:bg-slate-50"
-                  }`}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      handleSelect(publication);
+                    }
+                  }}
+                  className={[
+                    "cursor-pointer border-b border-slate-200 transition last:border-b-0",
+                    isSelected ? "bg-amber-50" : "bg-white hover:bg-slate-50",
+                  ].join(" ")}
                 >
-                  <td className="px-3 py-4 align-top font-extrabold text-slate-950">
+                  <td className="px-3 py-4 align-top font-black text-slate-950">
                     {getPublicationDocumentNumber(record)}
                   </td>
 
-                  <td className="max-w-[260px] px-3 py-4 align-top">
-                    <p className="font-bold leading-5 text-slate-950">
+                  <td className="px-3 py-4 align-top">
+                    <p className="font-black text-slate-950">
                       {getTitle(record)}
                     </p>
 
-                    <p className="mt-1 text-[11px] leading-4 text-slate-500">
+                    <p className="mt-2 max-w-xs text-xs leading-5 text-slate-500">
                       {getDescription(record)}
                     </p>
                   </td>
 
-                  <td className="px-3 py-4 align-top font-semibold text-slate-700">
+                  <td className="px-3 py-4 align-top font-bold text-slate-700">
                     {getSeries(record)}
                   </td>
 
                   <td className="px-3 py-4 align-top">
-                    <span className="inline-flex min-w-9 items-center justify-center rounded-md bg-emerald-100 px-2 py-1 text-[11px] font-extrabold text-emerald-700">
+                    <span className="inline-flex rounded-md bg-emerald-100 px-2 py-1 text-xs font-black text-emerald-700">
                       {getStatus(record)}
                     </span>
                   </td>
 
-                  <td className="px-3 py-4 align-top font-semibold text-slate-950">
+                  <td className="px-3 py-4 align-top font-black text-slate-950">
                     {String(record.version ?? "1.0")}
                   </td>
 
-                  <td className="px-3 py-4 align-top font-semibold text-slate-950">
+                  <td className="px-3 py-4 align-top font-black text-slate-950">
                     {record.owner ?? "HCA"}
                   </td>
 
-                  <td className="px-3 py-4 align-top font-semibold text-slate-950">
+                  <td className="px-3 py-4 align-top font-bold text-slate-700">
                     {record.reviewDate ?? record.lastUpdated ?? "Pending"}
                   </td>
                 </tr>
               );
             })}
+
+            {records.length === 0 && (
+              <tr>
+                <td colSpan={7} className="px-3 py-8 text-center">
+                  <p className="font-black text-slate-950">
+                    No recently updated publications available.
+                  </p>
+
+                  <p className="mt-2 text-sm text-slate-500">
+                    Future backend integration will populate this table from the
+                    publication registry and document activity log.
+                  </p>
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
-
-        {records.length === 0 && (
-          <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-6 text-center">
-            <p className="text-sm font-extrabold text-slate-950">
-              No recently updated publications available.
-            </p>
-
-            <p className="mt-2 text-xs text-slate-500">
-              Future backend integration will populate this table from the
-              publication registry and document activity log.
-            </p>
-          </div>
-        )}
       </div>
 
-      <p className="mt-4 text-[11px] leading-4 text-slate-500">
-        Select a publication row to update the Document Profile panel.
-      </p>
+      <div className="border-t border-slate-200 px-5 py-3">
+        <p className="text-xs text-slate-500">
+          Select a publication row to update the Document Profile panel.
+        </p>
+      </div>
     </section>
   );
 }
