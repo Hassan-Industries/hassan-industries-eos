@@ -1,9 +1,12 @@
+"use client";
+
 import Link from "next/link";
 import {
   ArrowLeft,
   BookOpen,
   CheckCircle2,
   FileCheck2,
+  FilePlus2,
   LockKeyhole,
   ShieldCheck,
 } from "lucide-react";
@@ -37,33 +40,29 @@ export default function CreateCertifiedCopyPage() {
 
         <main className="flex-1 px-5 py-4">
           <div className="mx-auto max-w-[1500px] space-y-4">
-            <section className="rounded-xl bg-slate-950 p-6 text-white shadow-sm">
-              <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-center">
+            <section className="rounded-xl border border-slate-200 bg-slate-950 p-6 text-white shadow-sm">
+              <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                  <p className="text-[11px] font-bold uppercase tracking-[0.48em] text-amber-400">
+                  <p className="text-[11px] font-extrabold uppercase tracking-[0.55em] text-amber-400">
                     Hassan Industries
                   </p>
-
-                  <h1 className="mt-3 text-3xl font-black uppercase tracking-tight">
+                  <h1 className="mt-3 text-3xl font-black uppercase tracking-[0.04em]">
                     EGL Create Certified Copy
                   </h1>
-
-                  <p className="mt-3 max-w-4xl text-sm leading-6 text-slate-200">
+                  <p className="mt-3 max-w-4xl text-sm leading-6 text-slate-100">
                     Frontend workflow shell for preparing certified copies of
                     controlled publications, executed records, resolutions, and
                     official enterprise documents.
                   </p>
                 </div>
 
-                <div className="rounded-lg border border-amber-500 bg-slate-900 px-8 py-5 text-center">
-                  <p className="text-[11px] font-black uppercase tracking-[0.42em] text-slate-200">
+                <div className="rounded-lg border border-amber-500 bg-white/5 px-8 py-5 text-center">
+                  <p className="text-[11px] font-extrabold uppercase tracking-[0.42em] text-slate-200">
                     Workflow Status
                   </p>
-
                   <p className="mt-3 text-2xl font-black text-amber-400">
                     Certification Shell
                   </p>
-
                   <p className="mt-1 text-xs text-slate-200">Frontend Only</p>
                 </div>
               </div>
@@ -72,7 +71,7 @@ export default function CreateCertifiedCopyPage() {
             <div className="flex flex-wrap items-center gap-3">
               <Link
                 href="/governance-library"
-                className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-950 shadow-sm transition hover:border-amber-500 hover:bg-amber-50"
+                className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-950 shadow-sm transition hover:border-amber-500 hover:bg-amber-50"
               >
                 <ArrowLeft className="h-4 w-4 text-amber-600" />
                 Back to EGL Dashboard
@@ -80,29 +79,27 @@ export default function CreateCertifiedCopyPage() {
 
               <Link
                 href="/governance-library/certified-copies"
-                className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-950 shadow-sm transition hover:border-amber-500 hover:bg-amber-50"
+                className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-950 shadow-sm transition hover:border-amber-500 hover:bg-amber-50"
               >
                 Certified Copies Registry
               </Link>
             </div>
 
-            <section className="grid gap-4 xl:grid-cols-[1fr_420px]">
+            <section className="grid gap-4 xl:grid-cols-[1fr_430px]">
               <div className="space-y-4">
-                <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-                  <div className="flex gap-4">
+                <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+                  <div className="flex items-start gap-4">
                     <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-slate-950">
                       <FileCheck2 className="h-7 w-7 text-amber-400" />
                     </div>
 
                     <div>
-                      <p className="text-[11px] font-bold uppercase tracking-[0.36em] text-slate-400">
+                      <p className="text-[11px] font-extrabold uppercase tracking-[0.42em] text-slate-400">
                         Certification Intake
                       </p>
-
-                      <h2 className="mt-2 text-3xl font-black text-slate-950">
+                      <h2 className="mt-2 text-3xl font-black">
                         New Certified Copy Request
                       </h2>
-
                       <p className="mt-3 max-w-4xl text-sm leading-6 text-slate-600">
                         This shell prepares the controlled workspace for issuing
                         a certified copy. No certified copy is generated yet, no
@@ -115,79 +112,69 @@ export default function CreateCertifiedCopyPage() {
 
                 <section className="grid gap-4 lg:grid-cols-2">
                   <WorkflowPanel title="Workflow Steps" items={workflowSteps} />
-                  <ChecklistPanel title="Control Checklist" items={checklistItems} />
+                  <ChecklistPanel items={checklistItems} />
                 </section>
 
-                <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-                  <div className="mb-5 flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-slate-950">
-                      <FileCheck2 className="h-5 w-5 text-amber-400" />
+                <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-slate-950">
+                      <FilePlus2 className="h-6 w-6 text-amber-400" />
                     </div>
 
                     <div>
-                      <h2 className="text-[17px] font-black uppercase tracking-[0.28em] text-slate-950">
-                        Certified Copy Workspace
+                      <h2 className="text-lg font-black uppercase tracking-[0.28em]">
+                        Certified Copy Creation Workspace
                       </h2>
-
                       <p className="mt-1 text-sm text-slate-500">
-                        Frontend placeholder for future certification form.
+                        Frontend placeholder for the future controlled
+                        certification form.
                       </p>
                     </div>
                   </div>
 
-                  <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-5">
-                    <div className="grid gap-3 md:grid-cols-2">
-                      <WorkspaceField label="Source Record" value="Select Source Record" />
-                      <WorkspaceField label="Source Type" value="Publication / Resolution" />
-                      <WorkspaceField label="Certification Authority" value="Pending Assignment" />
-                      <WorkspaceField label="Issue Status" value="Pending" />
-                      <WorkspaceField label="Certified Copy ID" value="Pending Assignment" />
-                      <WorkspaceField label="Retention" value="Permanent / As Assigned" />
+                  <div className="mt-6 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
+                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-xl bg-slate-950">
+                      <FileCheck2 className="h-8 w-8 text-amber-400" />
                     </div>
 
-                    <div className="mt-5 rounded-lg border border-slate-200 bg-white p-8 text-center">
-                      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-slate-950">
-                        <FileCheck2 className="h-7 w-7 text-amber-400" />
-                      </div>
+                    <h3 className="mt-5 text-lg font-black">
+                      Prepare Certified Copy pending backend integration.
+                    </h3>
 
-                      <h3 className="mt-5 text-lg font-black text-slate-950">
-                        Certified copy preparation pending backend integration.
-                      </h3>
-
-                      <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-slate-600">
-                        This area will later hold source selection, authority
-                        review, certification statements, file generation,
-                        issuance logging, approval routing, and filing controls.
-                      </p>
-                    </div>
+                    <p className="mx-auto mt-3 max-w-3xl text-sm leading-6 text-slate-600">
+                      This area will later hold source record selection,
+                      certification authority controls, file package generation,
+                      certified-copy numbering, approval routing, and issuance
+                      logging.
+                    </p>
                   </div>
                 </section>
               </div>
 
               <aside className="space-y-4">
                 <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-                  <h2 className="text-[17px] font-black uppercase tracking-[0.28em] text-slate-950">
+                  <h2 className="text-lg font-black uppercase tracking-[0.28em]">
                     Intake Actions
                   </h2>
 
                   <div className="mt-5 space-y-3">
                     <button
                       type="button"
-                      className="w-full rounded-lg border border-slate-950 bg-slate-950 px-4 py-3 text-xs font-bold text-white"
+                      className="flex w-full items-center justify-center rounded-lg border border-slate-950 bg-slate-950 px-4 py-3 text-sm font-bold text-white transition hover:bg-slate-800"
                     >
                       Prepare Certified Copy
                     </button>
 
                     <Link
                       href="/governance-library/certified-copies"
-                      className="block rounded-lg border border-slate-300 bg-white px-4 py-3 text-center text-xs font-bold text-slate-950 transition hover:border-amber-500 hover:bg-amber-50"
+                      className="flex w-full items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-bold text-slate-950 transition hover:border-amber-500 hover:bg-amber-50"
                     >
                       View Certified Copies Registry
                     </Link>
 
                     <Link
                       href="/governance-library"
-                      className="block rounded-lg border border-slate-300 bg-white px-4 py-3 text-center text-xs font-bold text-slate-950 transition hover:border-amber-500 hover:bg-amber-50"
+                      className="flex w-full items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-bold text-slate-950 transition hover:border-amber-500 hover:bg-amber-50"
                     >
                       Return to EGL Dashboard
                     </Link>
@@ -195,12 +182,12 @@ export default function CreateCertifiedCopyPage() {
                 </section>
 
                 <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-slate-950">
-                      <LockKeyhole className="h-5 w-5 text-amber-400" />
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-slate-950">
+                      <LockKeyhole className="h-6 w-6 text-amber-400" />
                     </div>
 
-                    <h2 className="text-[17px] font-black uppercase tracking-[0.28em] text-slate-950">
+                    <h2 className="text-lg font-black uppercase tracking-[0.28em]">
                       Control Notes
                     </h2>
                   </div>
@@ -214,17 +201,16 @@ export default function CreateCertifiedCopyPage() {
                   </ul>
                 </section>
 
-                <section className="rounded-lg border border-dashed border-slate-300 bg-white p-5">
-                  <p className="text-[15px] font-black uppercase tracking-[0.28em] text-slate-950">
+                <section className="rounded-lg border border-dashed border-slate-300 bg-white p-5 shadow-sm">
+                  <h2 className="text-lg font-black uppercase tracking-[0.28em]">
                     Training Note
-                  </p>
-
+                  </h2>
                   <p className="mt-4 text-sm leading-6 text-slate-600">
                     In future employee or executive training manuals, this page
                     should be described as the controlled workspace for starting
-                    a certified-copy request. The final backend version should
-                    require role-based authority, source verification, approval
-                    routing, generation, issuance logging, and recordkeeping.
+                    certified-copy issuance. The final backend version should
+                    require role-based authority, approval routing, and
+                    recordkeeping before completion.
                   </p>
                 </section>
               </aside>
@@ -239,27 +225,26 @@ export default function CreateCertifiedCopyPage() {
 function WorkflowPanel({ title, items }: { title: string; items: string[] }) {
   return (
     <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="mb-5 flex items-center gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-slate-950">
-          <CheckCircle2 className="h-5 w-5 text-amber-400" />
+      <div className="flex items-center gap-4">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-slate-950">
+          <CheckCircle2 className="h-6 w-6 text-amber-400" />
         </div>
 
-        <h2 className="text-[17px] font-black uppercase tracking-[0.28em] text-slate-950">
+        <h2 className="text-lg font-black uppercase tracking-[0.28em]">
           {title}
         </h2>
       </div>
 
-      <div className="space-y-3">
+      <div className="mt-5 space-y-3">
         {items.map((item, index) => (
           <div
             key={item}
-            className="flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm font-bold"
+            className="flex items-center gap-4 rounded-lg border border-slate-200 bg-slate-50 p-4"
           >
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-950 text-xs font-black text-amber-400">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-950 text-xs font-black text-amber-400">
               {index + 1}
             </span>
-
-            {item}
+            <p className="text-sm font-bold">{item}</p>
           </div>
         ))}
       </div>
@@ -267,42 +252,30 @@ function WorkflowPanel({ title, items }: { title: string; items: string[] }) {
   );
 }
 
-function ChecklistPanel({ title, items }: { title: string; items: string[] }) {
+function ChecklistPanel({ items }: { items: string[] }) {
   return (
     <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="mb-5 flex items-center gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-slate-950">
-          <ShieldCheck className="h-5 w-5 text-amber-400" />
+      <div className="flex items-center gap-4">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-slate-950">
+          <ShieldCheck className="h-6 w-6 text-amber-400" />
         </div>
 
-        <h2 className="text-[17px] font-black uppercase tracking-[0.28em] text-slate-950">
-          {title}
+        <h2 className="text-lg font-black uppercase tracking-[0.28em]">
+          Control Checklist
         </h2>
       </div>
 
-      <div className="space-y-3">
+      <div className="mt-5 space-y-3">
         {items.map((item) => (
           <div
             key={item}
-            className="flex items-center gap-3 rounded-lg border border-slate-200 bg-white p-4 text-sm font-bold"
+            className="flex items-center gap-3 rounded-lg border border-slate-200 bg-white p-4"
           >
-            <ShieldCheck className="h-4 w-4 text-amber-500" />
-            {item}
+            <ShieldCheck className="h-4 w-4 text-amber-600" />
+            <p className="text-sm font-bold">{item}</p>
           </div>
         ))}
       </div>
     </section>
-  );
-}
-
-function WorkspaceField({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-lg border border-slate-200 bg-white p-4">
-      <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-slate-500">
-        {label}
-      </p>
-
-      <p className="mt-2 text-sm font-black text-slate-950">{value}</p>
-    </div>
   );
 }

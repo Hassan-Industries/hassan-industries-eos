@@ -566,3 +566,25 @@ Changes:
 
 Impact:
 Establishes the controlled certified-copy registry workspace needed before backend certification logs, document storage, copy generation, access controls, and permanent recordkeeping are added.
+
+## HIEOS-IMP-006P-1
+
+### EGL Certified Copies Navigation Stabilization
+
+Status: Completed
+
+Summary:
+Stabilized Enterprise Governance Library certified-copy navigation so the certified copies registry, certified-copy intake shell, and certification history shell have clear, testable frontend routes.
+
+Changes:
+- Updated the EGL Certified Copies stat card to route to `/governance-library/certified-copies`.
+- Updated the EGL Quick Action "Create Certified Copy" to route to `/governance-library/certified-copies/new`.
+- Added a registry-level Create Certified Copy button to the Certified Copies Registry.
+- Added `/governance-library/certified-copies/new` as the certified-copy intake shell.
+- Added `/governance-library/certified-copies/history` as the certification history shell.
+- Updated selected certified-copy action links to open source records, source files, and certification history in a new browser tab.
+- Repositioned the Certified Copies Registry count and Create Certified Copy action to the right side of the registry header for consistency with other EGL registries.
+- Preserved existing record-specific certified-copy workflow routes under `/governance-library/publications/[documentId]/certified-copy`.
+
+Impact:
+Improves EGL navigation consistency and separates certified-copy registry review from certified-copy creation, while preserving frontend-only scope before backend certification generation, source-file handling, audit history, and Microsoft 365 / SharePoint integrations are introduced.

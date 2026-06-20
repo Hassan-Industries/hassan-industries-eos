@@ -89,7 +89,6 @@ export default function EGLQuickActions() {
                   action.primary ? "text-amber-400" : "text-amber-600",
                 ].join(" ")}
               />
-
               <span>{action.label}</span>
             </Link>
           );
