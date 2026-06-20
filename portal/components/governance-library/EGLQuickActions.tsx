@@ -33,7 +33,7 @@ const quickActions: QuickAction[] = [
   },
   {
     label: "Upload Document",
-    href: "/governance-library/publications",
+    href: "/governance-library/publications/upload",
     icon: Upload,
     primary: false,
   },
@@ -97,6 +97,7 @@ export default function EGLQuickActions() {
                   action.primary ? "text-amber-400" : "text-amber-600",
                 ].join(" ")}
               />
+
               <span>{action.label}</span>
             </Link>
           );
