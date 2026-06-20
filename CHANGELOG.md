@@ -515,3 +515,24 @@ Changes
 Impact
 
 Expanded the Enterprise Governance Library from publication control into formal governance decision tracking by introducing a controlled frontend registry for resolutions. Improved publication intake access by placing Create New Publication directly inside the Publications Registry where applicable users would reasonably expect it.
+
+## HIEOS-IMP-006P
+### EGL Certified Copies Registry Shell
+
+Status:
+Completed
+
+Summary:
+Added a controlled frontend registry shell for Enterprise Governance Library certified copy records.
+
+Changes:
+- Replaced the certified copies route with an institutional registry layout.
+- Added static certified copy records for publications and resolutions.
+- Added intentional row selection before opening certified copy metadata.
+- Added selected certified copy preview panel.
+- Added frontend copy-ID control.
+- Added source record and source viewer navigation controls.
+- Added certified copy backend readiness and training notes.
+
+Impact:
+Establishes the controlled certified-copy registry workspace needed before backend certification logs, document storage, copy generation, access controls, and permanent recordkeeping are added.
