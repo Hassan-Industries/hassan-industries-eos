@@ -1,19 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   ArrowLeft,
   ClipboardList,
   Copy,
-  Database,
-  FileText,
+  FileUp,
   FolderOpen,
   LockKeyhole,
   RotateCcw,
   Route,
   Send,
   ShieldCheck,
+  X,
 } from "lucide-react";
 
 import Sidebar from "@/components/layout/Sidebar";
@@ -28,9 +28,6 @@ type RelatedReference = {
   id: string;
   title: string;
   type: string;
-  department: string;
-  category: string;
-  classification: string;
 };
 
 type QueueRecommendation = {
@@ -88,65 +85,41 @@ const relatedReferences: RelatedReference[] = [
     id: "N/A",
     title: "No existing record selected",
     type: "None",
-    department: "All",
-    category: "All",
-    classification: "All",
   },
   {
     id: "HI-ADM-001",
     title: "Enterprise Administration & Enterprise Services Manual",
     type: "Publication",
-    department: "Administration",
-    category: "Administrative Support",
-    classification: "Internal Governance",
   },
   {
     id: "HI-ADM-002",
     title: "Enterprise Document Control Standard",
     type: "Publication",
-    department: "Governance Library",
-    category: "Document Replacement",
-    classification: "Internal Governance",
   },
   {
     id: "HI-TRE-001",
     title: "Enterprise Treasury Manual",
     type: "Publication",
-    department: "Treasury",
-    category: "Treasury Support",
-    classification: "Confidential",
   },
   {
     id: "HCP-RES-2026-001",
     title: "Foundational Treasury Resolution",
     type: "Resolution",
-    department: "Treasury",
-    category: "Governance Review",
-    classification: "Internal Governance",
   },
   {
     id: "CC-HI-ADM-001",
     title: "Certified Copy — HI-ADM-001",
     type: "Certified Copy",
-    department: "Corporate Records",
-    category: "Certified Copy",
-    classification: "Internal Governance",
-  },
-  {
-    id: "HCP-RESTRICTED",
-    title: "HCP Restricted Review Layer",
-    type: "Restricted Review",
-    department: "HCP Restricted",
-    category: "Parent-Level Review",
-    classification: "Restricted Internal",
   },
   {
     id: "HCA-REVIEW",
     title: "Restricted HCA Review Layer",
     type: "Restricted Review",
-    department: "HCA Review",
-    category: "Governance Review",
-    classification: "Restricted Internal",
+  },
+  {
+    id: "HCP-RESTRICTED",
+    title: "HCP Restricted Review Layer",
+    type: "Restricted Review",
   },
 ];
 
@@ -156,7 +129,7 @@ const intakeSteps = [
   "Confirm requester and owner",
   "Classify access level and routing sensitivity",
   "Select related record or mark N/A",
-  "Identify attachment or evidence needs",
+  "Attach supporting files when available",
   "Route for review, approval, execution, or filing",
 ];
 
@@ -224,36 +197,9 @@ function getQueueRecommendation(
   };
 }
 
-function getFilteredReferences(
-  department: string,
-  category: string,
-  classification: string,
-) {
-  const matches = relatedReferences.filter((reference) => {
-    if (reference.id === "N/A") return true;
-
-    const departmentMatch =
-      reference.department === department ||
-      department === "Executive Operations" ||
-      department === "Third-Party / Client";
-
-    const categoryMatch =
-      reference.category === category ||
-      category === "External Support Request" ||
-      category === "Administrative Support";
-
-    const classificationMatch =
-      reference.classification === classification ||
-      reference.classification === "Internal Governance" ||
-      classification === "External / Client";
-
-    return departmentMatch || categoryMatch || classificationMatch;
-  });
-
-  return matches.length ? matches : relatedReferences.filter((reference) => reference.id === "N/A");
-}
-
 export default function NewServiceRequestPage() {
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
   const [requestTitle, setRequestTitle] = useState("");
   const [requester, setRequester] = useState("Executive Operations");
   const [intakeChannel, setIntakeChannel] = useState("Internal EOS Intake");
@@ -265,21 +211,15 @@ export default function NewServiceRequestPage() {
   const [requestedAction, setRequestedAction] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [requestSummary, setRequestSummary] = useState("");
-  const [evidenceNote, setEvidenceNote] = useState("");
+  const [attachmentNames, setAttachmentNames] = useState<string[]>([]);
 
   const queueRecommendation = useMemo(
     () => getQueueRecommendation(department, category, classification),
     [department, category, classification],
   );
 
-  const filteredReferences = useMemo(
-    () => getFilteredReferences(department, category, classification),
-    [department, category, classification],
-  );
-
   const selectedReference =
-    filteredReferences.find((reference) => reference.id === relatedRecord) ??
-    relatedReferences.find((reference) => reference.id === "N/A");
+    relatedReferences.find((reference) => reference.id === relatedRecord) ?? relatedReferences[0];
 
   const controlChecks = [
     { label: "Request title entered", complete: requestTitle.trim().length > 0 },
@@ -288,12 +228,26 @@ export default function NewServiceRequestPage() {
     { label: "Category selected", complete: category.trim().length > 0 },
     { label: "Classification selected", complete: classification.trim().length > 0 },
     { label: "Related record selected or marked N/A", complete: relatedRecord.trim().length > 0 },
-    { label: "Evidence / attachment need identified", complete: evidenceNote.trim().length > 0 },
     { label: "Requested action documented", complete: requestedAction.trim().length > 0 },
     { label: "Request summary documented", complete: requestSummary.trim().length > 0 },
+    { label: "File attachment selected when available", complete: attachmentNames.length > 0 },
   ];
 
   const completedChecks = controlChecks.filter((check) => check.complete).length;
+
+  const handleFileSelection = (files: FileList | null) => {
+    if (!files) return;
+
+    setAttachmentNames(Array.from(files).map((file) => file.name));
+  };
+
+  const clearAttachments = () => {
+    setAttachmentNames([]);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
 
   const resetDraft = () => {
     setRequestTitle("");
@@ -307,35 +261,34 @@ export default function NewServiceRequestPage() {
     setRequestedAction("");
     setDueDate("");
     setRequestSummary("");
-    setEvidenceNote("");
+    clearAttachments();
   };
 
   return (
-    <div className="min-h-screen bg-[#edf3f8] text-[#050816]">
+    <div className="flex min-h-screen flex-col bg-[#edf3f8] text-[#050816] lg:flex-row">
       <Sidebar />
 
-      <div className="min-h-screen lg:pl-[280px]">
+      <div className="min-w-0 flex-1">
         <Topbar />
 
-        <main className="px-5 py-5 lg:px-6 lg:py-6">
-          <section className="rounded-xl bg-[#020617] px-7 py-7 text-white shadow-sm">
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+        <main className="w-full px-4 py-4 sm:px-5 lg:px-6">
+          <section className="rounded-xl bg-[#020617] px-5 py-6 text-white shadow-sm sm:px-7 sm:py-7">
+            <div className="flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
               <div>
-                <p className="mb-4 text-xs font-black uppercase tracking-[0.55em] text-[#ffb703]">
+                <p className="mb-4 text-xs font-black uppercase tracking-[0.45em] text-[#ffb703] sm:tracking-[0.55em]">
                   Hassan Industries
                 </p>
-                <h1 className="text-3xl font-black uppercase tracking-tight">
+                <h1 className="text-2xl font-black uppercase tracking-tight sm:text-3xl">
                   Create Service Request
                 </h1>
                 <p className="mt-3 max-w-5xl text-sm font-semibold leading-7 text-white/90">
-                  Controlled frontend intake workspace for preparing service request metadata,
-                  routing recommendations, ownership review, classification checks, attachment
-                  requirements, and future workflow handoff.
+                  Controlled frontend intake workspace for preparing request metadata, routing
+                  recommendation, classification, file attachments, and future workflow handoff.
                 </p>
               </div>
 
-              <div className="rounded-lg border border-[#ffb703] bg-white/5 px-8 py-6 text-center">
-                <p className="text-xs font-black uppercase tracking-[0.45em] text-white">
+              <div className="rounded-lg border border-[#ffb703] bg-white/5 px-6 py-5 text-center sm:px-8 sm:py-6">
+                <p className="text-xs font-black uppercase tracking-[0.35em] text-white sm:tracking-[0.45em]">
                   Intake Status
                 </p>
                 <p className="mt-4 text-2xl font-black text-[#ffb703]">Draft</p>
@@ -347,7 +300,7 @@ export default function NewServiceRequestPage() {
           <div className="mt-5 flex flex-wrap gap-3">
             <Link
               href="/service-requests"
-              className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-5 py-3 text-sm font-black shadow-sm transition hover:border-[#ffb703]"
+              className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-black shadow-sm transition hover:border-[#ffb703] sm:px-5"
             >
               <ArrowLeft size={16} className="text-[#fb8500]" />
               Service Requests Desk
@@ -355,7 +308,7 @@ export default function NewServiceRequestPage() {
 
             <Link
               href="/service-requests/queues"
-              className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-5 py-3 text-sm font-black shadow-sm transition hover:border-[#ffb703]"
+              className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-black shadow-sm transition hover:border-[#ffb703] sm:px-5"
             >
               <Route size={16} className="text-[#fb8500]" />
               Routing Queues
@@ -363,54 +316,51 @@ export default function NewServiceRequestPage() {
 
             <Link
               href="/dashboard"
-              className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-5 py-3 text-sm font-black shadow-sm transition hover:border-[#ffb703]"
+              className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-black shadow-sm transition hover:border-[#ffb703] sm:px-5"
             >
               <FolderOpen size={16} className="text-[#fb8500]" />
               Dashboard
             </Link>
           </div>
 
-          <p className="mt-5 text-right text-xs font-black uppercase tracking-[0.55em] text-slate-400">
+          <p className="mt-5 text-right text-xs font-black uppercase tracking-[0.35em] text-slate-400 sm:tracking-[0.55em]">
             Controlled Request Intake
           </p>
 
-          <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_390px]">
+          <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
             <div className="space-y-5">
-              <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                <div className="flex gap-5">
+              <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+                <div className="flex flex-col gap-4 sm:flex-row">
                   <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-[#020617] text-[#ffb703]">
                     <ClipboardList size={28} />
                   </div>
 
                   <div>
-                    <p className="text-xs font-black uppercase tracking-[0.45em] text-slate-400">
+                    <p className="text-xs font-black uppercase tracking-[0.35em] text-slate-400 sm:tracking-[0.45em]">
                       Service Request Intake
                     </p>
-                    <h2 className="mt-2 text-3xl font-black">New Service Request</h2>
+                    <h2 className="mt-2 text-2xl font-black sm:text-3xl">
+                      New Service Request
+                    </h2>
                     <p className="mt-3 max-w-4xl text-sm leading-7 text-slate-600">
-                      This page does not submit or save records yet. It prepares a governed request
-                      package so the future backend can route the work cleanly instead of creating
-                      an unstructured inbox.
+                      This page prepares a governed request package only. It does not submit, save,
+                      route, assign, notify, or upload to backend storage yet.
                     </p>
                   </div>
                 </div>
               </section>
 
               <section className="rounded-xl border border-slate-200 bg-white shadow-sm">
-                <div className="border-b border-slate-200 p-6">
-                  <p className="text-xs font-black uppercase tracking-[0.45em] text-slate-400">
+                <div className="border-b border-slate-200 p-5 sm:p-6">
+                  <p className="text-xs font-black uppercase tracking-[0.35em] text-slate-400 sm:tracking-[0.45em]">
                     Intake Form
                   </p>
                   <h2 className="mt-2 text-2xl font-black">Request Metadata</h2>
-                  <p className="mt-3 text-sm leading-7 text-slate-600">
-                    Capture enough information to determine ownership, authority, access level,
-                    routing queue, related record, evidence needs, and next action.
-                  </p>
                 </div>
 
-                <div className="grid gap-5 p-6 lg:grid-cols-2">
-                  <label className="space-y-2">
-                    <span className="text-xs font-black uppercase tracking-[0.4em] text-slate-500">
+                <div className="grid gap-4 p-5 sm:p-6 md:grid-cols-2 xl:grid-cols-3">
+                  <label className="space-y-2 xl:col-span-2">
+                    <span className="text-xs font-black uppercase tracking-[0.35em] text-slate-500">
                       Request Title *
                     </span>
                     <input
@@ -422,44 +372,24 @@ export default function NewServiceRequestPage() {
                   </label>
 
                   <label className="space-y-2">
-                    <span className="text-xs font-black uppercase tracking-[0.4em] text-slate-500">
+                    <span className="text-xs font-black uppercase tracking-[0.35em] text-slate-500">
                       Requester *
                     </span>
                     <input
                       value={requester}
                       onChange={(event) => setRequester(event.target.value)}
-                      placeholder="Executive Operations, Treasury, HCA, third party..."
+                      placeholder="Executive Operations"
                       className="h-12 w-full rounded-lg border border-slate-300 bg-white px-4 text-sm font-bold outline-none transition focus:border-[#fb8500]"
                     />
                   </label>
 
                   <label className="space-y-2">
-                    <span className="text-xs font-black uppercase tracking-[0.4em] text-slate-500">
-                      Intake Channel
-                    </span>
-                    <select
-                      value={intakeChannel}
-                      onChange={(event) => setIntakeChannel(event.target.value)}
-                      className="h-12 w-full rounded-lg border border-slate-300 bg-white px-4 text-sm font-bold outline-none transition focus:border-[#fb8500]"
-                    >
-                      {intakeChannels.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-
-                  <label className="space-y-2">
-                    <span className="text-xs font-black uppercase tracking-[0.4em] text-slate-500">
+                    <span className="text-xs font-black uppercase tracking-[0.35em] text-slate-500">
                       Department / Desk
                     </span>
                     <select
                       value={department}
-                      onChange={(event) => {
-                        setDepartment(event.target.value);
-                        setRelatedRecord("N/A");
-                      }}
+                      onChange={(event) => setDepartment(event.target.value)}
                       className="h-12 w-full rounded-lg border border-slate-300 bg-white px-4 text-sm font-bold outline-none transition focus:border-[#fb8500]"
                     >
                       {departmentOptions.map((option) => (
@@ -471,15 +401,12 @@ export default function NewServiceRequestPage() {
                   </label>
 
                   <label className="space-y-2">
-                    <span className="text-xs font-black uppercase tracking-[0.4em] text-slate-500">
+                    <span className="text-xs font-black uppercase tracking-[0.35em] text-slate-500">
                       Request Category
                     </span>
                     <select
                       value={category}
-                      onChange={(event) => {
-                        setCategory(event.target.value);
-                        setRelatedRecord("N/A");
-                      }}
+                      onChange={(event) => setCategory(event.target.value)}
                       className="h-12 w-full rounded-lg border border-slate-300 bg-white px-4 text-sm font-bold outline-none transition focus:border-[#fb8500]"
                     >
                       {requestCategories.map((option) => (
@@ -491,15 +418,12 @@ export default function NewServiceRequestPage() {
                   </label>
 
                   <label className="space-y-2">
-                    <span className="text-xs font-black uppercase tracking-[0.4em] text-slate-500">
+                    <span className="text-xs font-black uppercase tracking-[0.35em] text-slate-500">
                       Classification
                     </span>
                     <select
                       value={classification}
-                      onChange={(event) => {
-                        setClassification(event.target.value);
-                        setRelatedRecord("N/A");
-                      }}
+                      onChange={(event) => setClassification(event.target.value)}
                       className="h-12 w-full rounded-lg border border-slate-300 bg-white px-4 text-sm font-bold outline-none transition focus:border-[#fb8500]"
                     >
                       {classificationOptions.map((option) => (
@@ -511,7 +435,7 @@ export default function NewServiceRequestPage() {
                   </label>
 
                   <label className="space-y-2">
-                    <span className="text-xs font-black uppercase tracking-[0.4em] text-slate-500">
+                    <span className="text-xs font-black uppercase tracking-[0.35em] text-slate-500">
                       Priority
                     </span>
                     <select
@@ -528,15 +452,32 @@ export default function NewServiceRequestPage() {
                   </label>
 
                   <label className="space-y-2">
-                    <span className="text-xs font-black uppercase tracking-[0.4em] text-slate-500">
-                      Related Record / Reference
+                    <span className="text-xs font-black uppercase tracking-[0.35em] text-slate-500">
+                      Intake Channel
+                    </span>
+                    <select
+                      value={intakeChannel}
+                      onChange={(event) => setIntakeChannel(event.target.value)}
+                      className="h-12 w-full rounded-lg border border-slate-300 bg-white px-4 text-sm font-bold outline-none transition focus:border-[#fb8500]"
+                    >
+                      {intakeChannels.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <label className="space-y-2">
+                    <span className="text-xs font-black uppercase tracking-[0.35em] text-slate-500">
+                      Related Record
                     </span>
                     <select
                       value={relatedRecord}
                       onChange={(event) => setRelatedRecord(event.target.value)}
                       className="h-12 w-full rounded-lg border border-slate-300 bg-white px-4 text-sm font-bold outline-none transition focus:border-[#fb8500]"
                     >
-                      {filteredReferences.map((reference) => (
+                      {relatedReferences.map((reference) => (
                         <option key={reference.id} value={reference.id}>
                           {reference.id} — {reference.title}
                         </option>
@@ -544,76 +485,105 @@ export default function NewServiceRequestPage() {
                     </select>
                   </label>
 
-                  <label className="space-y-2 lg:col-span-2">
-                    <span className="text-xs font-black uppercase tracking-[0.4em] text-slate-500">
+                  <label className="space-y-2 xl:col-span-2">
+                    <span className="text-xs font-black uppercase tracking-[0.35em] text-slate-500">
                       Requested Action *
                     </span>
                     <input
                       value={requestedAction}
                       onChange={(event) => setRequestedAction(event.target.value)}
-                      placeholder="Prepare review, route to Treasury, verify certified copy, assign owner..."
+                      placeholder="Prepare review, verify record, route to owner, request approval..."
                       className="h-12 w-full rounded-lg border border-slate-300 bg-white px-4 text-sm font-bold outline-none transition focus:border-[#fb8500]"
                     />
                   </label>
 
                   <label className="space-y-2">
-                    <span className="text-xs font-black uppercase tracking-[0.4em] text-slate-500">
+                    <span className="text-xs font-black uppercase tracking-[0.35em] text-slate-500">
                       Due Date / Timing
                     </span>
                     <input
                       value={dueDate}
                       onChange={(event) => setDueDate(event.target.value)}
-                      placeholder="Pending, ASAP, 2026-06-30, next review cycle..."
+                      placeholder="Pending, ASAP, date, review cycle..."
                       className="h-12 w-full rounded-lg border border-slate-300 bg-white px-4 text-sm font-bold outline-none transition focus:border-[#fb8500]"
                     />
                   </label>
 
-                  <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-                    <p className="text-xs font-black uppercase tracking-[0.35em] text-slate-400">
-                      Selected Reference
-                    </p>
-                    <p className="mt-2 text-sm font-black">{selectedReference?.id}</p>
-                    <p className="mt-1 text-xs font-semibold leading-5 text-slate-600">
-                      {selectedReference?.title}
-                    </p>
-                    <p className="mt-3 text-xs font-black uppercase tracking-[0.25em] text-slate-400">
-                      {selectedReference?.type}
-                    </p>
-                  </div>
-
-                  <label className="space-y-2 lg:col-span-2">
-                    <span className="text-xs font-black uppercase tracking-[0.4em] text-slate-500">
+                  <label className="space-y-2 xl:col-span-3">
+                    <span className="text-xs font-black uppercase tracking-[0.35em] text-slate-500">
                       Request Summary *
                     </span>
                     <textarea
                       value={requestSummary}
                       onChange={(event) => setRequestSummary(event.target.value)}
                       placeholder="Describe the issue, purpose, requested outcome, and why this request needs routing."
-                      className="min-h-32 w-full rounded-lg border border-slate-300 bg-white px-4 py-4 text-sm font-semibold leading-6 outline-none transition focus:border-[#fb8500]"
-                    />
-                  </label>
-
-                  <label className="space-y-2 lg:col-span-2">
-                    <span className="text-xs font-black uppercase tracking-[0.4em] text-slate-500">
-                      Attachment / Evidence Note
-                    </span>
-                    <textarea
-                      value={evidenceNote}
-                      onChange={(event) => setEvidenceNote(event.target.value)}
-                      placeholder="List files, screenshots, executed copies, source documents, emails, approvals, or records that should be attached later."
                       className="min-h-28 w-full rounded-lg border border-slate-300 bg-white px-4 py-4 text-sm font-semibold leading-6 outline-none transition focus:border-[#fb8500]"
                     />
                   </label>
+
+                  <div className="space-y-3 xl:col-span-3">
+                    <span className="text-xs font-black uppercase tracking-[0.35em] text-slate-500">
+                      File Attachments
+                    </span>
+
+                    <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50 px-5 py-6 text-center transition hover:border-[#fb8500]">
+                      <FileUp size={28} className="text-[#fb8500]" />
+                      <span className="mt-3 text-sm font-black">
+                        Select documents, screenshots, emails, records, or supporting files
+                      </span>
+                      <span className="mt-1 text-xs font-semibold text-slate-500">
+                        Frontend only — selected files are not uploaded or stored yet.
+                      </span>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        multiple
+                        accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.webp,.txt,.eml,.msg"
+                        onChange={(event) => handleFileSelection(event.target.files)}
+                        className="sr-only"
+                      />
+                    </label>
+
+                    {attachmentNames.length > 0 ? (
+                      <div className="rounded-lg border border-slate-200 bg-white p-4">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                          <p className="text-sm font-black">
+                            {attachmentNames.length} file
+                            {attachmentNames.length === 1 ? "" : "s"} selected
+                          </p>
+                          <button
+                            type="button"
+                            onClick={clearAttachments}
+                            className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-black"
+                          >
+                            <X size={14} className="text-[#fb8500]" />
+                            Clear Files
+                          </button>
+                        </div>
+
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {attachmentNames.map((name) => (
+                            <span
+                              key={name}
+                              className="rounded-full bg-slate-100 px-3 py-2 text-xs font-black text-slate-700"
+                            >
+                              {name}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
                 </div>
               </section>
 
               <div className="grid gap-5 lg:grid-cols-2">
-                <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
                   <div className="mb-5 flex items-center gap-4">
                     <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#020617] text-[#ffb703]">
                       <Route size={24} />
                     </div>
-                    <h3 className="text-xl font-black uppercase tracking-[0.35em]">
+                    <h3 className="text-lg font-black uppercase tracking-[0.25em] sm:text-xl sm:tracking-[0.35em]">
                       Intake Steps
                     </h3>
                   </div>
@@ -633,12 +603,12 @@ export default function NewServiceRequestPage() {
                   </div>
                 </section>
 
-                <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
                   <div className="mb-5 flex items-center gap-4">
                     <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#020617] text-[#ffb703]">
                       <ShieldCheck size={24} />
                     </div>
-                    <h3 className="text-xl font-black uppercase tracking-[0.35em]">
+                    <h3 className="text-lg font-black uppercase tracking-[0.25em] sm:text-xl sm:tracking-[0.35em]">
                       Control Checklist
                     </h3>
                   </div>
@@ -666,13 +636,13 @@ export default function NewServiceRequestPage() {
             </div>
 
             <aside className="space-y-5">
-              <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                <h3 className="text-xl font-black uppercase tracking-[0.35em]">
+              <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+                <h3 className="text-lg font-black uppercase tracking-[0.25em] sm:text-xl sm:tracking-[0.35em]">
                   Intake Actions
                 </h3>
                 <p className="mt-3 text-sm leading-7 text-slate-600">
-                  These actions prepare a controlled request package only. They do not submit, save,
-                  route, assign, upload, notify, or create backend records.
+                  These controls prepare the request package only. They do not submit or create a
+                  backend record.
                 </p>
 
                 <div className="mt-5 space-y-3">
@@ -710,13 +680,13 @@ export default function NewServiceRequestPage() {
                 </div>
               </section>
 
-              <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+              <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
                 <div className="flex items-start gap-4">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#020617] text-[#ffb703]">
                     <Route size={24} />
                   </div>
                   <div>
-                    <p className="text-xs font-black uppercase tracking-[0.4em] text-slate-400">
+                    <p className="text-xs font-black uppercase tracking-[0.35em] text-slate-400">
                       Routing Recommendation
                     </p>
                     <h3 className="mt-2 text-2xl font-black">{queueRecommendation.title}</h3>
@@ -740,10 +710,6 @@ export default function NewServiceRequestPage() {
                     <span className="font-black text-slate-500">Priority</span>
                     <span className="text-right font-black">{priority}</span>
                   </div>
-                  <div className="flex justify-between gap-4 py-3">
-                    <span className="font-black text-slate-500">Intake Channel</span>
-                    <span className="text-right font-black">{intakeChannel}</span>
-                  </div>
                 </div>
 
                 <Link
@@ -754,13 +720,13 @@ export default function NewServiceRequestPage() {
                 </Link>
               </section>
 
-              <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+              <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
                 <div className="flex items-start gap-4">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#020617] text-[#ffb703]">
-                    <FileText size={24} />
+                    <ClipboardList size={24} />
                   </div>
                   <div>
-                    <p className="text-xs font-black uppercase tracking-[0.4em] text-slate-400">
+                    <p className="text-xs font-black uppercase tracking-[0.35em] text-slate-400">
                       Draft Request Package
                     </p>
                     <h3 className="mt-2 text-2xl font-black">SR-DRAFT</h3>
@@ -768,16 +734,16 @@ export default function NewServiceRequestPage() {
                 </div>
 
                 <div className="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-4">
-                  <p className="mb-3 text-xs font-black uppercase tracking-[0.35em] text-slate-400">
-                    Prepared Metadata
-                  </p>
-
                   <div className="divide-y divide-slate-200 text-sm">
                     <div className="flex justify-between gap-4 py-3">
                       <span className="font-black text-slate-500">Title</span>
                       <span className="text-right font-black">
                         {requestTitle.trim() || "Pending"}
                       </span>
+                    </div>
+                    <div className="flex justify-between gap-4 py-3">
+                      <span className="font-black text-slate-500">Department</span>
+                      <span className="text-right font-black">{department}</span>
                     </div>
                     <div className="flex justify-between gap-4 py-3">
                       <span className="font-black text-slate-500">Category</span>
@@ -789,67 +755,42 @@ export default function NewServiceRequestPage() {
                     </div>
                     <div className="flex justify-between gap-4 py-3">
                       <span className="font-black text-slate-500">Related Record</span>
-                      <span className="text-right font-black">{relatedRecord}</span>
+                      <span className="text-right font-black">{selectedReference.id}</span>
                     </div>
                     <div className="flex justify-between gap-4 py-3">
-                      <span className="font-black text-slate-500">Evidence Note</span>
-                      <span className="text-right font-black">
-                        {evidenceNote.trim() ? "Prepared" : "Pending"}
-                      </span>
+                      <span className="font-black text-slate-500">Reference Type</span>
+                      <span className="text-right font-black">{selectedReference.type}</span>
                     </div>
                     <div className="flex justify-between gap-4 py-3">
-                      <span className="font-black text-slate-500">Requested Action</span>
+                      <span className="font-black text-slate-500">Attachments</span>
                       <span className="text-right font-black">
-                        {requestedAction.trim() ? "Prepared" : "Pending"}
+                        {attachmentNames.length > 0 ? `${attachmentNames.length} selected` : "None"}
                       </span>
                     </div>
                   </div>
                 </div>
 
                 <div className="mt-5 rounded-lg border border-[#ffb703] bg-[#fff7d6] p-4 text-sm font-black text-[#b45309]">
-                  {completedChecks}/{controlChecks.length} control checks prepared. Complete the
-                  missing fields before treating this as ready.
+                  {completedChecks}/{controlChecks.length} control checks prepared.
                 </div>
               </section>
 
-              <section className="rounded-xl border border-dashed border-slate-300 bg-white p-6 shadow-sm">
+              <section className="rounded-xl border border-dashed border-slate-300 bg-white p-5 shadow-sm sm:p-6">
                 <div className="flex items-start gap-4">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#020617] text-[#ffb703]">
                     <LockKeyhole size={24} />
                   </div>
                   <div>
-                    <h3 className="text-xl font-black uppercase tracking-[0.35em]">
+                    <h3 className="text-lg font-black uppercase tracking-[0.25em] sm:text-xl sm:tracking-[0.35em]">
                       Control Notes
                     </h3>
                     <ul className="mt-4 space-y-3 text-sm leading-7 text-slate-600">
                       <li>• Intake remains frontend-only in this phase.</li>
+                      <li>• Selected files are not uploaded or stored yet.</li>
                       <li>• No request ID is reserved or saved.</li>
-                      <li>• No attachment is uploaded or stored.</li>
                       <li>• No owner is actually assigned.</li>
-                      <li>
-                        • Restricted and third-party intake should receive separate role-based pages
-                        in a later phase.
-                      </li>
+                      <li>• Restricted and external intake pages should be separated later.</li>
                     </ul>
-                  </div>
-                </div>
-              </section>
-
-              <section className="rounded-xl border border-dashed border-slate-300 bg-white p-6 shadow-sm">
-                <div className="flex items-start gap-4">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#020617] text-[#ffb703]">
-                    <Database size={24} />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-black uppercase tracking-[0.35em]">
-                      Training Note
-                    </h3>
-                    <p className="mt-4 text-sm leading-7 text-slate-600">
-                      Service Requests should not become a dumping ground. A request should exist
-                      only when work needs routing, ownership, review, approval, recordkeeping,
-                      evidence tracking, restricted handling, or department action. Every request
-                      should create operational clarity instead of unnecessary work.
-                    </p>
                   </div>
                 </div>
               </section>
