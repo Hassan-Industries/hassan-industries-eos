@@ -1,5 +1,11 @@
+import { Suspense } from "react";
+
 import EGLPublicationsRegistryShell from "@/components/governance-library/EGLPublicationsRegistryShell";
 
 export default function PublicationsRegistryPage() {
-  return <EGLPublicationsRegistryShell />;
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-100" />}>
+      <EGLPublicationsRegistryShell />
+    </Suspense>
+  );
 }

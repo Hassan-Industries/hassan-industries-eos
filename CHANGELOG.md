@@ -664,3 +664,12 @@ Cleaned the EGL Dashboard recently updated publications navigation to use the Ne
 
 #### Result
 The EGL Dashboard no longer triggers the Next.js `no-html-link-for-pages` lint error for the View All Publications action.
+
+## HIEOS-IMP-006V-1: EGL Dashboard Registry Filter Hydration
+
+- Converted EGL dashboard stat cards into navigable routing cards.
+- Routed Certified Copies, Pending Review, and Pending Execution cards to their controlled EGL registry or queue pages.
+- Added query-parameter hydration to the Publications Registry.
+- Publications Registry now recognizes `?status=`, `?series=`, `?classification=`, `?search=`, `?q=`, `?type=`, and `?documentType=`.
+- Preserved neutral registry preview state until a user intentionally selects a record.
+- No backend records, workflow submissions, storage integrations, or authentication changes were introduced.

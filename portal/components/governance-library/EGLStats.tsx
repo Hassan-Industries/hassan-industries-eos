@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 import type { ElementType } from "react";
 import {
@@ -10,18 +8,18 @@ import {
   FileText,
 } from "lucide-react";
 
-type EGLStat = {
+type EGLStatCard = {
   label: string;
   value: string;
   href: string;
   icon: ElementType;
 };
 
-const stats: EGLStat[] = [
+const stats: EGLStatCard[] = [
   {
     label: "Active Publications",
     value: "241",
-    href: "/governance-library/publications",
+    href: "/governance-library/publications?status=AP",
     icon: BookOpen,
   },
   {
@@ -45,7 +43,7 @@ const stats: EGLStat[] = [
   {
     label: "Active Policies",
     value: "64",
-    href: "/governance-library/publications?type=Policy",
+    href: "/governance-library/publications?search=policy",
     icon: FileText,
   },
 ];
@@ -60,7 +58,7 @@ export default function EGLStats() {
           <Link
             key={stat.label}
             href={stat.href}
-            className="flex min-h-[78px] items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm transition hover:border-amber-500 hover:bg-amber-50 focus:outline-none focus:ring-2 focus:ring-amber-500"
+            className="group flex min-h-[78px] items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm transition hover:border-amber-500 hover:bg-amber-50"
           >
             <div>
               <p className="text-[11px] text-slate-500">{stat.label}</p>
@@ -69,7 +67,7 @@ export default function EGLStats() {
               </p>
             </div>
 
-            <Icon className="h-6 w-6 text-amber-500" />
+            <Icon className="h-6 w-6 text-amber-500 transition group-hover:scale-105" />
           </Link>
         );
       })}
