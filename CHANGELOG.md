@@ -588,3 +588,12 @@ Changes:
 
 Impact:
 Improves EGL navigation consistency and separates certified-copy registry review from certified-copy creation, while preserving frontend-only scope before backend certification generation, source-file handling, audit history, and Microsoft 365 / SharePoint integrations are introduced.
+
+### HIEOS-IMP-006Q: EGL Registers Hub & Dashboard Stat Navigation
+
+- Added a dedicated EGL Registers Hub at `/governance-library/registers`.
+- Updated EGL Quick Actions so `View Registers` opens the new registers hub.
+- Updated `Create Certified Copy` quick action to open the certified-copy creation shell.
+- Converted EGL dashboard stat cards into navigable dashboard controls.
+- Added direct navigation to Publications, Pending Review, Pending Execution, Certified Copies, and Active Policies.
+- Preserved frontend-only backend readiness language for later workflow, storage, authority, approval, and recordkeeping integration.
