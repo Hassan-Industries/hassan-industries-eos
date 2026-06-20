@@ -4,7 +4,6 @@ import Link from "next/link";
 import {
   ArrowLeft,
   BookOpen,
-  CheckCircle2,
   FileCheck2,
   History,
   ShieldCheck,

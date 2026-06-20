@@ -13,7 +13,7 @@ import {
 
 import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
-
+1
 const uploadSteps = [
   "Identify upload purpose",
   "Select publication series or related record",

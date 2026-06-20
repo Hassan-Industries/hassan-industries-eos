@@ -7,12 +7,10 @@ import {
   BookOpen,
   ClipboardList,
   Eye,
-  FileCheck2,
   FileText,
   Gavel,
   RefreshCcw,
   Search,
-  ShieldCheck,
 } from "lucide-react";
 
 import Sidebar from "@/components/layout/Sidebar";
