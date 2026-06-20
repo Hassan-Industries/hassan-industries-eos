@@ -673,3 +673,28 @@ The EGL Dashboard no longer triggers the Next.js `no-html-link-for-pages` lint e
 - Publications Registry now recognizes `?status=`, `?series=`, `?classification=`, `?search=`, `?q=`, `?type=`, and `?documentType=`.
 - Preserved neutral registry preview state until a user intentionally selects a record.
 - No backend records, workflow submissions, storage integrations, or authentication changes were introduced.
+
+## HIEOS-IMP-006W-1
+
+### EGL Dashboard Command Search Routing
+
+Status: Completed
+
+Summary:
+Converted the Enterprise Governance Library dashboard search bar into a controlled navigation command that routes users to the correct EGL registry, queue, hub, or filtered publications list.
+
+Changes:
+- Updated EGL dashboard search submission behavior.
+- Routed empty searches to the Publications Registry.
+- Routed publication-style searches to `/governance-library/publications?search=...`.
+- Routed registry terms to the EGL Registers Hub.
+- Routed forms/templates terms to the Forms & Templates Hub.
+- Routed certified-copy terms to the Certified Copies Registry.
+- Routed resolution terms to the Resolutions Registry.
+- Routed review and execution terms to their respective queue shells.
+- Routed upload/replacement terms to the Upload Document shell.
+- Preserved dashboard no-default-selection behavior.
+- Preserved frontend-only implementation scope.
+
+Impact:
+Improves EGL dashboard usability by making search operate as a command-navigation control instead of only filtering the recently updated publications table.
