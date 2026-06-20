@@ -151,14 +151,6 @@ export default function ServiceRequestsPage() {
               </Link>
 
               <Link
-                href="/service-requests/new"
-                className="inline-flex items-center gap-2 rounded-lg border border-slate-950 bg-slate-950 px-4 py-3 text-sm font-black text-white shadow-sm transition hover:bg-slate-800"
-              >
-                <Plus className="h-4 w-4 text-amber-400" />
-                Create Service Request
-              </Link>
-
-              <Link
                 href="/service-requests/queues"
                 className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-black text-slate-950 shadow-sm transition hover:border-amber-500 hover:bg-amber-50"
               >
