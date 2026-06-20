@@ -698,3 +698,26 @@ Changes:
 
 Impact:
 Improves EGL dashboard usability by making search operate as a command-navigation control instead of only filtering the recently updated publications table.
+
+
+## HIEOS-IMP-007A
+
+### Service Requests Desk Foundation
+
+Status: Completed
+
+Summary:
+Created the frontend foundation for the HIEOS Service Requests Desk as the universal intake and routing workspace for administrative, governance, treasury, records, document-control, certified-copy, and restricted HCA review requests.
+
+Changes:
+- Replaced the placeholder `/service-requests` route with a controlled Service Requests Desk.
+- Added frontend service request records with search, status filter, department filter, and selected-request preview behavior.
+- Added service request metrics for open intake, pending routing, restricted review, and total request records.
+- Added intentional no-default-selection behavior for request preview.
+- Added copy request ID control.
+- Added `/service-requests/new` as a frontend service request intake shell.
+- Added intake steps, control checklist, routing standard, backend readiness, and training notes.
+- Preserved frontend-only scope.
+
+Impact:
+Establishes Service Requests as the universal intake and routing desk for HIEOS before backend request submission, workflow routing, reviewer assignment, attachment handling, audit history, role permissions, and permanent recordkeeping are introduced.
