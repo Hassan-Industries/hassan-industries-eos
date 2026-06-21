@@ -773,3 +773,29 @@ Enhanced the Service Request intake workspace with controlled frontend preparati
 - Tested `/service-requests/queues/hcp-restricted-review`.
 - Confirmed controlled lookup and evidence controls update the draft package preview.
 - Confirmed no backend submission, storage, upload, authentication, assignment, notification, or approval logic was introduced.
+
+## HIEOS IMP-007F: SERVICE REQUEST ACTION WORKSPACE CONTROLS
+**Status:** Completed
+
+Added and stablized the Service Request Action Workspace for controlled frontend action handling on service request detail pages.
+
+### Changes:
+- Added frontend action workspace controls to service request detail records.
+- Added controlled action options for request routing, owner assignment, HCA review, pending routing, history review, related record opening, and request ID copying.
+- Added action preview behavior so selected actions display purpose, authority, next step, and future backend handoff notes before execution.
+- Added controlled service request side-panel alignment fixes for Service Request detail, intake, and queue workspaces.
+- Stabilized shared clipboard button behavior so custom action buttons and existing copy controls both compile and function correctly.
+- Preserved frontend-only implementation scope.
+- Confirmed no backend mutation, assignment, approval, notification, upload, routing, or authentication logic was introduced.
+
+### Validation
+- Ran npm run lint.
+- Ran npm run build.
+- Tested /service-requests.
+- Tested /service-requests/new.
+- Tested /service-requests/queues.
+- Tested service request detail routes such as /service-requests/SR-2026-001.
+- Confirmed Service Request action controls render correctly.
+- Confirmed Service Request pages align properly with the EOS sidebar layout.
+- Confirmed clipboard/copy request ID control compiles and remains functional.
+- Confirmed frontend-only scope remains intact.
