@@ -1,25 +1,18 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
-  AlertTriangle,
   ArrowLeft,
   CheckCircle2,
   ClipboardCheck,
   ClipboardList,
-  ExternalLink,
   FileText,
-  FolderOpen,
   History,
-  LockKeyhole,
   Route,
-  Send,
   ShieldCheck,
-  UserRoundCheck,
 } from "lucide-react";
 
-import Sidebar from "@/components/layout/Sidebar";
-import Topbar from "@/components/layout/Topbar";
-import CopyToClipboardButton from "@/components/governance-library/CopyToClipboardButton";
+import EOCPageShell from "@/components/layout/EOCPageShell";
 import {
   getServiceRequestById,
   serviceRequestRecords,
@@ -28,6 +21,8 @@ import {
   type ServiceRequestStatus,
   type ServiceRequestTimelineStatus,
 } from "@/data/serviceRequests";
+
+import ServiceRequestActionWorkspace from "./ServiceRequestActionWorkspace";
 
 type ServiceRequestDetailPageProps = {
   params: Promise<{
@@ -52,259 +47,220 @@ export default async function ServiceRequestDetailPage({
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-100 text-slate-950">
-      <Sidebar />
-
-      <div className="flex min-h-screen min-w-0 flex-1 flex-col">
-        <Topbar />
-
-        <main className="flex-1 px-5 py-4">
-          <div className="mx-auto max-w-[1500px] space-y-4">
-            <section className="rounded-xl border border-slate-950 bg-slate-950 p-6 text-white shadow-sm">
-              <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-                <div>
-                  <p className="text-[11px] font-black uppercase tracking-[0.5em] text-amber-400">
-                    Hassan Industries
-                  </p>
-                  <h1 className="mt-3 text-3xl font-black uppercase tracking-tight">
-                    Service Request Detail
-                  </h1>
-                  <p className="mt-3 max-w-5xl text-sm font-medium leading-6 text-white">
-                    Controlled request workspace for reviewing intake
-                    authority, routing stage, assigned ownership, related
-                    records, restricted-review handling, and future workflow
-                    actions.
-                  </p>
-                </div>
-
-                <div className="rounded-lg border border-amber-500 bg-slate-900 px-8 py-5 text-center">
-                  <p className="text-[11px] font-black uppercase tracking-[0.45em] text-white">
-                    Request Status
-                  </p>
-                  <p className="mt-3 text-2xl font-black text-amber-400">
-                    {request.status}
-                  </p>
-                  <p className="mt-1 text-xs font-semibold text-white">
-                    {request.stage}
-                  </p>
-                </div>
-              </div>
-            </section>
-
-            <nav className="flex flex-wrap items-center gap-3">
-              <Link
-                href="/service-requests"
-                className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-black text-slate-950 shadow-sm transition hover:border-amber-500 hover:bg-amber-50"
-              >
-                <ArrowLeft className="h-4 w-4 text-amber-500" />
-                Back to Service Requests Desk
-              </Link>
-
-              <Link
-                href="/dashboard"
-                className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-black text-slate-950 shadow-sm transition hover:border-amber-500 hover:bg-amber-50"
-              >
-                <FolderOpen className="h-4 w-4 text-amber-500" />
-                Dashboard
-              </Link>
-            </nav>
-
-            <p className="text-right text-[12px] font-black uppercase tracking-[0.45em] text-slate-400">
-              Controlled Request Workspace
+    <EOCPageShell>
+      <section className="rounded-xl bg-[#050816] p-6 text-white shadow-md sm:p-8">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_260px] lg:items-center">
+          <div>
+            <p className="text-[11px] font-black uppercase tracking-[0.55em] text-[#ffbf00]">
+              Hassan Industries
             </p>
+            <h1 className="mt-4 text-3xl font-black uppercase tracking-[-0.04em] sm:text-4xl">
+              Service Request Detail
+            </h1>
+            <p className="mt-4 max-w-5xl text-sm font-semibold leading-7 text-white">
+              Controlled request workspace for reviewing intake authority,
+              routing stage, assigned ownership, related records,
+              restricted-review handling, and frontend action controls.
+            </p>
+          </div>
 
-            <section className="grid gap-4 xl:grid-cols-[1fr_390px]">
-              <div className="space-y-4">
-                <RequestHeader request={request} />
+          <div className="rounded-lg border border-[#ffbf00] bg-white/5 p-5 text-center">
+            <p className="text-[11px] font-black uppercase tracking-[0.45em]">
+              Request Status
+            </p>
+            <p className="mt-4 text-3xl font-black text-[#ffbf00]">
+              {request.status}
+            </p>
+            <p className="mt-1 text-xs font-black">{request.stage}</p>
+          </div>
+        </div>
+      </section>
 
-                <section className="grid gap-4 lg:grid-cols-2">
-                  <InfoPanel
-                    icon={<ShieldCheck className="h-5 w-5 text-amber-400" />}
-                    title="Request Authority"
-                    rows={[
-                      ["Requester", request.requester],
-                      ["Department", request.department],
-                      ["Owner", request.owner],
-                      ["Assigned Queue", request.assignedQueue],
-                      ["Access Scope", request.accessScope],
-                      ["Retention", request.retention],
-                    ]}
-                  />
+      <nav className="mt-5 flex flex-wrap gap-3">
+        <Link
+          href="/service-requests"
+          className="inline-flex h-11 items-center gap-2 rounded-lg border border-[#c8d3df] bg-white px-4 text-sm font-black text-[#050816] shadow-sm transition hover:border-[#ff8a00] hover:bg-[#fffaf0]"
+        >
+          <ArrowLeft size={16} className="text-[#ff8a00]" />
+          Back to Service Requests Desk
+        </Link>
 
-                  <InfoPanel
-                    icon={<Route className="h-5 w-5 text-amber-400" />}
-                    title="Routing Metadata"
-                    rows={[
-                      ["Status", request.status],
-                      ["Priority", request.priority],
-                      ["Stage", request.stage],
-                      ["Due Date", request.dueDate],
-                      ["Intake Channel", request.intakeChannel],
-                      ["Restricted Review", request.restrictedReview ? "Yes" : "No"],
-                    ]}
-                  />
-                </section>
+        <Link
+          href="/service-requests/queues"
+          className="inline-flex h-11 items-center gap-2 rounded-lg border border-[#c8d3df] bg-white px-4 text-sm font-black text-[#050816] shadow-sm transition hover:border-[#ff8a00] hover:bg-[#fffaf0]"
+        >
+          <Route size={16} className="text-[#ff8a00]" />
+          Routing Queues
+        </Link>
 
-                <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-                  <div className="flex items-start gap-4">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-slate-950">
-                      <FileText className="h-5 w-5 text-amber-400" />
-                    </div>
+        <Link
+          href="/"
+          className="inline-flex h-11 items-center gap-2 rounded-lg border border-[#c8d3df] bg-white px-4 text-sm font-black text-[#050816] shadow-sm transition hover:border-[#ff8a00] hover:bg-[#fffaf0]"
+        >
+          <ClipboardList size={16} className="text-[#ff8a00]" />
+          Dashboard
+        </Link>
+      </nav>
 
-                    <div className="min-w-0 flex-1">
-                      <h2 className="text-lg font-black uppercase tracking-[0.35em] text-slate-950">
-                        Request Relationships
-                      </h2>
-                      <p className="mt-2 text-sm leading-6 text-slate-600">
-                        Related source record, service category, requested
-                        action, and record linkage for future workflow routing.
-                      </p>
+      <p className="mt-7 text-right text-[11px] font-black uppercase tracking-[0.55em] text-[#94a3b8]">
+        Controlled Request Workspace
+      </p>
 
-                      <div className="mt-5 grid gap-3 md:grid-cols-2">
-                        <RelationshipCard
-                          label="Related Record"
-                          value={request.relatedRecord}
-                          subvalue={request.relatedRecordTitle}
-                        />
-                        <RelationshipCard
-                          label="Related Record Type"
-                          value={request.relatedRecordType}
-                          subvalue={request.category}
-                        />
-                        <RelationshipCard
-                          label="Requested Action"
-                          value={request.requestedAction}
-                          subvalue={request.classification}
-                        />
-                        <RelationshipCard
-                          label="Routing Note"
-                          value={request.routingNote}
-                          subvalue="Future routing rules should attach backend workflow authority."
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </section>
+      <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
+        <div className="min-w-0 space-y-5">
+          <RequestHeader request={request} />
 
-                <section className="grid gap-4 lg:grid-cols-2">
-                  <ChecklistPanel request={request} />
-                  <TimelinePanel request={request} />
-                </section>
+          <div className="grid gap-5 lg:grid-cols-2">
+            <InfoPanel
+              icon={<ShieldCheck size={26} />}
+              title="Request Authority"
+              rows={[
+                ["Requester", request.requester],
+                ["Department", request.department],
+                ["Owner", request.owner],
+                ["Assigned Queue", request.assignedQueue],
+                ["Access Scope", request.accessScope],
+                ["Retention", request.retention],
+              ]}
+            />
 
-                <section className="rounded-lg border border-dashed border-slate-300 bg-white p-5 shadow-sm">
-                  <div className="flex items-start gap-4">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-slate-950">
-                      <LockKeyhole className="h-5 w-5 text-amber-400" />
-                    </div>
-                    <div>
-                      <h2 className="text-lg font-black uppercase tracking-[0.35em] text-slate-950">
-                        Backend Readiness
-                      </h2>
-                      <p className="mt-3 text-sm leading-6 text-slate-600">
-                        This service request detail workspace is frontend-only.
-                        Later backend phases should connect it to authenticated
-                        requester identity, role-based permissions, comments,
-                        attachments, approval routing, assignment history,
-                        status transitions, escalation paths, and permanent
-                        service request records.
-                      </p>
-                    </div>
-                  </div>
-                </section>
+            <InfoPanel
+              icon={<Route size={26} />}
+              title="Routing Metadata"
+              rows={[
+                ["Status", request.status],
+                ["Priority", request.priority],
+                ["Stage", request.stage],
+                ["Due Date", request.dueDate],
+                ["Intake Channel", request.intakeChannel],
+                ["Restricted Review", request.restrictedReview ? "Yes" : "No"],
+              ]}
+            />
+          </div>
+
+          <section className="rounded-xl border border-[#d8e1ea] bg-white p-6 shadow-sm">
+            <div className="flex items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#050816] text-[#ffbf00]">
+                <FileText size={24} />
               </div>
 
-              <aside className="space-y-4">
-                <RequestActionsPanel request={request} />
+              <div>
+                <p className="text-[11px] font-black uppercase tracking-[0.45em] text-[#94a3b8]">
+                  Request Relationships
+                </p>
+                <h2 className="mt-2 text-2xl font-black">
+                  Related Record & Requested Action
+                </h2>
+                <p className="mt-2 text-sm leading-7 text-[#33445c]">
+                  Related source record, service category, requested action, and
+                  record linkage for future workflow routing.
+                </p>
+              </div>
+            </div>
 
-                <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-                  <div className="flex items-start gap-4">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-slate-950">
-                      <AlertTriangle className="h-5 w-5 text-amber-400" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-black uppercase tracking-[0.35em] text-slate-950">
-                        Control Notes
-                      </h3>
-                      <ul className="mt-4 space-y-3 text-sm leading-6 text-slate-600">
-                        <li>• Request detail is frontend-only in this phase.</li>
-                        <li>• No backend assignment is created yet.</li>
-                        <li>• No approval route is enforced yet.</li>
-                        <li>• No comments or attachments are saved yet.</li>
-                        <li>
-                          • Restricted HCA review controls require future
-                          role-based access.
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                </section>
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              <RelationshipCard
+                label="Related Record"
+                value={request.relatedRecord}
+                subvalue={request.relatedRecordTitle}
+              />
+              <RelationshipCard
+                label="Related Record Type"
+                value={request.relatedRecordType}
+                subvalue={request.category}
+              />
+              <RelationshipCard
+                label="Requested Action"
+                value={request.requestedAction}
+                subvalue={request.classification}
+              />
+              <RelationshipCard
+                label="Routing Note"
+                value={request.routingNote}
+                subvalue="Future routing rules should attach backend workflow authority."
+              />
+            </div>
+          </section>
 
-                <section className="rounded-lg border border-dashed border-slate-300 bg-white p-5 shadow-sm">
-                  <div className="flex items-start gap-4">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-slate-950">
-                      <UserRoundCheck className="h-5 w-5 text-amber-400" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-black uppercase tracking-[0.35em] text-slate-950">
-                        Training Note
-                      </h3>
-                      <p className="mt-4 text-sm leading-6 text-slate-600">
-                        Employees and executives should treat each service
-                        request detail page as the controlled review workspace
-                        for request routing, ownership confirmation, related
-                        record lookup, escalation, and future audit history.
-                      </p>
-                    </div>
-                  </div>
-                </section>
-              </aside>
-            </section>
+          <div className="grid gap-5 lg:grid-cols-2">
+            <ChecklistPanel request={request} />
+            <TimelinePanel request={request} />
           </div>
-        </main>
+        </div>
+
+        <aside className="min-w-0 space-y-5">
+          <ServiceRequestActionWorkspace request={request} />
+
+          <section className="rounded-xl border border-dashed border-[#c8d3df] bg-white p-6 shadow-sm">
+            <PanelTitle
+              icon={<ClipboardCheck size={24} />}
+              eyebrow="Control Notes"
+              title="Frontend Only"
+            />
+            <ul className="mt-5 space-y-3 text-sm leading-7 text-[#33445c]">
+              <li>• Request detail is frontend-only in this phase.</li>
+              <li>• No backend assignment is created yet.</li>
+              <li>• No approval route is enforced yet.</li>
+              <li>• No comments or attachments are saved yet.</li>
+              <li>
+                • Restricted HCA/HCP review controls require future role-based
+                access.
+              </li>
+            </ul>
+          </section>
+
+          <section className="rounded-xl border border-dashed border-[#c8d3df] bg-white p-6 shadow-sm">
+            <PanelTitle
+              icon={<History size={24} />}
+              eyebrow="Training Note"
+              title="Operational Use"
+            />
+            <p className="mt-5 text-sm leading-7 text-[#33445c]">
+              Employees and executives should treat each service request detail
+              page as the controlled review workspace for request routing,
+              ownership confirmation, related record lookup, escalation, action
+              selection, and future audit history.
+            </p>
+          </section>
+        </aside>
       </div>
-    </div>
+    </EOCPageShell>
   );
 }
 
 function RequestHeader({ request }: { request: ServiceRequestRecord }) {
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+    <section className="rounded-xl border border-[#d8e1ea] bg-white p-6 shadow-sm">
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-4">
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-slate-950">
-            <ClipboardList className="h-7 w-7 text-amber-400" />
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#050816] text-[#ffbf00]">
+            <ClipboardList size={24} />
           </div>
 
           <div>
-            <p className="text-[11px] font-black uppercase tracking-[0.45em] text-slate-400">
+            <p className="text-[11px] font-black uppercase tracking-[0.45em] text-[#94a3b8]">
               Service Request Record
             </p>
-            <h2 className="mt-2 text-3xl font-black text-slate-950">
-              {request.id}
-            </h2>
-            <p className="mt-2 text-base font-black text-slate-950">
-              {request.title}
-            </p>
-            <p className="mt-3 max-w-4xl text-sm leading-6 text-slate-600">
+            <h2 className="mt-2 text-3xl font-black">{request.id}</h2>
+            <p className="mt-2 text-lg font-black">{request.title}</p>
+            <p className="mt-4 max-w-4xl text-sm leading-7 text-[#33445c]">
               {request.summary}
             </p>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex shrink-0 flex-wrap gap-2">
           <span
-            className={[
-              "rounded-md px-3 py-1 text-xs font-black",
-              getStatusPillClass(request.status),
-            ].join(" ")}
+            className={`rounded-md px-3 py-2 text-xs font-black ${getStatusPillClass(
+              request.status,
+            )}`}
           >
             {request.status}
           </span>
           <span
-            className={[
-              "rounded-md px-3 py-1 text-xs font-black",
-              getPriorityPillClass(request.priority),
-            ].join(" ")}
+            className={`rounded-md px-3 py-2 text-xs font-black ${getPriorityPillClass(
+              request.priority,
+            )}`}
           >
             {request.priority}
           </span>
@@ -319,22 +275,15 @@ function InfoPanel({
   title,
   rows,
 }: {
-  icon: React.ReactNode;
+  icon: ReactNode;
   title: string;
   rows: [string, string][];
 }) {
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="flex items-center gap-4">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-slate-950">
-          {icon}
-        </div>
-        <h2 className="text-lg font-black uppercase tracking-[0.35em] text-slate-950">
-          {title}
-        </h2>
-      </div>
+    <section className="rounded-xl border border-[#d8e1ea] bg-white p-6 shadow-sm">
+      <PanelTitle icon={icon} eyebrow="Controlled Metadata" title={title} />
 
-      <div className="mt-5">
+      <div className="mt-6 divide-y divide-[#d8e1ea]">
         {rows.map(([label, value]) => (
           <DetailRow key={label} label={label} value={value} />
         ))}
@@ -353,36 +302,35 @@ function RelationshipCard({
   subvalue: string;
 }) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-      <p className="text-[11px] font-black uppercase tracking-[0.35em] text-slate-500">
+    <div className="rounded-lg border border-[#d8e1ea] bg-[#f8fafc] p-5">
+      <p className="text-[11px] font-black uppercase tracking-[0.4em] text-[#94a3b8]">
         {label}
       </p>
-      <p className="mt-3 text-sm font-black text-slate-950">{value}</p>
-      <p className="mt-2 text-xs leading-5 text-slate-500">{subvalue}</p>
+      <p className="mt-3 text-sm font-black text-[#050816]">{value}</p>
+      <p className="mt-2 text-xs font-semibold leading-6 text-[#62708a]">
+        {subvalue}
+      </p>
     </div>
   );
 }
 
 function ChecklistPanel({ request }: { request: ServiceRequestRecord }) {
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="flex items-center gap-4">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-slate-950">
-          <ClipboardCheck className="h-5 w-5 text-amber-400" />
-        </div>
-        <h2 className="text-lg font-black uppercase tracking-[0.35em] text-slate-950">
-          Control Checklist
-        </h2>
-      </div>
+    <section className="rounded-xl border border-[#d8e1ea] bg-white p-6 shadow-sm">
+      <PanelTitle
+        icon={<CheckCircle2 size={24} />}
+        eyebrow="Control Checklist"
+        title="Request Readiness"
+      />
 
-      <div className="mt-5 space-y-3">
+      <div className="mt-6 space-y-3">
         {request.checklist.map((item) => (
           <div
             key={item}
-            className="flex items-center gap-3 rounded-lg border border-slate-200 bg-white px-4 py-3"
+            className="flex items-center gap-3 rounded-lg border border-[#d8e1ea] bg-white p-4 text-sm font-black"
           >
-            <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-500" />
-            <p className="text-sm font-bold text-slate-950">{item}</p>
+            <CheckCircle2 size={16} className="text-[#ff8a00]" />
+            {item}
           </div>
         ))}
       </div>
@@ -392,45 +340,33 @@ function ChecklistPanel({ request }: { request: ServiceRequestRecord }) {
 
 function TimelinePanel({ request }: { request: ServiceRequestRecord }) {
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="flex items-center gap-4">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-slate-950">
-          <History className="h-5 w-5 text-amber-400" />
-        </div>
-        <h2 className="text-lg font-black uppercase tracking-[0.35em] text-slate-950">
-          Routing Timeline
-        </h2>
-      </div>
+    <section className="rounded-xl border border-[#d8e1ea] bg-white p-6 shadow-sm">
+      <PanelTitle
+        icon={<History size={24} />}
+        eyebrow="Routing Timeline"
+        title="Request History"
+      />
 
-      <div className="mt-5 space-y-3">
+      <div className="mt-6 space-y-3">
         {request.timeline.map((item) => (
           <div
             key={`${item.label}-${item.status}`}
-            className="rounded-lg border border-slate-200 bg-slate-50 p-4"
+            className="rounded-lg border border-[#d8e1ea] bg-[#f8fafc] p-4"
           >
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-sm font-black text-slate-950">
-                  {item.label}
-                </p>
-                <p className="mt-2 text-xs leading-5 text-slate-500">
-                  {item.note}
-                </p>
-              </div>
-
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <p className="text-sm font-black">{item.label}</p>
               <span
-                className={[
-                  "shrink-0 rounded-md px-3 py-1 text-[11px] font-black",
-                  getTimelinePillClass(item.status),
-                ].join(" ")}
+                className={`rounded-md px-3 py-1 text-xs font-black ${getTimelinePillClass(
+                  item.status,
+                )}`}
               >
                 {item.status}
               </span>
             </div>
-
-            <p className="mt-3 text-[11px] font-black uppercase tracking-[0.25em] text-slate-400">
+            <p className="mt-2 text-xs font-black uppercase tracking-[0.35em] text-[#94a3b8]">
               {item.date}
             </p>
+            <p className="mt-2 text-sm leading-6 text-[#33445c]">{item.note}</p>
           </div>
         ))}
       </div>
@@ -438,89 +374,35 @@ function TimelinePanel({ request }: { request: ServiceRequestRecord }) {
   );
 }
 
-function RequestActionsPanel({ request }: { request: ServiceRequestRecord }) {
+function PanelTitle({
+  icon,
+  eyebrow,
+  title,
+}: {
+  icon: ReactNode;
+  eyebrow: string;
+  title: string;
+}) {
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-      <h2 className="text-lg font-black uppercase tracking-[0.35em] text-slate-950">
-        Request Actions
-      </h2>
-      <p className="mt-2 text-sm leading-6 text-slate-600">
-        Frontend controls prepared for future routing, assignment, review,
-        escalation, attachment, and recordkeeping workflows.
-      </p>
-
-      <div className="mt-5 space-y-2">
-        <CopyToClipboardButton
-          value={request.id}
-          label="Copy Request ID"
-          copiedLabel="Request ID Copied"
-        />
-
-        <Link
-          href={request.relatedRecordHref}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 py-3 text-sm font-black text-white transition hover:bg-slate-800"
-        >
-          <ExternalLink className="h-4 w-4 text-amber-400" />
-          Open Related Record
-        </Link>
-
-        <button
-          type="button"
-          className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-black text-slate-950 transition hover:border-amber-500 hover:bg-amber-50"
-        >
-          <Route className="h-4 w-4 text-amber-500" />
-          Route Request
-        </button>
-
-        <button
-          type="button"
-          className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-black text-slate-950 transition hover:border-amber-500 hover:bg-amber-50"
-        >
-          <UserRoundCheck className="h-4 w-4 text-amber-500" />
-          Assign Owner
-        </button>
-
-        <button
-          type="button"
-          className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-black text-slate-950 transition hover:border-amber-500 hover:bg-amber-50"
-        >
-          <ShieldCheck className="h-4 w-4 text-amber-500" />
-          Request HCA Review
-        </button>
-
-        <button
-          type="button"
-          className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-black text-slate-950 transition hover:border-amber-500 hover:bg-amber-50"
-        >
-          <Send className="h-4 w-4 text-amber-500" />
-          Mark Pending Routing
-        </button>
-
-        <button
-          type="button"
-          className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-black text-slate-950 transition hover:border-amber-500 hover:bg-amber-50"
-        >
-          <History className="h-4 w-4 text-amber-500" />
-          View Request History
-        </button>
-
-        <Link
-          href="/service-requests"
-          className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-black text-slate-950 transition hover:border-amber-500 hover:bg-amber-50"
-        >
-          <ArrowLeft className="h-4 w-4 text-amber-500" />
-          Return to Service Requests Desk
-        </Link>
+    <div className="flex items-start gap-4">
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#050816] text-[#ffbf00]">
+        {icon}
       </div>
-    </section>
+      <div>
+        <p className="text-[11px] font-black uppercase tracking-[0.45em] text-[#94a3b8]">
+          {eyebrow}
+        </p>
+        <h2 className="mt-2 text-2xl font-black">{title}</h2>
+      </div>
+    </div>
   );
 }
 
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-start justify-between gap-4 border-b border-slate-200 py-3 text-sm">
-      <span className="font-bold text-slate-500">{label}</span>
-      <span className="text-right font-black text-slate-950">{value}</span>
+    <div className="flex justify-between gap-4 py-3 text-sm">
+      <span className="font-bold text-[#62708a]">{label}</span>
+      <span className="text-right font-black text-[#050816]">{value}</span>
     </div>
   );
 }
@@ -564,8 +446,8 @@ function getTimelinePillClass(status: ServiceRequestTimelineStatus) {
     case "Restricted":
       return "bg-rose-100 text-rose-700";
     case "Pending":
-      return "bg-slate-100 text-slate-600";
+      return "bg-slate-100 text-slate-700";
     default:
-      return "bg-slate-100 text-slate-600";
+      return "bg-slate-100 text-slate-700";
   }
 }

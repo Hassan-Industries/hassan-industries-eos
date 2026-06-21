@@ -1,18 +1,26 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useState } from "react";
 import { Check, Copy } from "lucide-react";
 
 interface CopyToClipboardButtonProps {
   value: string;
-  label: string;
+  label?: string;
   copiedLabel?: string;
+  className?: string;
+  children?: ReactNode;
 }
+
+const defaultButtonClassName =
+  "flex h-12 w-full items-center justify-center gap-2 rounded-lg border border-[#c8d3df] bg-white px-4 text-sm font-black text-[#050816] transition hover:border-[#ff8a00] hover:text-[#ff8a00]";
 
 export default function CopyToClipboardButton({
   value,
-  label,
+  label = "Copy",
   copiedLabel = "Copied",
+  className,
+  children,
 }: CopyToClipboardButtonProps) {
   const [copied, setCopied] = useState(false);
 
@@ -24,35 +32,39 @@ export default function CopyToClipboardButton({
         fallbackCopy(value);
       }
 
-      setCopied(true);
-
-      window.setTimeout(() => {
-        setCopied(false);
-      }, 1800);
+      showCopiedState();
     } catch {
       fallbackCopy(value);
-
-      setCopied(true);
-
-      window.setTimeout(() => {
-        setCopied(false);
-      }, 1800);
+      showCopiedState();
     }
+  }
+
+  function showCopiedState() {
+    setCopied(true);
+
+    window.setTimeout(() => {
+      setCopied(false);
+    }, 1800);
   }
 
   return (
     <button
       type="button"
       onClick={handleCopy}
-      className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-xs font-bold text-slate-950 transition hover:border-amber-500 hover:bg-amber-50"
+      className={className ?? defaultButtonClassName}
+      aria-label={copied ? copiedLabel : label}
+      title={copied ? copiedLabel : label}
     >
-      {copied ? (
-        <Check className="h-4 w-4 text-emerald-600" />
-      ) : (
-        <Copy className="h-4 w-4 text-amber-600" />
+      {children ?? (
+        <>
+          {copied ? (
+            <Check size={16} className="text-emerald-600" />
+          ) : (
+            <Copy size={16} className="text-[#ff8a00]" />
+          )}
+          <span>{copied ? copiedLabel : label}</span>
+        </>
       )}
-
-      {copied ? copiedLabel : label}
     </button>
   );
 }

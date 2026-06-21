@@ -1,32 +1,24 @@
 import { Suspense } from "react";
-import Sidebar from "@/components/layout/Sidebar";
-import Topbar from "@/components/layout/Topbar";
+
+import ServiceRequestWorkspaceFrame from "@/components/service-requests/ServiceRequestWorkspaceFrame";
 import ServiceRequestIntakeClient from "./ServiceRequestIntakeClient";
 
 function ServiceRequestIntakeLoading() {
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-      <p className="text-sm font-black text-slate-500">
-        Loading service request intake...
+    <div className="mx-auto max-w-[1680px] rounded-xl border border-[#d8e1ea] bg-white p-8 shadow-sm">
+      <p className="text-sm font-black uppercase tracking-[0.35em] text-[#94a3b8]">
+        Loading Service Request Intake
       </p>
-    </section>
+    </div>
   );
 }
 
 export default function NewServiceRequestPage() {
   return (
-    <div className="flex min-h-screen bg-slate-100">
-      <Sidebar />
-
-      <div className="flex min-h-screen min-w-0 flex-1 flex-col bg-slate-100">
-        <Topbar />
-
-        <main className="flex-1 overflow-x-hidden bg-slate-100 p-4 sm:p-5 lg:p-6">
-          <Suspense fallback={<ServiceRequestIntakeLoading />}>
-            <ServiceRequestIntakeClient />
-          </Suspense>
-        </main>
-      </div>
-    </div>
+    <ServiceRequestWorkspaceFrame>
+      <Suspense fallback={<ServiceRequestIntakeLoading />}>
+        <ServiceRequestIntakeClient />
+      </Suspense>
+    </ServiceRequestWorkspaceFrame>
   );
 }
