@@ -18,11 +18,38 @@ export type ServiceRequestQueueStatus =
   | "Department Queue"
   | "Restricted Queue";
 
+export type ServiceRequestActionId =
+  | "route-request"
+  | "assign-owner"
+  | "request-hca-review"
+  | "mark-pending-routing"
+  | "view-request-history"
+  | "open-related-record";
+
+export type ServiceRequestActionTone =
+  | "default"
+  | "routing"
+  | "review"
+  | "restricted"
+  | "history"
+  | "record";
+
 export type ServiceRequestTimelineItem = {
   label: string;
   status: ServiceRequestTimelineStatus;
   date: string;
   note: string;
+};
+
+export type ServiceRequestActionControl = {
+  id: ServiceRequestActionId;
+  label: string;
+  purpose: string;
+  authority: string;
+  nextStep: string;
+  controlNote: string;
+  timelineLabel: string;
+  tone: ServiceRequestActionTone;
 };
 
 export type ServiceRequestRecord = {
@@ -89,8 +116,7 @@ export const serviceRequestRecords: ServiceRequestRecord[] = [
     routingNote:
       "Route through HCA document-control review before publication numbering, approval, or repository filing.",
     relatedRecord: "HI-ADM-001",
-    relatedRecordTitle:
-      "Enterprise Administration & Enterprise Services Manual",
+    relatedRecordTitle: "Enterprise Administration & Enterprise Services Manual",
     relatedRecordType: "Publication",
     relatedRecordHref: "/governance-library/publications/HI-ADM-001",
     intakeChannel: "Internal EOS Intake",
@@ -161,8 +187,7 @@ export const serviceRequestRecords: ServiceRequestRecord[] = [
     assignedQueue: "Corporate Records Review",
     routingQueueId: "corporate-records-review",
     accessScope: "Corporate Records + HCA",
-    requestedAction:
-      "Verify certification authority and prepare certified-copy issuance.",
+    requestedAction: "Verify certification authority and prepare certified-copy issuance.",
     submittedDate: "2026-06-20",
     lastUpdated: "2026-06-20",
     retention: "Permanent",
@@ -354,8 +379,7 @@ export const serviceRequestRecords: ServiceRequestRecord[] = [
     assignedQueue: "Administration Desk",
     routingQueueId: "administration-desk",
     accessScope: "Administration + Assigned Owner",
-    requestedAction:
-      "Clarify workflow and determine whether escalation is required.",
+    requestedAction: "Clarify workflow and determine whether escalation is required.",
     submittedDate: "2026-06-20",
     lastUpdated: "2026-06-20",
     retention: "Operational",
@@ -730,6 +754,94 @@ export function getServiceRequestSearchText(request: ServiceRequestRecord) {
     .filter(Boolean)
     .join(" ")
     .toLowerCase();
+}
+
+export function getServiceRequestActionControls(
+  request: ServiceRequestRecord,
+): ServiceRequestActionControl[] {
+  const restrictedAuthority = request.restrictedReview
+    ? `${request.owner} + Executive Authorization`
+    : `${request.owner} + HCA Review`;
+
+  const relatedRecordLabel =
+    request.relatedRecord === "N/A"
+      ? "No related record selected."
+      : `${request.relatedRecord} — ${request.relatedRecordTitle}`;
+
+  return [
+    {
+      id: "route-request",
+      label: "Route Request",
+      purpose: `Prepare ${request.id} for routing into the ${request.assignedQueue} queue.`,
+      authority: `${request.department} / ${request.owner}`,
+      nextStep:
+        "Confirm the queue, stage, classification, and routing note before backend routing is introduced.",
+      controlNote:
+        "Frontend-only control. This does not change request status, assign a queue, notify staff, or create a backend workflow.",
+      timelineLabel: "Routing review prepared",
+      tone: "routing",
+    },
+    {
+      id: "assign-owner",
+      label: "Assign Owner",
+      purpose: `Preview ownership assignment for ${request.id} without changing the record.`,
+      authority: `${request.owner} ownership lane`,
+      nextStep:
+        "Confirm whether the listed owner is correct, whether an individual assignee is needed, and whether the matter requires escalation.",
+      controlNote:
+        "Frontend-only control. No person, group, queue, or department is actually assigned in this phase.",
+      timelineLabel: "Owner assignment prepared",
+      tone: "default",
+    },
+    {
+      id: "request-hca-review",
+      label: "Request HCA Review",
+      purpose: `Prepare document-control, governance, authority, or restricted-review handling for ${request.id}.`,
+      authority: restrictedAuthority,
+      nextStep:
+        "Confirm whether HCA review is required before routing, execution, publication, certification, or recordkeeping.",
+      controlNote:
+        "Frontend-only control. HCA is not notified and no restricted role-based review is created yet.",
+      timelineLabel: "HCA review path prepared",
+      tone: request.restrictedReview ? "restricted" : "review",
+    },
+    {
+      id: "mark-pending-routing",
+      label: "Mark Pending Routing",
+      purpose: `Preview a pending-routing state for ${request.id} when ownership or authority is not final.`,
+      authority: "Service Request Desk / Authorized Routing Owner",
+      nextStep:
+        "Use this only when the request is not ready for owner action and needs intake clarification first.",
+      controlNote:
+        "Frontend-only control. The record status remains unchanged until backend status transitions are introduced.",
+      timelineLabel: "Pending routing note prepared",
+      tone: "routing",
+    },
+    {
+      id: "view-request-history",
+      label: "View Request History",
+      purpose: `Review the existing timeline and future audit-history path for ${request.id}.`,
+      authority: "Service Request Desk / Records Control",
+      nextStep:
+        "Use the timeline to understand what has already happened, what is current, and what remains pending.",
+      controlNote:
+        "Frontend-only control. Timeline entries are sample/static and do not represent a saved audit log yet.",
+      timelineLabel: "History reviewed",
+      tone: "history",
+    },
+    {
+      id: "open-related-record",
+      label: "Open Related Record",
+      purpose: `Review the related record reference for ${request.id}: ${relatedRecordLabel}`,
+      authority: `${request.department} + Records / Governance Authority`,
+      nextStep:
+        "Open the related record only to verify source authority, context, record relationship, or filing location.",
+      controlNote:
+        "Frontend-only navigation. Opening a related record does not attach, certify, replace, or file anything.",
+      timelineLabel: "Related record lookup prepared",
+      tone: "record",
+    },
+  ];
 }
 
 function normalizeQueueLookup(value: string) {

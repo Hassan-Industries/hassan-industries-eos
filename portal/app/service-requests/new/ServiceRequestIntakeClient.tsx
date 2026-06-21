@@ -5,7 +5,6 @@ import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
-  CalendarDays,
   CheckCircle2,
   ClipboardList,
   Copy,
@@ -17,6 +16,7 @@ import {
   ShieldCheck,
   SlidersHorizontal,
 } from "lucide-react";
+
 import {
   getServiceRequestQueueById,
   serviceRequestQueues,
@@ -35,9 +35,6 @@ type RelatedRecordOption = {
   id: string;
   label: string;
   type: string;
-  departments: string[];
-  categories: string[];
-  classifications: string[];
 };
 
 type QueueDefault = {
@@ -98,7 +95,11 @@ const classificationOptions = [
   "Training / Administrative",
 ];
 
-const priorityOptions: ServiceRequestPriority[] = ["Normal", "High", "Restricted"];
+const priorityOptions: ServiceRequestPriority[] = [
+  "Normal",
+  "High",
+  "Restricted",
+];
 
 const intakeChannelOptions: IntakeChannel[] = [
   "Internal EOS Intake",
@@ -236,16 +237,13 @@ function getRelatedRecordOptions(
   department: string,
   category: string,
   classification: string,
-) {
+): RelatedRecordOption[] {
   const options = new Map<string, RelatedRecordOption>();
 
   options.set("N/A", {
     id: "N/A",
     label: "N/A — No existing record selected",
     type: "None",
-    departments: departmentOptions,
-    categories: categoryOptions,
-    classifications: classificationOptions,
   });
 
   serviceRequestRecords.forEach((request) => {
@@ -267,9 +265,6 @@ function getRelatedRecordOptions(
       id: relatedRecordId,
       label: `${relatedRecordId} — ${request.relatedRecordTitle}`,
       type: request.relatedRecordType,
-      departments: [request.department],
-      categories: [request.category],
-      classifications: [request.classification],
     });
   });
 
@@ -284,48 +279,10 @@ function labelClass() {
   return "mb-2 block text-[11px] font-black uppercase tracking-[0.35em] text-[#64748b]";
 }
 
-function PanelRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-start justify-between gap-4 border-b border-slate-200 py-3 last:border-b-0">
-      <span className="text-sm font-bold text-[#62708a]">{label}</span>
-      <span className="max-w-[210px] text-right text-sm font-black text-[#050816]">
-        {value}
-      </span>
-    </div>
-  );
-}
-
-function ActionButton({
-  children,
-  onClick,
-  primary = false,
-}: {
-  children: React.ReactNode;
-  onClick?: () => void;
-  primary?: boolean;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={
-        primary
-          ? "flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#050816] px-4 text-sm font-black text-white transition hover:bg-[#111827]"
-          : "flex h-12 w-full items-center justify-center gap-2 rounded-lg border border-[#c8d3df] bg-white px-4 text-sm font-black text-[#050816] transition hover:border-[#ff8a00]"
-      }
-    >
-      {children}
-    </button>
-  );
-}
-
 export default function ServiceRequestIntakeClient() {
   const searchParams = useSearchParams();
   const queueParam = searchParams.get("queue") ?? searchParams.get("queueId");
-
-  const startingQueue =
-    getServiceRequestQueueById(queueParam ?? "") ?? fallbackQueue();
-
+  const startingQueue = getServiceRequestQueueById(queueParam ?? "") ?? fallbackQueue();
   const startingDefaults = getQueueDefault(startingQueue);
 
   const [requestTitle, setRequestTitle] = useState("");
@@ -508,6 +465,7 @@ export default function ServiceRequestIntakeClient() {
       `Priority: ${priority}`,
       `Intake Channel: ${intakeChannel}`,
       `Related Record: ${effectiveRelatedRecord}`,
+      `Reference Type: ${selectedRelatedRecord?.type ?? "None"}`,
       `Requested Action: ${requestedAction}`,
       `Recommended Queue: ${recommendedQueue.title}`,
       `Queue Owner: ${recommendedQueue.owner}`,
@@ -572,28 +530,28 @@ export default function ServiceRequestIntakeClient() {
   const completedChecks = controlChecks.filter((check) => check.complete).length;
 
   return (
-    <div className="mx-auto w-full max-w-none space-y-6">
-      <section className="rounded-xl border border-slate-200 bg-[#050816] p-6 text-white shadow-sm sm:p-8">
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_260px] lg:items-center">
-          <div className="min-w-0">
-            <p className="mb-4 text-xs font-black uppercase tracking-[0.55em] text-[#ffbf00]">
+    <div className="mx-auto max-w-[1680px] space-y-6">
+      <section className="rounded-xl bg-[#050816] p-6 text-white shadow-sm lg:p-8">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="text-[11px] font-black uppercase tracking-[0.45em] text-[#ffbf00]">
               Hassan Industries
             </p>
-            <h1 className="text-3xl font-black uppercase tracking-tight sm:text-4xl">
+            <h1 className="mt-4 text-3xl font-black uppercase tracking-tight lg:text-4xl">
               Create Service Request
             </h1>
-            <p className="mt-4 max-w-5xl text-sm font-bold leading-7 text-white">
+            <p className="mt-4 max-w-5xl text-sm font-semibold leading-7 text-white">
               Controlled frontend intake workspace for preparing request
               metadata, routing recommendation, classification, file
               attachments, and future workflow handoff.
             </p>
           </div>
 
-          <div className="rounded-lg border border-[#ffbf00] bg-white/5 p-5 text-center">
-            <p className="text-xs font-black uppercase tracking-[0.45em] text-white">
+          <div className="rounded-lg border border-[#ffbf00] bg-[#101827] px-8 py-5 text-center">
+            <p className="text-[11px] font-black uppercase tracking-[0.45em] text-white">
               Intake Status
             </p>
-            <p className="mt-4 text-3xl font-black text-[#ffbf00]">Draft</p>
+            <p className="mt-3 text-3xl font-black text-[#ffbf00]">Draft</p>
             <p className="mt-1 text-xs font-black text-white">
               Frontend Preparation
             </p>
@@ -601,48 +559,48 @@ export default function ServiceRequestIntakeClient() {
         </div>
       </section>
 
-      <nav className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-3">
         <Link
           href="/service-requests"
-          className="inline-flex h-11 items-center gap-2 rounded-lg border border-slate-300 bg-white px-5 text-sm font-black text-[#050816] shadow-sm transition hover:border-[#ff8a00]"
+          className="inline-flex h-11 items-center gap-2 rounded-lg border border-[#c8d3df] bg-white px-5 text-sm font-black text-[#050816] shadow-sm transition hover:border-[#ff8a00]"
         >
-          <ArrowLeft className="h-4 w-4 text-[#ff8a00]" />
+          <ArrowLeft size={16} className="text-[#ff8a00]" />
           Service Requests Desk
         </Link>
 
         <Link
           href="/service-requests/queues"
-          className="inline-flex h-11 items-center gap-2 rounded-lg border border-slate-300 bg-white px-5 text-sm font-black text-[#050816] shadow-sm transition hover:border-[#ff8a00]"
+          className="inline-flex h-11 items-center gap-2 rounded-lg border border-[#c8d3df] bg-white px-5 text-sm font-black text-[#050816] shadow-sm transition hover:border-[#ff8a00]"
         >
-          <Route className="h-4 w-4 text-[#ff8a00]" />
+          <Route size={16} className="text-[#ff8a00]" />
           Routing Queues
         </Link>
 
         <Link
-          href="/dashboard"
-          className="inline-flex h-11 items-center gap-2 rounded-lg border border-slate-300 bg-white px-5 text-sm font-black text-[#050816] shadow-sm transition hover:border-[#ff8a00]"
+          href="/"
+          className="inline-flex h-11 items-center gap-2 rounded-lg border border-[#c8d3df] bg-white px-5 text-sm font-black text-[#050816] shadow-sm transition hover:border-[#ff8a00]"
         >
-          <FolderOpen className="h-4 w-4 text-[#ff8a00]" />
+          <FolderOpen size={16} className="text-[#ff8a00]" />
           Dashboard
         </Link>
-      </nav>
+      </div>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_390px]">
         <div className="min-w-0 space-y-6">
-          <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-[#050816] text-[#ffbf00]">
-                <ClipboardList className="h-6 w-6" />
+          <section className="rounded-xl border border-[#d8e1ea] bg-white p-6 shadow-sm">
+            <div className="flex items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#050816] text-[#ffbf00]">
+                <ClipboardList size={24} />
               </div>
 
-              <div className="min-w-0">
-                <p className="text-xs font-black uppercase tracking-[0.45em] text-slate-400">
+              <div>
+                <p className="text-[11px] font-black uppercase tracking-[0.45em] text-[#94a3b8]">
                   Service Request Intake
                 </p>
-                <h2 className="mt-2 text-3xl font-black text-[#050816]">
+                <h2 className="mt-2 text-3xl font-black">
                   New Service Request
                 </h2>
-                <p className="mt-4 max-w-4xl text-sm leading-7 text-slate-600">
+                <p className="mt-3 text-sm leading-7 text-[#33445c]">
                   This page prepares a governed request package only. It does
                   not submit, save, route, assign, notify, or upload to backend
                   storage yet.
@@ -651,14 +609,12 @@ export default function ServiceRequestIntakeClient() {
             </div>
           </section>
 
-          <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-            <div className="border-b border-slate-200 p-6">
-              <p className="text-xs font-black uppercase tracking-[0.45em] text-slate-400">
+          <section className="overflow-hidden rounded-xl border border-[#d8e1ea] bg-white shadow-sm">
+            <div className="border-b border-[#d8e1ea] p-6">
+              <p className="text-[11px] font-black uppercase tracking-[0.45em] text-[#94a3b8]">
                 Intake Form
               </p>
-              <h2 className="mt-2 text-2xl font-black text-[#050816]">
-                Request Metadata
-              </h2>
+              <h2 className="mt-2 text-2xl font-black">Request Metadata</h2>
             </div>
 
             <div className="grid gap-5 p-6 lg:grid-cols-3">
@@ -811,7 +767,7 @@ export default function ServiceRequestIntakeClient() {
                 </select>
               </div>
 
-              <div className="lg:col-span-2">
+              <div className={priority === "High" ? "lg:col-span-2" : "lg:col-span-3"}>
                 <label className={labelClass()} htmlFor="requested-action">
                   Requested Action *
                 </label>
@@ -835,28 +791,25 @@ export default function ServiceRequestIntakeClient() {
                   <label className={labelClass()} htmlFor="due-date">
                     Due Date
                   </label>
-                  <div className="relative">
-                    <input
-                      id="due-date"
-                      type="date"
-                      value={dueDate}
-                      onChange={(event) => {
-                        setPrepared(false);
-                        setDueDate(event.target.value);
-                      }}
-                      className={`${inputClass()} pr-10`}
-                    />
-                    <CalendarDays className="pointer-events-none absolute right-3 top-3.5 h-5 w-5 text-[#ff8a00]" />
-                  </div>
+                  <input
+                    id="due-date"
+                    type="date"
+                    value={dueDate}
+                    onChange={(event) => {
+                      setPrepared(false);
+                      setDueDate(event.target.value);
+                    }}
+                    className={inputClass()}
+                  />
                 </div>
               ) : null}
 
               <div className="lg:col-span-3">
-                <label className={labelClass()} htmlFor="request-summary">
+                <label className={labelClass()} htmlFor="summary">
                   Request Summary *
                 </label>
                 <textarea
-                  id="request-summary"
+                  id="summary"
                   value={summary}
                   onChange={(event) => {
                     setPrepared(false);
@@ -871,7 +824,6 @@ export default function ServiceRequestIntakeClient() {
                 <label className={labelClass()} htmlFor="service-request-files">
                   File Attachments
                 </label>
-
                 <input
                   id="service-request-files"
                   type="file"
@@ -882,7 +834,6 @@ export default function ServiceRequestIntakeClient() {
                     setSelectedFiles(Array.from(event.target.files ?? []));
                   }}
                 />
-
                 <label
                   htmlFor="service-request-files"
                   className="flex min-h-28 cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-[#c8d3df] bg-[#f8fafc] px-4 py-6 text-center transition hover:border-[#ff8a00] hover:bg-[#fffaf0]"
@@ -893,25 +844,23 @@ export default function ServiceRequestIntakeClient() {
                     supporting files
                   </span>
                   <span className="mt-1 text-xs font-semibold text-[#62708a]">
-                    Frontend only — selected files are not uploaded or stored
-                    yet.
+                    Frontend only — selected files are not uploaded or stored yet.
                   </span>
                 </label>
 
                 {selectedFiles.length > 0 ? (
-                  <div className="mt-3 rounded-lg border border-slate-200 bg-white p-4">
-                    <p className="mb-2 text-[11px] font-black uppercase tracking-[0.35em] text-slate-400">
+                  <div className="mt-3 rounded-lg border border-[#d8e1ea] bg-white p-4">
+                    <p className="mb-2 text-[11px] font-black uppercase tracking-[0.35em] text-[#94a3b8]">
                       Selected Files
                     </p>
-
                     <div className="space-y-2">
                       {selectedFiles.map((file) => (
                         <div
                           key={`${file.name}-${file.size}`}
-                          className="flex items-center justify-between gap-3 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-bold text-[#050816]"
+                          className="flex items-center justify-between gap-3 rounded-md border border-[#d8e1ea] bg-[#f8fafc] px-3 py-2 text-sm font-bold text-[#050816]"
                         >
                           <span className="min-w-0 truncate">{file.name}</span>
-                          <span className="shrink-0 text-xs text-slate-500">
+                          <span className="shrink-0 text-xs text-[#64748b]">
                             {(file.size / 1024).toFixed(1)} KB
                           </span>
                         </div>
@@ -924,7 +873,7 @@ export default function ServiceRequestIntakeClient() {
           </section>
 
           <div className="grid gap-6 lg:grid-cols-2">
-            <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <section className="rounded-xl border border-[#d8e1ea] bg-white p-6 shadow-sm">
               <div className="mb-5 flex items-center gap-4">
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#050816] text-[#ffbf00]">
                   <SlidersHorizontal className="h-6 w-6" />
@@ -946,7 +895,7 @@ export default function ServiceRequestIntakeClient() {
                 ].map((step, index) => (
                   <div
                     key={step}
-                    className="flex items-center gap-4 rounded-lg border border-slate-200 bg-slate-50 p-4"
+                    className="flex items-center gap-4 rounded-lg border border-[#d8e1ea] bg-[#f8fafc] p-4"
                   >
                     <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#050816] text-sm font-black text-[#ffbf00]">
                       {index + 1}
@@ -959,7 +908,7 @@ export default function ServiceRequestIntakeClient() {
               </div>
             </section>
 
-            <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <section className="rounded-xl border border-[#d8e1ea] bg-white p-6 shadow-sm">
               <div className="mb-5 flex items-center gap-4">
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#050816] text-[#ffbf00]">
                   <ShieldCheck className="h-6 w-6" />
@@ -976,7 +925,7 @@ export default function ServiceRequestIntakeClient() {
                     className={
                       check.complete
                         ? "flex items-center gap-3 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm font-black text-emerald-700"
-                        : "flex items-center gap-3 rounded-lg border border-slate-200 bg-white p-4 text-sm font-black text-[#050816]"
+                        : "flex items-center gap-3 rounded-lg border border-[#d8e1ea] bg-white p-4 text-sm font-black text-[#050816]"
                     }
                   >
                     <CheckCircle2
@@ -995,16 +944,15 @@ export default function ServiceRequestIntakeClient() {
         </div>
 
         <aside className="min-w-0 space-y-5 xl:sticky xl:top-6 xl:self-start">
-          <p className="text-[11px] font-black uppercase tracking-[0.55em] text-slate-400">
+          <p className="text-[11px] font-black uppercase tracking-[0.55em] text-[#94a3b8]">
             Controlled Request Intake
           </p>
 
-          <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <section className="rounded-xl border border-[#d8e1ea] bg-white p-6 shadow-sm">
             <h2 className="mb-5 text-2xl font-black uppercase tracking-[0.32em] text-[#050816]">
               Intake Actions
             </h2>
-
-            <p className="mb-5 text-sm leading-7 text-slate-600">
+            <p className="mb-5 text-sm leading-7 text-[#33445c]">
               These controls prepare the request package only. They do not
               submit or create a backend record.
             </p>
@@ -1041,60 +989,58 @@ export default function ServiceRequestIntakeClient() {
             ) : null}
           </section>
 
-          <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="flex items-start gap-4">
+          <section className="rounded-xl border border-[#d8e1ea] bg-white p-6 shadow-sm">
+            <div className="mb-5 flex items-start gap-4">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#050816] text-[#ffbf00]">
                 <Route className="h-6 w-6" />
               </div>
-
               <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.4em] text-slate-400">
+                <p className="text-[11px] font-black uppercase tracking-[0.35em] text-[#94a3b8]">
                   Routing Recommendation
                 </p>
-                <h3 className="mt-2 text-2xl font-black text-[#050816]">
+                <h3 className="mt-2 text-2xl font-black">
                   {recommendedQueue.title}
                 </h3>
               </div>
             </div>
 
-            <div className="mt-5 divide-y divide-slate-200">
-              <PanelRow label="Queue Owner" value={recommendedQueue.owner} />
-              <PanelRow label="Department" value={recommendedQueue.department} />
-              <PanelRow label="Access Scope" value={recommendedQueue.accessScope} />
-              <PanelRow label="Priority" value={priority} />
-            </div>
+            <PanelRow label="Queue Owner" value={recommendedQueue.owner} />
+            <PanelRow label="Department" value={recommendedQueue.department} />
+            <PanelRow label="Access Scope" value={recommendedQueue.accessScope} />
+            <PanelRow label="Priority" value={priority} />
+            <PanelRow label="Intake Channel" value={intakeChannel} />
 
             <Link
               href={`/service-requests/queues/${recommendedQueue.id}`}
-              className="mt-5 flex h-12 w-full items-center justify-center rounded-lg bg-[#050816] px-4 text-sm font-black text-white transition hover:bg-[#111827]"
+              className="mt-5 flex h-12 w-full items-center justify-center rounded-lg bg-[#050816] px-4 text-sm font-black text-white"
             >
               Open Recommended Queue
             </Link>
           </section>
 
-          <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="flex items-start gap-4">
+          <section className="rounded-xl border border-[#d8e1ea] bg-white p-6 shadow-sm">
+            <div className="mb-5 flex items-start gap-4">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#050816] text-[#ffbf00]">
                 <ClipboardList className="h-6 w-6" />
               </div>
-
               <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.4em] text-slate-400">
+                <p className="text-[11px] font-black uppercase tracking-[0.35em] text-[#94a3b8]">
                   Draft Request Package
                 </p>
-                <h3 className="mt-2 text-3xl font-black text-[#050816]">
-                  SR-DRAFT
-                </h3>
+                <h3 className="mt-2 text-3xl font-black">SR-DRAFT</h3>
               </div>
             </div>
 
-            <div className="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-4">
+            <div className="rounded-lg border border-[#d8e1ea] bg-[#f8fafc] p-4">
               <PanelRow label="Title" value={requestTitle || "Pending"} />
               <PanelRow label="Department" value={department} />
               <PanelRow label="Category" value={category} />
               <PanelRow label="Classification" value={classification} />
-              <PanelRow label="Related Record" value={selectedRelatedRecord.id} />
-              <PanelRow label="Reference Type" value={selectedRelatedRecord.type} />
+              <PanelRow label="Related Record" value={effectiveRelatedRecord} />
+              <PanelRow
+                label="Reference Type"
+                value={selectedRelatedRecord?.type ?? "None"}
+              />
               <PanelRow
                 label="Attachments"
                 value={
@@ -1104,16 +1050,74 @@ export default function ServiceRequestIntakeClient() {
                 }
               />
               {priority === "High" ? (
-                <PanelRow label="Due Date" value={dueDate || "Required"} />
+                <PanelRow label="Due Date" value={dueDate || "Pending"} />
               ) : null}
             </div>
 
-            <div className="mt-5 rounded-lg border border-[#ffbf00] bg-[#fff8db] px-4 py-3 text-sm font-black text-[#b45309]">
+            <div className="mt-5 rounded-lg border border-[#ffbf00] bg-[#fff7e6] px-4 py-3 text-sm font-black leading-6 text-[#9a4a00]">
               {completedChecks}/{controlChecks.length} control checks prepared.
+            </div>
+          </section>
+
+          <section className="rounded-xl border border-dashed border-[#c8d3df] bg-white p-6 shadow-sm">
+            <div className="flex items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#050816] text-[#ffbf00]">
+                <ShieldCheck className="h-6 w-6" />
+              </div>
+              <div>
+                <h3 className="text-2xl font-black uppercase tracking-[0.35em]">
+                  Control Notes
+                </h3>
+                <ul className="mt-5 space-y-4 text-sm leading-7 text-[#33445c]">
+                  <li>• Intake remains frontend-only in this phase.</li>
+                  <li>• Selected files are not uploaded or stored yet.</li>
+                  <li>• No request ID is reserved or saved.</li>
+                  <li>• No owner is actually assigned yet.</li>
+                  <li>
+                    • Restricted and third-party intake should receive separate
+                    role-based pages in a later phase.
+                  </li>
+                </ul>
+              </div>
             </div>
           </section>
         </aside>
       </div>
     </div>
+  );
+}
+
+function PanelRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-start justify-between gap-4 border-b border-[#d8e1ea] py-3 last:border-b-0">
+      <span className="text-sm font-bold text-[#64748b]">{label}</span>
+      <span className="max-w-[190px] text-right text-sm font-black text-[#050816]">
+        {value}
+      </span>
+    </div>
+  );
+}
+
+function ActionButton({
+  children,
+  onClick,
+  primary = false,
+}: {
+  children: React.ReactNode;
+  onClick?: () => void;
+  primary?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={
+        primary
+          ? "flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#050816] px-4 text-sm font-black text-white transition hover:bg-[#101827]"
+          : "flex h-12 w-full items-center justify-center gap-2 rounded-lg border border-[#c8d3df] bg-white px-4 text-sm font-black text-[#050816] transition hover:border-[#ff8a00] hover:bg-[#fffaf0]"
+      }
+    >
+      {children}
+    </button>
   );
 }

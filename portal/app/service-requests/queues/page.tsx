@@ -7,11 +7,10 @@ import {
   Plus,
   Route,
   ShieldCheck,
-  UserRoundCheck,
 } from "lucide-react";
 
-import Sidebar from "@/components/layout/Sidebar";
-import Topbar from "@/components/layout/Topbar";
+
+import EOCPageShell from "@/components/layout/EOCPageShell";
 import {
   getRequestsForQueue,
   serviceRequestQueues,
@@ -32,11 +31,7 @@ export default function ServiceRequestQueuesPage() {
   ).length;
 
   const statCards = [
-    {
-      label: "Routing Queues",
-      value: queueCount.toString(),
-      icon: Route,
-    },
+    { label: "Routing Queues", value: queueCount.toString(), icon: Route },
     {
       label: "Active Requests",
       value: activeRequestCount.toString(),
@@ -55,226 +50,192 @@ export default function ServiceRequestQueuesPage() {
   ];
 
   return (
-    <div className="flex min-h-screen bg-slate-100 text-slate-950">
-      <Sidebar />
-
-      <div className="flex min-h-screen min-w-0 flex-1 flex-col">
-        <Topbar />
-
-        <main className="flex-1 px-5 py-4">
-          <div className="mx-auto max-w-[1500px] space-y-4">
-            <section className="rounded-xl border border-slate-950 bg-slate-950 p-6 text-white shadow-sm">
-              <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-                <div>
-                  <p className="text-[11px] font-black uppercase tracking-[0.5em] text-amber-400">
-                    Hassan Industries
-                  </p>
-                  <h1 className="mt-3 text-3xl font-black uppercase tracking-tight">
-                    Service Request Routing Queues
-                  </h1>
-                  <p className="mt-3 max-w-5xl text-sm font-medium leading-6 text-white">
-                    Controlled routing layer for assigning service requests to
-                    department desks, HCA review lanes, records review,
-                    treasury review, and restricted governance handling.
-                  </p>
-                </div>
-
-                <div className="rounded-lg border border-amber-500 bg-slate-900 px-8 py-5 text-center">
-                  <p className="text-[11px] font-black uppercase tracking-[0.45em] text-white">
-                    Queue Status
-                  </p>
-                  <p className="mt-3 text-2xl font-black text-amber-400">
-                    Frontend Queues
-                  </p>
-                  <p className="mt-1 text-xs font-semibold text-white">
-                    Assignment Layer
-                  </p>
-                </div>
-              </div>
-            </section>
-
-            <nav className="flex flex-wrap items-center gap-3">
-              <Link
-                href="/service-requests"
-                className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-black text-slate-950 shadow-sm transition hover:border-amber-500 hover:bg-amber-50"
-              >
-                <FolderOpen className="h-4 w-4 text-amber-500" />
-                Back to Service Requests Desk
-              </Link>
-
-              <Link
-                href="/service-requests/new"
-                className="inline-flex items-center gap-2 rounded-lg border border-slate-950 bg-slate-950 px-4 py-3 text-sm font-black text-white shadow-sm transition hover:bg-slate-800"
-              >
-                <Plus className="h-4 w-4 text-amber-400" />
-                Create Service Request
-              </Link>
-            </nav>
-
-            <p className="text-right text-[12px] font-black uppercase tracking-[0.45em] text-slate-400">
-              Controlled Queue Navigation
+    <EOCPageShell>
+      <section className="rounded-xl bg-[#050816] p-6 text-white shadow-md sm:p-8">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_260px] lg:items-center">
+          <div>
+            <p className="text-[11px] font-black uppercase tracking-[0.55em] text-[#ffbf00]">
+              Hassan Industries
             </p>
+            <h1 className="mt-4 text-3xl font-black uppercase tracking-[-0.04em] sm:text-4xl">
+              Service Request Routing Queues
+            </h1>
+            <p className="mt-4 max-w-5xl text-sm font-semibold leading-7 text-white">
+              Controlled routing layer for assigning service requests to
+              department desks, HCA review lanes, records review, treasury
+              review, and restricted governance handling.
+            </p>
+          </div>
 
-            <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              {statCards.map((stat) => {
-                const Icon = stat.icon;
+          <div className="rounded-lg border border-[#ffbf00] bg-white/5 p-5 text-center">
+            <p className="text-[11px] font-black uppercase tracking-[0.45em]">
+              Queue Status
+            </p>
+            <p className="mt-4 text-3xl font-black text-[#ffbf00]">
+              Frontend Queues
+            </p>
+            <p className="mt-1 text-xs font-black">Assignment Layer</p>
+          </div>
+        </div>
+      </section>
 
-                return (
-                  <div
-                    key={stat.label}
-                    className="flex min-h-[92px] items-center justify-between rounded-lg border border-slate-200 bg-white px-5 py-4 shadow-sm"
-                  >
-                    <div>
-                      <p className="text-xs font-semibold text-slate-500">
-                        {stat.label}
-                      </p>
-                      <p className="mt-2 text-3xl font-black leading-none text-slate-950">
-                        {stat.value}
-                      </p>
-                    </div>
+      <nav className="mt-5 flex flex-wrap gap-3">
+        <Link
+          href="/service-requests"
+          className="inline-flex h-11 items-center gap-2 rounded-lg border border-[#c8d3df] bg-white px-4 text-sm font-black text-[#050816] shadow-sm transition hover:border-[#ff8a00] hover:bg-[#fffaf0]"
+        >
+          <FolderOpen size={16} className="text-[#ff8a00]" />
+          Back to Service Requests Desk
+        </Link>
 
-                    <Icon className="h-6 w-6 text-amber-500" />
-                  </div>
-                );
-              })}
+        <Link
+          href="/service-requests/new"
+          className="inline-flex h-11 items-center gap-2 rounded-lg bg-[#050816] px-4 text-sm font-black text-white shadow-sm transition hover:bg-[#111827]"
+        >
+          <Plus size={16} className="text-[#ffbf00]" />
+          Create Service Request
+        </Link>
+      </nav>
+
+      <p className="mt-7 text-right text-[11px] font-black uppercase tracking-[0.55em] text-[#94a3b8]">
+        Controlled Queue Navigation
+      </p>
+
+      <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {statCards.map((stat) => {
+          const Icon = stat.icon;
+
+          return (
+            <section
+              key={stat.label}
+              className="rounded-lg border border-[#d8e1ea] bg-white p-5 shadow-sm"
+            >
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm font-semibold text-[#53657f]">
+                    {stat.label}
+                  </p>
+                  <p className="mt-2 text-4xl font-black">{stat.value}</p>
+                </div>
+                <Icon size={24} className="text-[#ff8a00]" />
+              </div>
             </section>
+          );
+        })}
+      </div>
 
-            <section className="grid gap-4 xl:grid-cols-[1fr_390px]">
-              <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-                <div className="flex flex-col gap-4 border-b border-slate-200 p-5 lg:flex-row lg:items-start lg:justify-between">
-                  <div>
-                    <p className="text-[11px] font-black uppercase tracking-[0.45em] text-slate-400">
-                      Enterprise Operations System
-                    </p>
-                    <h2 className="mt-2 text-2xl font-black text-slate-950">
-                      Controlled Routing Queues
-                    </h2>
-                    <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-                      Each queue has a defined purpose, owner, access scope,
-                      routing standard, and escalation path so requests do not
-                      sit in an ungoverned general inbox.
-                    </p>
-                  </div>
-
-                  <span className="rounded-full bg-amber-100 px-4 py-2 text-xs font-black text-amber-700">
-                    {serviceRequestQueues.length} queues
-                  </span>
-                </div>
-
-                <div className="grid gap-4 p-5 lg:grid-cols-2">
-                  {serviceRequestQueues.map((queue) => {
-                    const queueRequests = getRequestsForQueue(queue.id);
-
-                    return (
-                      <Link
-                        key={queue.id}
-                        href={`/service-requests/queues/${queue.id}`}
-                        className="group rounded-lg border border-slate-200 bg-slate-50 p-5 transition hover:border-amber-500 hover:bg-amber-50"
-                      >
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-slate-950">
-                            <Route className="h-6 w-6 text-amber-400" />
-                          </div>
-
-                          <span
-                            className={[
-                              "rounded-full px-3 py-1 text-[11px] font-black",
-                              getQueueStatusClass(queue.status),
-                            ].join(" ")}
-                          >
-                            {queue.status}
-                          </span>
-                        </div>
-
-                        <h3 className="mt-5 text-xl font-black text-slate-950">
-                          {queue.title}
-                        </h3>
-                        <p className="mt-3 text-sm leading-6 text-slate-600">
-                          {queue.summary}
-                        </p>
-
-                        <div className="mt-5 border-t border-slate-200 pt-4">
-                          <div className="flex items-center justify-between gap-4">
-                            <p className="text-[11px] font-black uppercase tracking-[0.35em] text-slate-400">
-                              {queueRequests.length} assigned
-                            </p>
-
-                            <span className="inline-flex items-center gap-2 text-xs font-black text-slate-950 group-hover:text-amber-700">
-                              Open Queue
-                              <ArrowRight className="h-4 w-4 text-amber-500" />
-                            </span>
-                          </div>
-                        </div>
-                      </Link>
-                    );
-                  })}
-                </div>
+      <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
+        <section className="rounded-xl border border-[#d8e1ea] bg-white shadow-sm">
+          <div className="border-b border-[#d8e1ea] p-6">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <p className="text-[11px] font-black uppercase tracking-[0.45em] text-[#94a3b8]">
+                  Enterprise Operations System
+                </p>
+                <h2 className="mt-2 text-2xl font-black">
+                  Controlled Routing Queues
+                </h2>
+                <p className="mt-3 max-w-5xl text-sm leading-7 text-[#33445c]">
+                  Each queue has a defined purpose, owner, access scope, routing
+                  standard, and escalation path so requests do not sit in an
+                  ungoverned general inbox.
+                </p>
               </div>
 
-              <aside className="space-y-4">
-                <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-                  <div className="flex items-start gap-4">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-slate-950">
-                      <ShieldCheck className="h-5 w-5 text-amber-400" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-black uppercase tracking-[0.35em] text-slate-950">
-                        Queue Standard
-                      </h3>
-                      <ul className="mt-4 space-y-3 text-sm leading-6 text-slate-600">
-                        <li>• Each queue has a defined owner.</li>
-                        <li>• Each queue has a governed routing purpose.</li>
-                        <li>• Requests should not remain unassigned.</li>
-                        <li>
-                          • Restricted matters must remain separated from
-                          general intake.
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                </section>
-
-                <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-                  <div className="flex items-start gap-4">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-slate-950">
-                      <UserRoundCheck className="h-5 w-5 text-amber-400" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-black uppercase tracking-[0.35em] text-slate-950">
-                        Backend Readiness
-                      </h3>
-                      <p className="mt-4 text-sm leading-6 text-slate-600">
-                        Future backend work should connect queues to role-based
-                        permissions, assignment rules, SLA timers, escalations,
-                        notifications, comments, attachments, approvals, and
-                        permanent service request audit history.
-                      </p>
-                    </div>
-                  </div>
-                </section>
-
-                <section className="rounded-lg border border-dashed border-slate-300 bg-white p-5 shadow-sm">
-                  <div className="flex items-start gap-4">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-slate-950">
-                      <ClipboardList className="h-5 w-5 text-amber-400" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-black uppercase tracking-[0.35em] text-slate-950">
-                        Training Note
-                      </h3>
-                      <p className="mt-4 text-sm leading-6 text-slate-600">
-                        Queue pages should be treated as operating desks, not
-                        passive lists. Every queue should help staff determine
-                        ownership, review path, escalation, and next action.
-                      </p>
-                    </div>
-                  </div>
-                </section>
-              </aside>
-            </section>
+              <span className="rounded-full bg-[#fff0b8] px-5 py-2 text-sm font-black text-[#b45309]">
+                {serviceRequestQueues.length} queues
+              </span>
+            </div>
           </div>
-        </main>
+
+          <div className="grid gap-4 p-5 md:grid-cols-2">
+            {serviceRequestQueues.map((queue) => {
+              const queueRequests = getRequestsForQueue(queue.id);
+
+              return (
+                <Link
+                  key={queue.id}
+                  href={`/service-requests/queues/${queue.id}`}
+                  className="rounded-xl border border-[#d8e1ea] bg-[#f8fafc] p-6 transition hover:border-[#ff8a00] hover:bg-[#fffaf0]"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#050816] text-[#ffbf00]">
+                      <Route size={24} />
+                    </div>
+
+                    <span
+                      className={`rounded-full px-4 py-2 text-xs font-black ${getQueueStatusClass(
+                        queue.status,
+                      )}`}
+                    >
+                      {queue.status}
+                    </span>
+                  </div>
+
+                  <h3 className="mt-6 text-2xl font-black">{queue.title}</h3>
+                  <p className="mt-4 text-sm leading-7 text-[#33445c]">
+                    {queue.summary}
+                  </p>
+
+                  <div className="mt-6 flex items-center justify-between border-t border-[#d8e1ea] pt-4">
+                    <p className="text-xs font-black uppercase tracking-[0.35em] text-[#94a3b8]">
+                      {queueRequests.length} assigned
+                    </p>
+                    <span className="inline-flex items-center gap-2 text-sm font-black text-[#050816]">
+                      Open Queue
+                      <ArrowRight size={16} className="text-[#ff8a00]" />
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+
+        <aside className="space-y-5">
+          <section className="rounded-xl border border-[#d8e1ea] bg-white p-6 shadow-sm">
+            <PanelTitle icon={<ShieldCheck size={24} />} title="Queue Standard" />
+            <ul className="mt-5 space-y-3 text-sm leading-7 text-[#33445c]">
+              <li>• Each queue has a defined owner.</li>
+              <li>• Each queue has a governed routing purpose.</li>
+              <li>• Requests should not remain unassigned.</li>
+              <li>• Restricted matters must remain separated from general intake.</li>
+            </ul>
+          </section>
+
+          <section className="rounded-xl border border-[#d8e1ea] bg-white p-6 shadow-sm">
+            <PanelTitle icon={<Route size={24} />} title="Backend Readiness" />
+            <p className="mt-5 text-sm leading-7 text-[#33445c]">
+              Future backend work should connect queues to role-based
+              permissions, assignment rules, SLA timers, escalations,
+              notifications, comments, attachments, approvals, and permanent
+              service request audit history.
+            </p>
+          </section>
+
+          <section className="rounded-xl border border-dashed border-[#c8d3df] bg-white p-6 shadow-sm">
+            <PanelTitle icon={<ClipboardList size={24} />} title="Training Note" />
+            <p className="mt-5 text-sm leading-7 text-[#33445c]">
+              Queue pages should be treated as operating desks, not passive
+              lists. Every queue should help staff determine ownership, review
+              path, escalation, and next action.
+            </p>
+          </section>
+        </aside>
       </div>
+    </EOCPageShell>
+  );
+}
+
+function PanelTitle({ icon, title }: { icon: React.ReactNode; title: string }) {
+  return (
+    <div className="flex items-start gap-4">
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#050816] text-[#ffbf00]">
+        {icon}
+      </div>
+      <h3 className="text-2xl font-black uppercase tracking-[0.18em]">
+        {title}
+      </h3>
     </div>
   );
 }
