@@ -1,8 +1,5 @@
-import type { ReactNode } from "react";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import {
-  ArrowLeft,
   ArrowRight,
   ClipboardList,
   FolderOpen,
@@ -11,421 +8,221 @@ import {
   Route,
   ShieldCheck,
 } from "lucide-react";
-
-
-import EOCPageShell from "@/components/layout/EOCPageShell";
+import ServiceRequestWorkspaceFrame from "@/components/service-requests/ServiceRequestWorkspaceFrame";
 import {
   getRequestsForQueue,
-  getServiceRequestQueueById,
   serviceRequestQueues,
-  type ServiceRequestPriority,
-  type ServiceRequestQueueRecord,
+  serviceRequestRecords,
   type ServiceRequestQueueStatus,
-  type ServiceRequestStatus,
 } from "@/data/serviceRequests";
 
-type ServiceRequestQueueDetailPageProps = {
-  params: Promise<{
-    queuesId: string;
-  }>;
-};
-
-export function generateStaticParams() {
-  return serviceRequestQueues.map((queue) => ({
-    queuesId: queue.id,
-  }));
-}
-
-export default async function ServiceRequestQueueDetailPage({
-  params,
-}: ServiceRequestQueueDetailPageProps) {
-  const { queuesId } = await params;
-  const queue = getServiceRequestQueueById(queuesId);
-
-  if (!queue) {
-    notFound();
-  }
-
-  const queueRequests = getRequestsForQueue(queue.id);
-  const restrictedCount = queueRequests.filter(
-    (request) => request.priority === "Restricted",
+export default function ServiceRequestQueuesPage() {
+  const queueCount = serviceRequestQueues.length;
+  const restrictedQueueCount = serviceRequestQueues.filter(
+    (queue) => queue.status === "Restricted Queue",
   ).length;
-  const pendingRoutingCount = queueRequests.filter(
-    (request) => request.status === "Pending Routing",
+  const departmentQueueCount = serviceRequestQueues.filter(
+    (queue) => queue.status === "Department Queue",
   ).length;
-  const openCount = queueRequests.filter(
+  const activeRequestCount = serviceRequestRecords.filter(
     (request) => request.status !== "Closed",
   ).length;
 
   const statCards = [
+    { label: "Routing Queues", value: queueCount.toString(), icon: Route },
     {
-      label: "Assigned Requests",
-      value: queueRequests.length.toString(),
+      label: "Active Requests",
+      value: activeRequestCount.toString(),
       icon: ClipboardList,
     },
-    { label: "Open Items", value: openCount.toString(), icon: FolderOpen },
     {
-      label: "Pending Routing",
-      value: pendingRoutingCount.toString(),
-      icon: Route,
+      label: "Department Queues",
+      value: departmentQueueCount.toString(),
+      icon: FolderOpen,
     },
-    { label: "Restricted", value: restrictedCount.toString(), icon: LockKeyhole },
+    {
+      label: "Restricted Queues",
+      value: restrictedQueueCount.toString(),
+      icon: LockKeyhole,
+    },
   ];
 
   return (
-    <EOCPageShell>
-      <section className="rounded-xl bg-[#050816] p-6 text-white shadow-md sm:p-8">
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_260px] lg:items-center">
+    <ServiceRequestWorkspaceFrame>
+      <section className="rounded-xl bg-[#050816] p-8 text-white shadow-sm">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-[11px] font-black uppercase tracking-[0.55em] text-[#ffbf00]">
+            <p className="text-xs font-black uppercase tracking-[0.45em] text-[#ffc400]">
               Hassan Industries
             </p>
-            <h1 className="mt-4 text-3xl font-black uppercase tracking-[-0.04em] sm:text-4xl">
-              {queue.title}
+            <h1 className="mt-4 text-3xl font-black uppercase">
+              Service Request Routing Queues
             </h1>
-            <p className="mt-4 max-w-5xl text-sm font-semibold leading-7 text-white">
-              {queue.summary}
+            <p className="mt-4 max-w-5xl text-sm leading-7 text-white">
+              Controlled routing layer for assigning service requests to
+              department desks, HCA review lanes, records review, treasury review,
+              and restricted governance handling.
             </p>
           </div>
 
-          <div className="rounded-lg border border-[#ffbf00] bg-white/5 p-5 text-center">
-            <p className="text-[11px] font-black uppercase tracking-[0.45em]">
+          <div className="rounded-lg border border-[#ff8a00] bg-white/5 px-10 py-7 text-center">
+            <p className="text-xs font-black uppercase tracking-[0.35em]">
               Queue Status
             </p>
-            <p className="mt-4 text-3xl font-black text-[#ffbf00]">
-              {queue.status}
+            <p className="mt-4 text-2xl font-black text-[#ffc400]">
+              Frontend Queues
             </p>
-            <p className="mt-1 text-xs font-black">{queue.department}</p>
+            <p className="mt-1 text-xs font-black">Assignment Layer</p>
           </div>
         </div>
       </section>
 
-      <nav className="mt-5 flex flex-wrap gap-3">
-        <Link
-          href="/service-requests/queues"
-          className="inline-flex h-11 items-center gap-2 rounded-lg border border-[#c8d3df] bg-white px-4 text-sm font-black text-[#050816] shadow-sm transition hover:border-[#ff8a00] hover:bg-[#fffaf0]"
-        >
-          <ArrowLeft size={16} className="text-[#ff8a00]" />
-          Back to Routing Queues
+      <div className="mt-5 flex flex-wrap gap-3">
+        <Link href="/service-requests" className="service-button">
+          Back to Service Requests Desk
         </Link>
-
-        <Link
-          href="/service-requests"
-          className="inline-flex h-11 items-center gap-2 rounded-lg border border-[#c8d3df] bg-white px-4 text-sm font-black text-[#050816] shadow-sm transition hover:border-[#ff8a00] hover:bg-[#fffaf0]"
-        >
-          <FolderOpen size={16} className="text-[#ff8a00]" />
-          Service Requests Desk
-        </Link>
-
-        <Link
-          href={`/service-requests/new?queue=${queue.id}`}
-          className="inline-flex h-11 items-center gap-2 rounded-lg bg-[#050816] px-4 text-sm font-black text-white shadow-sm transition hover:bg-[#111827]"
-        >
-          <Plus size={16} className="text-[#ffbf00]" />
+        <Link href="/service-requests/new" className="service-button-primary">
+          <Plus size={16} />
           Create Service Request
         </Link>
-      </nav>
+      </div>
 
-      <p className="mt-7 text-right text-[11px] font-black uppercase tracking-[0.55em] text-[#94a3b8]">
-        Controlled Routing Workspace
+      <p className="mt-8 text-right text-xs font-black uppercase tracking-[0.45em] text-slate-400">
+        Controlled Queue Navigation
       </p>
 
-      <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {statCards.map((stat) => {
           const Icon = stat.icon;
 
           return (
-            <section
+            <div
               key={stat.label}
-              className="rounded-lg border border-[#d8e1ea] bg-white p-5 shadow-sm"
+              className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
             >
-              <div className="flex items-center justify-between gap-4">
+              <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-sm font-semibold text-[#53657f]">
-                    {stat.label}
-                  </p>
-                  <p className="mt-2 text-4xl font-black">{stat.value}</p>
+                  <p className="text-sm font-bold text-slate-500">{stat.label}</p>
+                  <p className="mt-2 text-3xl font-black">{stat.value}</p>
                 </div>
-                <Icon size={24} className="text-[#ff8a00]" />
+                <Icon className="text-[#ff8a00]" size={24} />
               </div>
-            </section>
+            </div>
           );
         })}
-      </div>
+      </section>
 
-      <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
-        <div className="min-w-0 space-y-5">
-          <QueueAuthorityPanel queue={queue} />
-
-          <section className="rounded-xl border border-[#d8e1ea] bg-white p-6 shadow-sm">
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.45em] text-[#94a3b8]">
-                  Queue Records
-                </p>
-                <h2 className="mt-2 text-2xl font-black">Assigned Requests</h2>
-                <p className="mt-3 text-sm leading-7 text-[#33445c]">
-                  Open each request to review detail workspace, related record,
-                  routing stage, authority, and future action history.
-                </p>
-              </div>
-
-              <span className="rounded-full bg-[#fff0b8] px-5 py-2 text-sm font-black text-[#b45309]">
-                {queueRequests.length} assigned
-              </span>
+      <section className="mt-5 grid gap-5 xl:grid-cols-[1fr_390px]">
+        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.35em] text-slate-400">
+                Enterprise Operations System
+              </p>
+              <h2 className="mt-2 text-2xl font-black">
+                Controlled Routing Queues
+              </h2>
+              <p className="mt-3 max-w-4xl text-sm leading-7 text-slate-600">
+                Each queue has a defined purpose, owner, access scope, routing
+                standard, and escalation path so requests do not sit in an
+                ungoverned general inbox.
+              </p>
             </div>
 
-            <div className="mt-6 overflow-x-auto">
-              <table className="min-w-[860px] w-full border-collapse text-left">
-                <thead className="bg-[#f8fafc] text-[11px] uppercase tracking-[0.45em] text-[#53657f]">
-                  <tr>
-                    <th className="px-4 py-4">Request ID</th>
-                    <th className="px-4 py-4">Title</th>
-                    <th className="px-4 py-4">Status</th>
-                    <th className="px-4 py-4">Priority</th>
-                    <th className="px-4 py-4">Owner</th>
-                    <th className="px-4 py-4">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {queueRequests.map((request) => (
-                    <tr
-                      key={request.id}
-                      className="border-b border-[#d8e1ea] align-top"
+            <span className="rounded-full bg-amber-100 px-5 py-3 text-sm font-black text-amber-700">
+              {serviceRequestQueues.length} queues
+            </span>
+          </div>
+
+          <div className="mt-6 grid gap-4 lg:grid-cols-2">
+            {serviceRequestQueues.map((queue) => {
+              const queueRequests = getRequestsForQueue(queue.id);
+
+              return (
+                <Link
+                  key={queue.id}
+                  href={`/service-requests/queues/${queue.id}`}
+                  className="group rounded-xl border border-slate-200 bg-slate-50 p-6 transition hover:border-[#ff8a00] hover:bg-amber-50"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#050816] text-[#ffc400]">
+                      <Route size={24} />
+                    </div>
+                    <span
+                      className={`rounded-full px-4 py-2 text-xs font-black ${getQueueStatusClass(
+                        queue.status,
+                      )}`}
                     >
-                      <td className="px-4 py-5 text-sm font-black">
-                        {request.id}
-                      </td>
-                      <td className="px-4 py-5">
-                        <p className="text-sm font-black">{request.title}</p>
-                        <p className="mt-2 max-w-sm text-xs leading-6 text-[#53657f]">
-                          {request.summary}
-                        </p>
-                      </td>
-                      <td className="px-4 py-5">
-                        <span
-                          className={`rounded-md px-3 py-2 text-xs font-black ${getStatusPillClass(
-                            request.status,
-                          )}`}
-                        >
-                          {request.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-5">
-                        <span
-                          className={`rounded-md px-3 py-2 text-xs font-black ${getPriorityPillClass(
-                            request.priority,
-                          )}`}
-                        >
-                          {request.priority}
-                        </span>
-                      </td>
-                      <td className="px-4 py-5 text-sm font-black">
-                        {request.owner}
-                      </td>
-                      <td className="px-4 py-5">
-                        <Link
-                          href={`/service-requests/${request.id}`}
-                          className="inline-flex h-10 items-center gap-2 rounded-lg border border-[#c8d3df] bg-white px-4 text-sm font-black text-[#050816] transition hover:border-[#ff8a00] hover:bg-[#fffaf0]"
-                        >
-                          Open
-                          <ArrowRight size={16} className="text-[#ff8a00]" />
-                        </Link>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
+                      {queue.status}
+                    </span>
+                  </div>
+
+                  <h3 className="mt-6 text-xl font-black">{queue.title}</h3>
+                  <p className="mt-4 min-h-[72px] text-sm leading-7 text-slate-600">
+                    {queue.summary}
+                  </p>
+
+                  <div className="mt-5 flex items-center justify-between border-t border-slate-200 pt-4">
+                    <span className="text-xs font-black uppercase tracking-[0.35em] text-slate-400">
+                      {queueRequests.length} assigned
+                    </span>
+                    <span className="inline-flex items-center gap-2 text-sm font-black">
+                      Open Queue
+                      <ArrowRight
+                        size={16}
+                        className="text-[#ff8a00] transition group-hover:translate-x-1"
+                      />
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
         </div>
 
-        <aside className="min-w-0 space-y-5">
-          <section className="rounded-xl border border-[#d8e1ea] bg-white p-6 shadow-sm">
-            <h2 className="text-2xl font-black uppercase tracking-[0.25em]">
-              Queue Actions
-            </h2>
-            <p className="mt-4 text-sm leading-7 text-[#33445c]">
-              Frontend controls prepared for future assignment, routing, SLA
-              tracking, restricted review, escalation, and permanent audit
-              history.
-            </p>
-
-            <div className="mt-6 space-y-3">
-              <Link
-                href={`/service-requests/new?queue=${queue.id}`}
-                className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#050816] px-4 text-sm font-black text-white"
-              >
-                <Plus size={16} className="text-[#ffbf00]" />
-                Create Request for Queue
-              </Link>
-
-              <button className="h-12 w-full rounded-lg border border-[#c8d3df] bg-white px-4 text-sm font-black">
-                Assign Queue Owner
-              </button>
-
-              <button className="h-12 w-full rounded-lg border border-[#c8d3df] bg-white px-4 text-sm font-black">
-                Review Queue SLA
-              </button>
-
-              <button className="h-12 w-full rounded-lg border border-[#ff8a00] bg-[#fff7e6] px-4 text-sm font-black text-[#9a4a00]">
-                Escalate Queue Review
-              </button>
-
-              <Link
-                href="/service-requests"
-                className="flex h-12 w-full items-center justify-center rounded-lg border border-[#c8d3df] bg-white px-4 text-sm font-black"
-              >
-                Return to Service Requests
-              </Link>
-            </div>
-          </section>
-
-          <QueueControlsPanel queue={queue} />
-          <QueueWorkflowPanel queue={queue} />
-
-          <section className="rounded-xl border border-dashed border-[#c8d3df] bg-white p-6 shadow-sm">
-            <PanelTitle
-              icon={<ShieldCheck size={24} />}
-              eyebrow="Routing Standard"
-              title="Controlled Queue"
-            />
-            <p className="mt-5 text-sm leading-7 text-[#33445c]">
-              {queue.routingStandard}
-            </p>
-          </section>
-
-          <section className="rounded-xl border border-dashed border-[#c8d3df] bg-white p-6 shadow-sm">
-            <PanelTitle
-              icon={<LockKeyhole size={24} />}
-              eyebrow="Access Note"
-              title="Future Controls"
-            />
-            <p className="mt-5 text-sm leading-7 text-[#33445c]">
-              {queue.accessScope}. Future backend phases should enforce this
-              through role-based access, queue ownership, approval permissions,
-              and audit logging.
-            </p>
-          </section>
+        <aside className="space-y-5">
+          <InfoPanel
+            icon={<ShieldCheck size={24} />}
+            title="Queue Standard"
+            text="Each queue has a defined owner, governed routing purpose, escalation path, and separation standard for restricted matters."
+          />
+          <InfoPanel
+            icon={<ClipboardList size={24} />}
+            title="Backend Readiness"
+            text="Future backend work should connect queues to role-based permissions, assignment rules, SLA timers, escalations, notifications, comments, attachments, approvals, and permanent service request audit history."
+          />
+          <InfoPanel
+            icon={<Route size={24} />}
+            title="Training Note"
+            text="Queue pages should be treated as operating desks, not passive lists. Every queue should help staff determine ownership, review path, escalation, and next action."
+          />
         </aside>
-      </div>
-    </EOCPageShell>
+      </section>
+    </ServiceRequestWorkspaceFrame>
   );
 }
 
-function QueueAuthorityPanel({ queue }: { queue: ServiceRequestQueueRecord }) {
-  return (
-    <section className="rounded-xl border border-[#d8e1ea] bg-white p-6 shadow-sm">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <PanelTitle
-          icon={<Route size={24} />}
-          eyebrow="Service Request Queue"
-          title={queue.title}
-        />
-
-        <span
-          className={`rounded-full px-5 py-2 text-sm font-black ${getQueueStatusClass(
-            queue.status,
-          )}`}
-        >
-          {queue.status}
-        </span>
-      </div>
-
-      <p className="mt-5 text-sm font-black leading-7">{queue.purpose}</p>
-      <p className="mt-3 text-sm leading-7 text-[#33445c]">{queue.summary}</p>
-
-      <div className="mt-6 grid gap-4 md:grid-cols-2">
-        <QueueInfoCard label="Department" value={queue.department} />
-        <QueueInfoCard label="Owner" value={queue.owner} />
-        <QueueInfoCard label="Access Scope" value={queue.accessScope} />
-        <QueueInfoCard label="Escalation Path" value={queue.escalationPath} />
-      </div>
-    </section>
-  );
-}
-
-function QueueInfoCard({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-lg border border-[#d8e1ea] bg-[#f8fafc] p-5">
-      <p className="text-[11px] font-black uppercase tracking-[0.4em] text-[#94a3b8]">
-        {label}
-      </p>
-      <p className="mt-3 text-sm font-black leading-6">{value}</p>
-    </div>
-  );
-}
-
-function QueueControlsPanel({ queue }: { queue: ServiceRequestQueueRecord }) {
-  return (
-    <section className="rounded-xl border border-[#d8e1ea] bg-white p-6 shadow-sm">
-      <PanelTitle
-        icon={<ShieldCheck size={24} />}
-        eyebrow="Queue Controls"
-        title="Review Rules"
-      />
-
-      <div className="mt-6 space-y-3">
-        {queue.controls.map((control) => (
-          <div
-            key={control}
-            className="rounded-lg border border-[#d8e1ea] bg-white p-4 text-sm font-black"
-          >
-            {control}
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function QueueWorkflowPanel({ queue }: { queue: ServiceRequestQueueRecord }) {
-  return (
-    <section className="rounded-xl border border-[#d8e1ea] bg-white p-6 shadow-sm">
-      <PanelTitle
-        icon={<ClipboardList size={24} />}
-        eyebrow="Queue Workflow"
-        title="Operating Path"
-      />
-
-      <div className="mt-6 space-y-3">
-        {queue.workflowStages.map((stage, index) => (
-          <div
-            key={stage}
-            className="flex items-center gap-3 rounded-lg border border-[#d8e1ea] bg-[#f8fafc] p-4 text-sm font-black"
-          >
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#050816] text-xs font-black text-[#ffbf00]">
-              {index + 1}
-            </span>
-            {stage}
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function PanelTitle({
+function InfoPanel({
   icon,
-  eyebrow,
   title,
+  text,
 }: {
-  icon: ReactNode;
-  eyebrow: string;
+  icon: React.ReactNode;
   title: string;
+  text: string;
 }) {
   return (
-    <div className="flex items-start gap-4">
-      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#050816] text-[#ffbf00]">
-        {icon}
+    <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="flex items-center gap-4">
+        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#050816] text-[#ffc400]">
+          {icon}
+        </div>
+        <h3 className="text-xl font-black uppercase tracking-[0.25em]">
+          {title}
+        </h3>
       </div>
-      <div>
-        <p className="text-[11px] font-black uppercase tracking-[0.45em] text-[#94a3b8]">
-          {eyebrow}
-        </p>
-        <h2 className="mt-2 text-2xl font-black">{title}</h2>
-      </div>
-    </div>
+      <p className="mt-5 text-sm leading-7 text-slate-600">{text}</p>
+    </section>
   );
 }
 
@@ -436,36 +233,6 @@ function getQueueStatusClass(status: ServiceRequestQueueStatus) {
     case "Department Queue":
       return "bg-blue-100 text-blue-700";
     case "Restricted Queue":
-      return "bg-rose-100 text-rose-700";
-    default:
-      return "bg-slate-100 text-slate-700";
-  }
-}
-
-function getStatusPillClass(status: ServiceRequestStatus) {
-  switch (status) {
-    case "Open":
-      return "bg-emerald-100 text-emerald-700";
-    case "In Review":
-      return "bg-blue-100 text-blue-700";
-    case "Pending Routing":
-      return "bg-amber-100 text-amber-700";
-    case "Restricted Review":
-      return "bg-rose-100 text-rose-700";
-    case "Closed":
-      return "bg-slate-200 text-slate-600";
-    default:
-      return "bg-slate-200 text-slate-600";
-  }
-}
-
-function getPriorityPillClass(priority: ServiceRequestPriority) {
-  switch (priority) {
-    case "Normal":
-      return "bg-slate-100 text-slate-700";
-    case "High":
-      return "bg-amber-100 text-amber-700";
-    case "Restricted":
       return "bg-rose-100 text-rose-700";
     default:
       return "bg-slate-100 text-slate-700";
