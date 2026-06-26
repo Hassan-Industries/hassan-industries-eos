@@ -1,15 +1,16 @@
 import { Suspense } from "react";
 
 import ServiceRequestWorkspaceFrame from "@/components/service-requests/ServiceRequestWorkspaceFrame";
+
 import ServiceRequestIntakeClient from "./ServiceRequestIntakeClient";
 
 function ServiceRequestIntakeLoading() {
   return (
-    <div className="mx-auto max-w-[1680px] rounded-xl border border-[#d8e1ea] bg-white p-8 shadow-sm">
+    <section className="rounded-xl border border-[#d8e1ea] bg-white p-8 shadow-sm">
       <p className="text-sm font-black uppercase tracking-[0.35em] text-[#94a3b8]">
         Loading Service Request Intake
       </p>
-    </div>
+    </section>
   );
 }
 
