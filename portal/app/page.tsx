@@ -1,3 +1,1 @@
-import Home from "./dashboard/page";
-
-export default Home;
+import Home from"./dashboard/page"; export default Home;

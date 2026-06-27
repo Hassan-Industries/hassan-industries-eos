@@ -1,155 +1,39 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import {
-  BookOpen,
-  Building2,
-  ClipboardList,
-  FileText,
-  FolderOpen,
-  Gavel,
-  Headphones,
-  Landmark,
-  LayoutDashboard,
-  Mail,
-  Scale,
-  Settings,
-  ShieldCheck,
-} from "lucide-react";
+import { Bell, Search } from "lucide-react";
 
-type SidebarItem = {
-  label: string;
-  href: string;
-  icon: typeof LayoutDashboard;
-};
-
-const sidebarItems: SidebarItem[] = [
-  {
-    label: "Dashboard",
-    href: "/",
-    icon: LayoutDashboard,
-  },
-  {
-    label: "Governance Library",
-    href: "/governance-library",
-    icon: BookOpen,
-  },
-  {
-    label: "Administration",
-    href: "/administration",
-    icon: Settings,
-  },
-  {
-    label: "Treasury",
-    href: "/treasury",
-    icon: Landmark,
-  },
-  {
-    label: "Legal",
-    href: "/legal",
-    icon: Scale,
-  },
-  {
-    label: "Tax",
-    href: "/tax",
-    icon: ShieldCheck,
-  },
-  {
-    label: "Corporate Records",
-    href: "/corporate-records",
-    icon: FolderOpen,
-  },
-  {
-    label: "Correspondence",
-    href: "/correspondence",
-    icon: Mail,
-  },
-  {
-    label: "Technology",
-    href: "/technology",
-    icon: ShieldCheck,
-  },
-  {
-    label: "Entity Management",
-    href: "/entity-management",
-    icon: Building2,
-  },
-  {
-    label: "Publications",
-    href: "/governance-library/publications",
-    icon: FileText,
-  },
-  {
-    label: "Resolutions",
-    href: "/governance-library/registers/resolutions",
-    icon: Gavel,
-  },
-  {
-    label: "Service Requests",
-    href: "/service-requests",
-    icon: Headphones,
-  },
-  {
-    label: "Implementation Center",
-    href: "/implementation-center",
-    icon: ClipboardList,
-  },
-];
-
-function isActivePath(pathname: string, href: string) {
-  if (href === "/") {
-    return pathname === "/";
-  }
-
-  return pathname === href || pathname.startsWith(`${href}/`);
-}
-
-export default function Sidebar() {
-  const pathname = usePathname();
-
+export default function Topbar() {
   return (
-    <aside className="fixed inset-y-0 left-0 z-40 hidden w-[280px] flex-col bg-[#071426] text-white shadow-xl lg:flex">
-      <div className="border-b border-white/10 px-5 py-6">
-        <Link href="/" className="block">
-          <p className="text-xl font-black uppercase tracking-[0.08em] text-[#ffbf00]">
-            Hassan Industries
+    <header className="sticky top-0 z-30 border-b border-[#1b2a3d] bg-[#071426]">
+      <div className="flex h-[88px] items-center justify-between gap-6 px-4 sm:px-6 lg:px-8">
+        <div>
+          <h1 className="text-2xl font-black uppercase tracking-[0.04em] text-white sm:text-3xl">
+            Enterprise Operations Center
+          </h1>
+          <p className="mt-1 text-sm font-medium text-white">
+            Unified. Governed. Purpose-Driven.
           </p>
-          <p className="mt-2 text-xs font-bold uppercase tracking-[0.38em] text-white">
-            Enterprise Operating System
-          </p>
-        </Link>
-      </div>
-
-      <nav className="flex-1 overflow-y-auto px-3 py-5">
-        <div className="space-y-1">
-          {sidebarItems.map((item) => {
-            const Icon = item.icon;
-            const active = isActivePath(pathname, item.href);
-
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={[
-                  "flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-bold transition",
-                  active
-                    ? "bg-[#ffbf00] text-[#050816] shadow-sm"
-                    : "text-white hover:bg-white/10",
-                ].join(" ")}
-              >
-                <Icon size={18} />
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
         </div>
-      </nav>
 
-      <div className="border-t border-white/10 px-5 py-5">
-        <p className="text-xs font-black text-[#ffbf00]">Hassan Industries</p>
-        <p className="text-xs text-slate-300">Building Generations of Legacy</p>
+        <div className="hidden items-center gap-4 md:flex">
+          <div className="flex h-10 w-44 items-center gap-2 rounded-lg bg-[#1b2a3d] px-4 text-sm text-white">
+            <Search size={16} />
+            <span>Search HIEOS...</span>
+          </div>
+
+          <button
+            type="button"
+            aria-label="Notifications"
+            className="flex h-10 w-10 items-center justify-center rounded-full text-white transition hover:bg-[#1b2a3d]"
+          >
+            <Bell size={18} />
+          </button>
+
+          <div className="flex h-11 w-11 items-center justify-center rounded-full border border-[#ffbf00] text-sm font-black text-[#ffbf00]">
+            JH
+          </div>
+        </div>
       </div>
-    </aside>
+    </header>
   );
 }

@@ -1,5 +1,1 @@
-import EGLResolutionsRegistryShell from "@/components/governance-library/EGLResolutionsRegistryShell";
-
-export default function ResolutionsPage() {
-  return <EGLResolutionsRegistryShell />;
-}
+import EGLResolutionsRegistryShell from"@/components/governance-library/EGLResolutionsRegistryShell"; export default function ResolutionsPage() { return <EGLResolutionsRegistryShell />; }

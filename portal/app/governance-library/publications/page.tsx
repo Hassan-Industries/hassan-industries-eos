@@ -1,11 +1,1 @@
-import { Suspense } from "react";
-
-import EGLPublicationsRegistryShell from "@/components/governance-library/EGLPublicationsRegistryShell";
-
-export default function PublicationsRegistryPage() {
-  return (
-    <Suspense fallback={<div className="min-h-screen bg-slate-100" />}>
-      <EGLPublicationsRegistryShell />
-    </Suspense>
-  );
-}
+import { Suspense } from"react"; import EGLPublicationsRegistryShell from"@/components/governance-library/EGLPublicationsRegistryShell"; export default function PublicationsRegistryPage() { return ( <Suspense fallback={<div className="min-h-screen bg-slate-100" />}> <EGLPublicationsRegistryShell /> </Suspense> ); }
