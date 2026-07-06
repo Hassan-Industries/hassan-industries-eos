@@ -799,3 +799,38 @@ Added and stablized the Service Request Action Workspace for controlled frontend
 - Confirmed Service Request pages align properly with the EOS sidebar layout.
 - Confirmed clipboard/copy request ID control compiles and remains functional.
 - Confirmed frontend-only scope remains intact.
+
+### HIEOS-IMP-007F-4 — Universal Shell and Service Route Repair
+
+- Standardized the HIEOS application shell so `app/layout.tsx` owns the enterprise Sidebar and Topbar globally.
+- Updated Sidebar and Topbar to render only when called by the root shell, making legacy page-level imports harmless during transition.
+- Repaired active navigation logic so only one sidebar item is highlighted per route.
+- Corrected Resolutions routing to the canonical Governance Library resolutions registry and added `/resolutions` redirect protection.
+- Restored Service Request Desk, Create Request, and Routing Queue page rendering.
+- Added Suspense fallback protection for Service Request intake search-parameter usage.
+- Hid sidebar scrollbar visually while preserving scrolling.
+- Removed invalid JSX whitespace nodes from EGL table components to prevent hydration errors.
+- Preserved existing dashboard and Governance Library functionality while stabilizing future route-shell implementation standards.
+
+## HIEOS-IMP-007F-3 — Service Request Route Shell Standardization Correction Pack
+
+### Fixed
+- Restored visible Service Request Desk route content.
+- Restored Service Request Intake route shell behavior.
+- Corrected Service Request workspace frame so service-request routes render inside the universal shell without duplicating sidebar/topbar.
+- Removed table-based markup from EGL Resolutions Registry to prevent Next.js hydration errors caused by whitespace text nodes inside table structures.
+- Removed table-based markup from EGL module shell pages used by pending review and pending execution.
+- Corrected dark primary action button readability by enforcing white text and amber icon styling on navy action controls.
+- Removed unused `ShieldCheck` import from the resolutions registry shell.
+- Replaced the typed status-label helper call with the existing `record.statusLabel` field to resolve the TypeScript build failure.
+
+### Improved
+- Standardized Service Request pages around card/grid layouts instead of fragile table markup.
+- Improved consistency between Service Requests, Resolutions, and existing EGL publication-style pages.
+- Reduced risk of future shell/sidebar duplication by keeping corrected route components content-only under the universal EOC shell.
+- Improved build stability by avoiding unnecessary helper typing where the static record already contains the resolved display label.
+
+### Validation
+- `npm run lint`
+- `npm run build`
+- Manual route review across Service Requests, Service Request Intake, Queue Detail, Resolutions Registry, Resolution Detail, Pending Review, and Pending Execution.

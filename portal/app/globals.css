@@ -3,6 +3,12 @@
 :root {
   --background: #eaf0f5;
   --foreground: #050816;
+  --hieos-navy: #050816;
+  --hieos-navy-2: #081528;
+  --hieos-gold: #ffbf00;
+  --hieos-orange: #ff8a00;
+  --hieos-border: #d8e1ea;
+  --hieos-muted: #48617e;
 }
 
 @theme inline {
@@ -17,15 +23,22 @@
 }
 
 html {
-  background: #eaf0f5;
+  min-height: 100%;
+  background: var(--background);
+  scroll-behavior: smooth;
 }
 
 body {
+  min-height: 100%;
   margin: 0;
-  min-height: 100vh;
-  background: #eaf0f5;
-  color: #050816;
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
 }
 
 button,
@@ -35,16 +48,65 @@ textarea {
   font: inherit;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+button {
+  cursor: pointer;
 }
 
-.eoc-sidebar-scroll {
+button:disabled {
+  cursor: not-allowed;
+}
+
+::selection {
+  background: rgba(255, 191, 0, 0.35);
+  color: #050816;
+}
+
+/* Hide internal sidebar scrollbar while preserving scroll behavior */
+.hieos-sidebar-scroll {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
 
-.eoc-sidebar-scroll::-webkit-scrollbar {
+.hieos-sidebar-scroll::-webkit-scrollbar {
   display: none;
+}
+
+/* Stable horizontal overflow for enterprise tables / registers */
+.hieos-horizontal-scroll {
+  scrollbar-color: #94a3b8 transparent;
+  scrollbar-width: thin;
+}
+
+/* Prevent browser default purple link styling from bleeding into route shells */
+.hieos-link-reset,
+.hieos-link-reset a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Primary navy buttons must stay readable on every module page */
+.hieos-primary-action {
+  background: #050816;
+  color: #ffffff;
+}
+
+.hieos-primary-action svg {
+  color: #ffbf00;
+}
+
+.hieos-primary-action:hover {
+  background: #101827;
+}
+
+/* Dashboard and shell cards */
+.hieos-card {
+  border: 1px solid #d8e1ea;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(5, 8, 22, 0.08);
+}
+
+/* Removes browser focus ugliness while keeping clear keyboard focus */
+:focus-visible {
+  outline: 2px solid #ff8a00;
+  outline-offset: 2px;
 }
