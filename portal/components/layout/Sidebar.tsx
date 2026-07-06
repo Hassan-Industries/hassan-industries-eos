@@ -19,6 +19,11 @@ import {
   ShieldCheck,
   type LucideIcon,
 } from "lucide-react";
+import { useShellActive } from "@/components/layout/ShellContext";
+
+type SidebarProps = {
+  shellOwner?: "root" | "page";
+};
 
 type SidebarItem = {
   label: string;
@@ -70,8 +75,13 @@ function isActivePath(pathname: string, item: SidebarItem) {
   return pathname === item.href || pathname.startsWith(`${item.href}/`);
 }
 
-export default function Sidebar() {
+export default function Sidebar({ shellOwner = "page" }: SidebarProps) {
   const pathname = usePathname();
+  const shellActive = useShellActive();
+
+  if (shellActive && shellOwner !== "root") {
+    return null;
+  }
 
   return (
     <aside className="fixed inset-y-0 left-0 z-40 hidden w-[280px] border-r border-[#1b2a3d] bg-[#071426] text-white shadow-xl lg:flex lg:flex-col">
@@ -115,7 +125,9 @@ export default function Sidebar() {
 
       <div className="border-t border-[#1b2a3d] px-5 py-6">
         <p className="text-xs font-black text-[#ffbf00]">Hassan Industries</p>
-        <p className="mt-1 text-xs text-[#b7c4d6]">Building Generations of Legacy</p>
+        <p className="mt-1 text-xs text-[#b7c4d6]">
+          Building Generations of Legacy
+        </p>
       </div>
     </aside>
   );

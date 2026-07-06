@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
+import { ShellProvider } from "@/components/layout/ShellContext";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -24,5 +25,25 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <html lang="en" suppressHydrationWarning><body suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable} bg-[#eaf0f5] text-[#050816] antialiased`}><div className="min-h-screen bg-[#eaf0f5]"><Sidebar /><div className="min-h-screen lg:pl-[280px]"><Topbar /><main className="min-h-[calc(100vh-88px)] bg-[#eaf0f5] px-4 py-6 sm:px-6 lg:px-8">{children}</main></div></div></body></html>;
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body
+        suppressHydrationWarning
+        className={`${geistSans.variable} ${geistMono.variable} bg-[#eaf0f5] text-[#050816] antialiased`}
+      >
+        <ShellProvider>
+          <div className="min-h-screen bg-[#eaf0f5]">
+            <Sidebar shellOwner="root" />
+
+            <div className="min-h-screen lg:pl-[280px]">
+             <Topbar />
+              <main className="min-h-[calc(100vh-88px)] bg-[#eaf0f5] px-4 py-6 sm:px-6 lg:px-8">
+                {children}
+              </main>
+            </div>
+          </div>
+        </ShellProvider>
+      </body>
+    </html>
+  );
 }

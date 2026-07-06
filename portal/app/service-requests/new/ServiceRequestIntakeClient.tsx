@@ -1,1 +1,1135 @@
-"use client"; import Link from"next/link"; import { useMemo, useState } from"react"; import { useSearchParams } from"next/navigation"; import { ArrowLeft, CheckCircle2, ClipboardList, Copy, FileUp, FolderOpen, RotateCcw, Route, Send, ShieldCheck, SlidersHorizontal, } from"lucide-react"; import { getServiceRequestQueueById, serviceRequestQueues, serviceRequestRecords, type ServiceRequestPriority, type ServiceRequestQueueRecord, } from"@/data/serviceRequests"; type IntakeChannel = |"Internal EOS Intake" |"Executive Prepared Intake" |"Department Prepared Intake" |"Third-Party / Client Intake"; type RelatedRecordOption = { id: string; label: string; type: string; }; type QueueDefault = { requester: string; department: string; category: string; classification: string; priority: ServiceRequestPriority; intakeChannel: IntakeChannel; requestedAction: string; titlePlaceholder: string; }; const requesterOptions = ["Executive Operations","HCA","Corporate Records","Treasury","Administration","Legal","Tax","Technology","Third-Party / Client", ]; const departmentOptions = ["Executive Operations","Governance Library","Corporate Records","Treasury","HCA Review","HCP Restricted","Administration","Legal","Tax","Technology","Entity Management","Third-Party / Client", ]; const categoryOptions = ["Administrative Support","Publication Intake","Certified Copy","Document Replacement","Governance Review","Treasury Support","Records Review","Parent-Level Review","External Support Request", ]; const classificationOptions = ["Internal Governance","Confidential","Restricted Internal","External Intake","Training / Administrative", ]; const priorityOptions: ServiceRequestPriority[] = ["Normal","High","Restricted", ]; const intakeChannelOptions: IntakeChannel[] = ["Internal EOS Intake","Executive Prepared Intake","Department Prepared Intake","Third-Party / Client Intake", ]; const requestedActionOptions = ["Prepare intake review","Route to assigned department queue","Verify source record","Prepare certified-copy review","Prepare document replacement review","Route for treasury review","Route for restricted HCA review","Route for HCP restricted review","Assign owner for follow-up","Prepare filing or recordkeeping action","Escalate for executive review", ]; const queueDefaults: Record<string, QueueDefault> = {"governance-library-intake": { requester:"Executive Operations", department:"Governance Library", category:"Publication Intake", classification:"Internal Governance", priority:"Normal", intakeChannel:"Internal EOS Intake", requestedAction:"Prepare intake review", titlePlaceholder:"Example: EGL publication intake request", },"corporate-records-review": { requester:"Corporate Records", department:"Corporate Records", category:"Certified Copy", classification:"Confidential", priority:"Normal", intakeChannel:"Department Prepared Intake", requestedAction:"Verify source record", titlePlaceholder:"Example: Certified copy issuance request", },"treasury-review": { requester:"Treasury", department:"Treasury", category:"Treasury Support", classification:"Confidential", priority:"High", intakeChannel:"Department Prepared Intake", requestedAction:"Route for treasury review", titlePlaceholder:"Example: Treasury document replacement request", },"restricted-hca-review": { requester:"Executive Operations", department:"HCA Review", category:"Governance Review", classification:"Restricted Internal", priority:"Restricted", intakeChannel:"Executive Prepared Intake", requestedAction:"Route for restricted HCA review", titlePlaceholder:"Example: Restricted HCA governance review", },"hcp-restricted-review": { requester:"Executive Operations", department:"HCP Restricted", category:"Parent-Level Review", classification:"Restricted Internal", priority:"Restricted", intakeChannel:"Executive Prepared Intake", requestedAction:"Route for HCP restricted review", titlePlaceholder:"Example: HCP parent-level restricted review", },"administration-desk": { requester:"Executive Operations", department:"Administration", category:"Administrative Support", classification:"Internal Governance", priority:"Normal", intakeChannel:"Internal EOS Intake", requestedAction:"Route to assigned department queue", titlePlaceholder:"Example: Administrative workflow clarification", }, }; function fallbackQueue() { return getServiceRequestQueueById("administration-desk") ?? serviceRequestQueues[0]; } function getQueueDefault(queue: ServiceRequestQueueRecord) { return queueDefaults[queue.id] ?? queueDefaults["administration-desk"]; } function resolveRecommendedQueue( department: string, category: string, classification: string, ) { if (department ==="HCP Restricted" || category ==="Parent-Level Review") { return getServiceRequestQueueById("hcp-restricted-review") ?? fallbackQueue(); } if ( department ==="HCA Review" || category ==="Governance Review" || classification ==="Restricted Internal" ) { return getServiceRequestQueueById("restricted-hca-review") ?? fallbackQueue(); } if (department ==="Treasury" || category ==="Treasury Support") { return getServiceRequestQueueById("treasury-review") ?? fallbackQueue(); } if ( department ==="Corporate Records" || category ==="Certified Copy" || category ==="Records Review" ) { return getServiceRequestQueueById("corporate-records-review") ?? fallbackQueue(); } if ( department ==="Governance Library" || category ==="Publication Intake" || category ==="Document Replacement" ) { return getServiceRequestQueueById("governance-library-intake") ?? fallbackQueue(); } return fallbackQueue(); } function getRelatedRecordOptions( department: string, category: string, classification: string, ): RelatedRecordOption[] { const options = new Map<string, RelatedRecordOption>(); options.set("N/A", { id:"N/A", label:"N/A — No existing record selected", type:"None", }); serviceRequestRecords.forEach((request) => { const relatedRecordId = request.relatedRecord; if (!relatedRecordId || relatedRecordId ==="Pending") { return; } const departmentMatch = request.department === department; const categoryMatch = request.category === category; const classificationMatch = request.classification === classification; if (!departmentMatch && !categoryMatch && !classificationMatch) { return; } options.set(relatedRecordId, { id: relatedRecordId, label: `${relatedRecordId} — ${request.relatedRecordTitle}`, type: request.relatedRecordType, }); }); return Array.from(options.values()); } function inputClass() { return"h-12 w-full rounded-lg border border-[#c8d3df] bg-white px-4 text-sm font-black text-[#050816] outline-none transition placeholder:text-[#7d8999] focus:border-[#ff8a00] focus:ring-2 focus:ring-[#ff8a00]/20"; } function labelClass() { return"mb-2 block text-[11px] font-black uppercase tracking-[0.35em] text-[#64748b]"; } export default function ServiceRequestIntakeClient() { const searchParams = useSearchParams(); const queueParam = searchParams.get("queue") ?? searchParams.get("queueId"); const startingQueue = getServiceRequestQueueById(queueParam ??"") ?? fallbackQueue(); const startingDefaults = getQueueDefault(startingQueue); const [requestTitle, setRequestTitle] = useState(""); const [requester, setRequester] = useState(startingDefaults.requester); const [department, setDepartment] = useState(startingDefaults.department); const [category, setCategory] = useState(startingDefaults.category); const [classification, setClassification] = useState( startingDefaults.classification, ); const [priority, setPriority] = useState<ServiceRequestPriority>( startingDefaults.priority, ); const [intakeChannel, setIntakeChannel] = useState<IntakeChannel>( startingDefaults.intakeChannel, ); const [relatedRecord, setRelatedRecord] = useState("N/A"); const [requestedAction, setRequestedAction] = useState( startingDefaults.requestedAction, ); const [dueDate, setDueDate] = useState(""); const [summary, setSummary] = useState(""); const [selectedFiles, setSelectedFiles] = useState<File[]>([]); const [prepared, setPrepared] = useState(false); const [copied, setCopied] = useState(false); const recommendedQueue = useMemo( () => resolveRecommendedQueue(department, category, classification), [department, category, classification], ); const relatedRecordOptions = useMemo( () => getRelatedRecordOptions(department, category, classification), [department, category, classification], ); const effectiveRelatedRecord = relatedRecordOptions.some( (option) => option.id === relatedRecord, ) ? relatedRecord :"N/A"; const selectedRelatedRecord = relatedRecordOptions.find((option) => option.id === effectiveRelatedRecord) ?? relatedRecordOptions[0]; function updateDepartment(nextDepartment: string) { setPrepared(false); setDepartment(nextDepartment); setRelatedRecord("N/A"); if (nextDepartment ==="Treasury") { setCategory("Treasury Support"); setPriority("High"); setRequestedAction("Route for treasury review"); } if (nextDepartment ==="Corporate Records") { setCategory("Certified Copy"); setRequestedAction("Verify source record"); } if (nextDepartment ==="Governance Library") { setCategory("Publication Intake"); setRequestedAction("Prepare intake review"); } if (nextDepartment ==="HCA Review") { setCategory("Governance Review"); setClassification("Restricted Internal"); setPriority("Restricted"); setRequestedAction("Route for restricted HCA review"); } if (nextDepartment ==="HCP Restricted") { setCategory("Parent-Level Review"); setClassification("Restricted Internal"); setPriority("Restricted"); setRequestedAction("Route for HCP restricted review"); } if (nextDepartment ==="Administration") { setCategory("Administrative Support"); setRequestedAction("Route to assigned department queue"); } if (nextDepartment ==="Third-Party / Client") { setCategory("External Support Request"); setClassification("External Intake"); setIntakeChannel("Third-Party / Client Intake"); setRequestedAction("Assign owner for follow-up"); } } function updateCategory(nextCategory: string) { setPrepared(false); setCategory(nextCategory); setRelatedRecord("N/A"); if (nextCategory ==="Treasury Support") { setDepartment("Treasury"); setPriority("High"); setRequestedAction("Route for treasury review"); } if (nextCategory ==="Certified Copy" || nextCategory ==="Records Review") { setDepartment("Corporate Records"); setRequestedAction("Verify source record"); } if ( nextCategory ==="Publication Intake" || nextCategory ==="Document Replacement" ) { setDepartment("Governance Library"); setRequestedAction( nextCategory ==="Document Replacement" ?"Prepare document replacement review" :"Prepare intake review", ); } if (nextCategory ==="Governance Review") { setDepartment("HCA Review"); setClassification("Restricted Internal"); setPriority("Restricted"); setRequestedAction("Route for restricted HCA review"); } if (nextCategory ==="Parent-Level Review") { setDepartment("HCP Restricted"); setClassification("Restricted Internal"); setPriority("Restricted"); setRequestedAction("Route for HCP restricted review"); } if (nextCategory ==="External Support Request") { setIntakeChannel("Third-Party / Client Intake"); setRequestedAction("Assign owner for follow-up"); } } function updatePriority(nextPriority: ServiceRequestPriority) { setPrepared(false); setPriority(nextPriority); if (nextPriority !=="High") { setDueDate(""); } if (nextPriority ==="Restricted") { setClassification("Restricted Internal"); } } function resetDraft() { setRequestTitle(""); setRequester(startingDefaults.requester); setDepartment(startingDefaults.department); setCategory(startingDefaults.category); setClassification(startingDefaults.classification); setPriority(startingDefaults.priority); setIntakeChannel(startingDefaults.intakeChannel); setRelatedRecord("N/A"); setRequestedAction(startingDefaults.requestedAction); setDueDate(""); setSummary(""); setSelectedFiles([]); setPrepared(false); setCopied(false); } async function copyDraftPacket() { const draftPacket = ["SERVICE REQUEST DRAFT PACKET", `Title: ${requestTitle ||"Pending"}`, `Requester: ${requester}`, `Department: ${department}`, `Category: ${category}`, `Classification: ${classification}`, `Priority: ${priority}`, `Intake Channel: ${intakeChannel}`, `Related Record: ${effectiveRelatedRecord}`, `Reference Type: ${selectedRelatedRecord?.type ??"None"}`, `Requested Action: ${requestedAction}`, `Recommended Queue: ${recommendedQueue.title}`, `Queue Owner: ${recommendedQueue.owner}`, priority ==="High" ? `Due Date: ${dueDate ||"Pending"}` : null, `Summary: ${summary ||"Pending"}`, `Selected Files: ${ selectedFiles.length > 0 ? selectedFiles.map((file) => file.name).join(",") :"None" }`, ] .filter(Boolean) .join("\n"); if (typeof navigator !=="undefined" && navigator.clipboard) { await navigator.clipboard.writeText(draftPacket); } setCopied(true); window.setTimeout(() => setCopied(false), 1600); } const controlChecks = [ { label:"Request title entered", complete: requestTitle.trim().length > 0, }, { label:"Requester identified", complete: requester.trim().length > 0, }, { label:"Department / desk selected", complete: department.trim().length > 0, }, { label:"Category selected", complete: category.trim().length > 0, }, { label:"Classification selected", complete: classification.trim().length > 0, }, { label:"Related record selected or marked N/A", complete: effectiveRelatedRecord.trim().length > 0, }, { label:"Requested action selected", complete: requestedAction.trim().length > 0, }, { label:"Request summary documented", complete: summary.trim().length > 0, }, { label:"High priority due date selected when required", complete: priority !=="High" || dueDate.trim().length > 0, }, ]; const completedChecks = controlChecks.filter((check) => check.complete).length; return ( <div className="mx-auto max-w-[1680px] space-y-6"> <section className="rounded-xl bg-[#050816] p-6 text-white shadow-sm lg:p-8"> <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between"> <div> <p className="text-[11px] font-black uppercase tracking-[0.45em] text-[#ffbf00]"> Hassan Industries </p> <h1 className="mt-4 text-3xl font-black uppercase tracking-tight lg:text-4xl"> Create Service Request </h1> <p className="mt-4 max-w-5xl text-sm font-semibold leading-7 text-white"> Controlled frontend intake workspace for preparing request metadata, routing recommendation, classification, file attachments, and future workflow handoff. </p> </div> <div className="rounded-lg border border-[#ffbf00] bg-[#101827] px-8 py-5 text-center"> <p className="text-[11px] font-black uppercase tracking-[0.45em] text-white"> Intake Status </p> <p className="mt-3 text-3xl font-black text-[#ffbf00]">Draft</p> <p className="mt-1 text-xs font-black text-white"> Frontend Preparation </p> </div> </div> </section> <div className="flex flex-wrap gap-3"> <Link href="/service-requests" className="inline-flex h-11 items-center gap-2 rounded-lg border border-[#c8d3df] bg-white px-5 text-sm font-black text-[#050816] shadow-sm transition hover:border-[#ff8a00]" > <ArrowLeft size={16} className="text-[#ff8a00]" /> Service Requests Desk </Link> <Link href="/service-requests/queues" className="inline-flex h-11 items-center gap-2 rounded-lg border border-[#c8d3df] bg-white px-5 text-sm font-black text-[#050816] shadow-sm transition hover:border-[#ff8a00]" > <Route size={16} className="text-[#ff8a00]" /> Routing Queues </Link> <Link href="/" className="inline-flex h-11 items-center gap-2 rounded-lg border border-[#c8d3df] bg-white px-5 text-sm font-black text-[#050816] shadow-sm transition hover:border-[#ff8a00]" > <FolderOpen size={16} className="text-[#ff8a00]" /> Dashboard </Link> </div> <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_390px]"> <div className="min-w-0 space-y-6"> <section className="rounded-xl border border-[#d8e1ea] bg-white p-6 shadow-sm"> <div className="flex items-start gap-4"> <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#050816] text-[#ffbf00]"> <ClipboardList size={24} /> </div> <div> <p className="text-[11px] font-black uppercase tracking-[0.45em] text-[#94a3b8]"> Service Request Intake </p> <h2 className="mt-2 text-3xl font-black"> New Service Request </h2> <p className="mt-3 text-sm leading-7 text-[#33445c]"> This page prepares a governed request package only. It does not submit, save, route, assign, notify, or upload to backend storage yet. </p> </div> </div> </section> <section className="overflow-hidden rounded-xl border border-[#d8e1ea] bg-white shadow-sm"> <div className="border-b border-[#d8e1ea] p-6"> <p className="text-[11px] font-black uppercase tracking-[0.45em] text-[#94a3b8]"> Intake Form </p> <h2 className="mt-2 text-2xl font-black">Request Metadata</h2> </div> <div className="grid gap-5 p-6 lg:grid-cols-3"> <div className="lg:col-span-2"> <label className={labelClass()} htmlFor="request-title"> Request Title * </label> <input id="request-title" value={requestTitle} onChange={(event) => { setPrepared(false); setRequestTitle(event.target.value); }} placeholder={startingDefaults.titlePlaceholder} className={inputClass()} /> </div> <div> <label className={labelClass()} htmlFor="requester"> Requester * </label> <select id="requester" value={requester} onChange={(event) => { setPrepared(false); setRequester(event.target.value); }} className={inputClass()} > {requesterOptions.map((option) => ( <option key={option}>{option}</option> ))} </select> </div> <div> <label className={labelClass()} htmlFor="department"> Department / Desk </label> <select id="department" value={department} onChange={(event) => updateDepartment(event.target.value)} className={inputClass()} > {departmentOptions.map((option) => ( <option key={option}>{option}</option> ))} </select> </div> <div> <label className={labelClass()} htmlFor="category"> Request Category </label> <select id="category" value={category} onChange={(event) => updateCategory(event.target.value)} className={inputClass()} > {categoryOptions.map((option) => ( <option key={option}>{option}</option> ))} </select> </div> <div> <label className={labelClass()} htmlFor="classification"> Classification </label> <select id="classification" value={classification} onChange={(event) => { setPrepared(false); setClassification(event.target.value); setRelatedRecord("N/A"); if (event.target.value ==="Restricted Internal") { setPriority("Restricted"); } }} className={inputClass()} > {classificationOptions.map((option) => ( <option key={option}>{option}</option> ))} </select> </div> <div> <label className={labelClass()} htmlFor="priority"> Priority </label> <select id="priority" value={priority} onChange={(event) => updatePriority(event.target.value as ServiceRequestPriority) } className={inputClass()} > {priorityOptions.map((option) => ( <option key={option}>{option}</option> ))} </select> </div> <div> <label className={labelClass()} htmlFor="intake-channel"> Intake Channel </label> <select id="intake-channel" value={intakeChannel} onChange={(event) => { setPrepared(false); setIntakeChannel(event.target.value as IntakeChannel); }} className={inputClass()} > {intakeChannelOptions.map((option) => ( <option key={option}>{option}</option> ))} </select> </div> <div> <label className={labelClass()} htmlFor="related-record"> Related Record </label> <select id="related-record" value={effectiveRelatedRecord} onChange={(event) => { setPrepared(false); setRelatedRecord(event.target.value); }} className={inputClass()} > {relatedRecordOptions.map((record) => ( <option key={record.id} value={record.id}> {record.label} </option> ))} </select> </div> <div className={priority ==="High" ?"lg:col-span-2" :"lg:col-span-3"}> <label className={labelClass()} htmlFor="requested-action"> Requested Action * </label> <select id="requested-action" value={requestedAction} onChange={(event) => { setPrepared(false); setRequestedAction(event.target.value); }} className={inputClass()} > {requestedActionOptions.map((option) => ( <option key={option}>{option}</option> ))} </select> </div> {priority ==="High" ? ( <div> <label className={labelClass()} htmlFor="due-date"> Due Date </label> <input id="due-date" type="date" value={dueDate} onChange={(event) => { setPrepared(false); setDueDate(event.target.value); }} className={inputClass()} /> </div> ) : null} <div className="lg:col-span-3"> <label className={labelClass()} htmlFor="summary"> Request Summary * </label> <textarea id="summary" value={summary} onChange={(event) => { setPrepared(false); setSummary(event.target.value); }} placeholder="Describe the issue, purpose, requested outcome, and why this request needs routing." className="min-h-28 w-full resize-y rounded-lg border border-[#c8d3df] bg-white px-4 py-3 text-sm font-semibold text-[#050816] outline-none transition placeholder:text-[#7d8999] focus:border-[#ff8a00] focus:ring-2 focus:ring-[#ff8a00]/20" /> </div> <div className="lg:col-span-3"> <label className={labelClass()} htmlFor="service-request-files"> File Attachments </label> <input id="service-request-files" type="file" multiple className="sr-only" onChange={(event) => { setPrepared(false); setSelectedFiles(Array.from(event.target.files ?? [])); }} /> <label htmlFor="service-request-files" className="flex min-h-28 cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-[#c8d3df] bg-[#f8fafc] px-4 py-6 text-center transition hover:border-[#ff8a00] hover:bg-[#fffaf0]" > <FileUp className="mb-3 h-7 w-7 text-[#ff8a00]" /> <span className="text-sm font-black text-[#050816]"> Select documents, screenshots, emails, records, or supporting files </span> <span className="mt-1 text-xs font-semibold text-[#62708a]"> Frontend only — selected files are not uploaded or stored yet. </span> </label> {selectedFiles.length > 0 ? ( <div className="mt-3 rounded-lg border border-[#d8e1ea] bg-white p-4"> <p className="mb-2 text-[11px] font-black uppercase tracking-[0.35em] text-[#94a3b8]"> Selected Files </p> <div className="space-y-2"> {selectedFiles.map((file) => ( <div key={`${file.name}-${file.size}`} className="flex items-center justify-between gap-3 rounded-md border border-[#d8e1ea] bg-[#f8fafc] px-3 py-2 text-sm font-bold text-[#050816]" > <span className="min-w-0 truncate">{file.name}</span> <span className="shrink-0 text-xs text-[#64748b]"> {(file.size / 1024).toFixed(1)} KB </span> </div> ))} </div> </div> ) : null} </div> </div> </section> <div className="grid gap-6 lg:grid-cols-2"> <section className="rounded-xl border border-[#d8e1ea] bg-white p-6 shadow-sm"> <div className="mb-5 flex items-center gap-4"> <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#050816] text-[#ffbf00]"> <SlidersHorizontal className="h-6 w-6" /> </div> <h2 className="text-2xl font-black uppercase tracking-[0.3em] text-[#050816]"> Intake Steps </h2> </div> <div className="space-y-3"> {["Identify request purpose","Select department or operating desk","Confirm requester and owner","Classify access level and routing sensitivity","Select related record or mark N/A","Attach supporting files when available","Route for review, approval, execution, or filing", ].map((step, index) => ( <div key={step} className="flex items-center gap-4 rounded-lg border border-[#d8e1ea] bg-[#f8fafc] p-4" > <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#050816] text-sm font-black text-[#ffbf00]"> {index + 1} </span> <span className="text-sm font-black text-[#050816]"> {step} </span> </div> ))} </div> </section> <section className="rounded-xl border border-[#d8e1ea] bg-white p-6 shadow-sm"> <div className="mb-5 flex items-center gap-4"> <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#050816] text-[#ffbf00]"> <ShieldCheck className="h-6 w-6" /> </div> <h2 className="text-2xl font-black uppercase tracking-[0.25em] text-[#050816]"> Control Checklist </h2> </div> <div className="space-y-3"> {controlChecks.map((check) => ( <div key={check.label} className={ check.complete ?"flex items-center gap-3 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm font-black text-emerald-700" :"flex items-center gap-3 rounded-lg border border-[#d8e1ea] bg-white p-4 text-sm font-black text-[#050816]" } > <CheckCircle2 className={ check.complete ?"h-4 w-4 text-emerald-600" :"h-4 w-4 text-[#ff8a00]" } /> {check.label} </div> ))} </div> </section> </div> </div> <aside className="min-w-0 space-y-5 xl:sticky xl:top-6 xl:self-start"> <p className="text-[11px] font-black uppercase tracking-[0.55em] text-[#94a3b8]"> Controlled Request Intake </p> <section className="rounded-xl border border-[#d8e1ea] bg-white p-6 shadow-sm"> <h2 className="mb-5 text-2xl font-black uppercase tracking-[0.32em] text-[#050816]"> Intake Actions </h2> <p className="mb-5 text-sm leading-7 text-[#33445c]"> These controls prepare the request package only. They do not submit or create a backend record. </p> <div className="space-y-3"> <ActionButton primary onClick={() => setPrepared(true)}> <Send className="h-4 w-4 text-[#ffbf00]" /> Prepare Intake Review </ActionButton> <ActionButton onClick={copyDraftPacket}> <Copy className="h-4 w-4 text-[#ff8a00]" /> {copied ?"Draft Packet Copied" :"Copy Draft Packet"} </ActionButton> <ActionButton onClick={resetDraft}> <RotateCcw className="h-4 w-4 text-[#ff8a00]" /> Reset Draft </ActionButton> <Link href="/service-requests" className="flex h-12 w-full items-center justify-center rounded-lg border border-[#c8d3df] bg-white px-4 text-sm font-black text-[#050816] transition hover:border-[#ff8a00]" > Return to Service Requests Desk </Link> </div> {prepared ? ( <div className="mt-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-bold leading-6 text-blue-700"> Intake package prepared in the frontend workspace. No backend submission occurred. </div> ) : null} </section> <section className="rounded-xl border border-[#d8e1ea] bg-white p-6 shadow-sm"> <div className="mb-5 flex items-start gap-4"> <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#050816] text-[#ffbf00]"> <Route className="h-6 w-6" /> </div> <div> <p className="text-[11px] font-black uppercase tracking-[0.35em] text-[#94a3b8]"> Routing Recommendation </p> <h3 className="mt-2 text-2xl font-black"> {recommendedQueue.title} </h3> </div> </div> <PanelRow label="Queue Owner" value={recommendedQueue.owner} /> <PanelRow label="Department" value={recommendedQueue.department} /> <PanelRow label="Access Scope" value={recommendedQueue.accessScope} /> <PanelRow label="Priority" value={priority} /> <PanelRow label="Intake Channel" value={intakeChannel} /> <Link href={`/service-requests/queues/${recommendedQueue.id}`} className="mt-5 flex h-12 w-full items-center justify-center rounded-lg bg-[#050816] px-4 text-sm font-black text-white" > Open Recommended Queue </Link> </section> <section className="rounded-xl border border-[#d8e1ea] bg-white p-6 shadow-sm"> <div className="mb-5 flex items-start gap-4"> <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#050816] text-[#ffbf00]"> <ClipboardList className="h-6 w-6" /> </div> <div> <p className="text-[11px] font-black uppercase tracking-[0.35em] text-[#94a3b8]"> Draft Request Package </p> <h3 className="mt-2 text-3xl font-black">SR-DRAFT</h3> </div> </div> <div className="rounded-lg border border-[#d8e1ea] bg-[#f8fafc] p-4"> <PanelRow label="Title" value={requestTitle ||"Pending"} /> <PanelRow label="Department" value={department} /> <PanelRow label="Category" value={category} /> <PanelRow label="Classification" value={classification} /> <PanelRow label="Related Record" value={effectiveRelatedRecord} /> <PanelRow label="Reference Type" value={selectedRelatedRecord?.type ??"None"} /> <PanelRow label="Attachments" value={ selectedFiles.length > 0 ? `${selectedFiles.length} selected` :"None" } /> {priority ==="High" ? ( <PanelRow label="Due Date" value={dueDate ||"Pending"} /> ) : null} </div> <div className="mt-5 rounded-lg border border-[#ffbf00] bg-[#fff7e6] px-4 py-3 text-sm font-black leading-6 text-[#9a4a00]"> {completedChecks}/{controlChecks.length} control checks prepared. </div> </section> <section className="rounded-xl border border-dashed border-[#c8d3df] bg-white p-6 shadow-sm"> <div className="flex items-start gap-4"> <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#050816] text-[#ffbf00]"> <ShieldCheck className="h-6 w-6" /> </div> <div> <h3 className="text-2xl font-black uppercase tracking-[0.35em]"> Control Notes </h3> <ul className="mt-5 space-y-4 text-sm leading-7 text-[#33445c]"> <li>• Intake remains frontend-only in this phase.</li> <li>• Selected files are not uploaded or stored yet.</li> <li>• No request ID is reserved or saved.</li> <li>• No owner is actually assigned yet.</li> <li> • Restricted and third-party intake should receive separate role-based pages in a later phase. </li> </ul> </div> </div> </section> </aside> </div> </div> ); } function PanelRow({ label, value }: { label: string; value: string }) { return ( <div className="flex items-start justify-between gap-4 border-b border-[#d8e1ea] py-3 last:border-b-0"> <span className="text-sm font-bold text-[#64748b]">{label}</span> <span className="max-w-[190px] text-right text-sm font-black text-[#050816]"> {value} </span> </div> ); } function ActionButton({ children, onClick, primary = false, }: { children: React.ReactNode; onClick?: () => void; primary?: boolean; }) { return ( <button type="button" onClick={onClick} className={ primary ?"flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#050816] px-4 text-sm font-black text-white transition hover:bg-[#101827]" :"flex h-12 w-full items-center justify-center gap-2 rounded-lg border border-[#c8d3df] bg-white px-4 text-sm font-black text-[#050816] transition hover:border-[#ff8a00] hover:bg-[#fffaf0]" } > {children} </button> ); }
+"use client";
+
+import Link from "next/link";
+import { useMemo, useState, type ReactNode } from "react";
+import { useSearchParams } from "next/navigation";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  ClipboardList,
+  Copy,
+  FileUp,
+  FolderOpen,
+  RotateCcw,
+  Route,
+  Send,
+  ShieldCheck,
+  SlidersHorizontal,
+} from "lucide-react";
+
+import {
+  getServiceRequestQueueById,
+  serviceRequestQueues,
+  serviceRequestRecords,
+  type ServiceRequestPriority,
+  type ServiceRequestQueueRecord,
+} from "@/data/serviceRequests";
+
+type IntakeChannel =
+  | "Internal EOS Intake"
+  | "Executive Prepared Intake"
+  | "Department Prepared Intake"
+  | "Third-Party / Client Intake";
+
+type RelatedRecordOption = {
+  id: string;
+  label: string;
+  type: string;
+};
+
+type QueueDefault = {
+  requester: string;
+  department: string;
+  category: string;
+  classification: string;
+  priority: ServiceRequestPriority;
+  intakeChannel: IntakeChannel;
+  requestedAction: string;
+  titlePlaceholder: string;
+};
+
+const requesterOptions = [
+  "Executive Operations",
+  "HCA",
+  "Corporate Records",
+  "Treasury",
+  "Administration",
+  "Legal",
+  "Tax",
+  "Technology",
+  "Third-Party / Client",
+];
+
+const departmentOptions = [
+  "Executive Operations",
+  "Governance Library",
+  "Corporate Records",
+  "Treasury",
+  "HCA Review",
+  "HCP Restricted",
+  "Administration",
+  "Legal",
+  "Tax",
+  "Technology",
+  "Entity Management",
+  "Third-Party / Client",
+];
+
+const categoryOptions = [
+  "Administrative Support",
+  "Publication Intake",
+  "Certified Copy",
+  "Document Replacement",
+  "Governance Review",
+  "Treasury Support",
+  "Records Review",
+  "Parent-Level Review",
+  "External Support Request",
+];
+
+const classificationOptions = [
+  "Internal Governance",
+  "Confidential",
+  "Restricted Internal",
+  "External Intake",
+  "Training / Administrative",
+];
+
+const priorityOptions: ServiceRequestPriority[] = ["Normal", "High", "Restricted"];
+
+const intakeChannelOptions: IntakeChannel[] = [
+  "Internal EOS Intake",
+  "Executive Prepared Intake",
+  "Department Prepared Intake",
+  "Third-Party / Client Intake",
+];
+
+const requestedActionOptions = [
+  "Prepare intake review",
+  "Route to assigned department queue",
+  "Verify source record",
+  "Prepare certified-copy review",
+  "Prepare document replacement review",
+  "Route for treasury review",
+  "Route for restricted HCA review",
+  "Route for HCP restricted review",
+  "Assign owner for follow-up",
+  "Prepare filing or recordkeeping action",
+  "Escalate for executive review",
+];
+
+const queueDefaults: Record<string, QueueDefault> = {
+  "governance-library-intake": {
+    requester: "Executive Operations",
+    department: "Governance Library",
+    category: "Publication Intake",
+    classification: "Internal Governance",
+    priority: "Normal",
+    intakeChannel: "Internal EOS Intake",
+    requestedAction: "Prepare intake review",
+    titlePlaceholder: "Example: EGL publication intake request",
+  },
+  "corporate-records-review": {
+    requester: "Corporate Records",
+    department: "Corporate Records",
+    category: "Certified Copy",
+    classification: "Confidential",
+    priority: "Normal",
+    intakeChannel: "Department Prepared Intake",
+    requestedAction: "Verify source record",
+    titlePlaceholder: "Example: Certified copy issuance request",
+  },
+  "treasury-review": {
+    requester: "Treasury",
+    department: "Treasury",
+    category: "Treasury Support",
+    classification: "Confidential",
+    priority: "High",
+    intakeChannel: "Department Prepared Intake",
+    requestedAction: "Route for treasury review",
+    titlePlaceholder: "Example: Treasury document replacement request",
+  },
+  "restricted-hca-review": {
+    requester: "Executive Operations",
+    department: "HCA Review",
+    category: "Governance Review",
+    classification: "Restricted Internal",
+    priority: "Restricted",
+    intakeChannel: "Executive Prepared Intake",
+    requestedAction: "Route for restricted HCA review",
+    titlePlaceholder: "Example: Restricted HCA governance review",
+  },
+  "hcp-restricted-review": {
+    requester: "Executive Operations",
+    department: "HCP Restricted",
+    category: "Parent-Level Review",
+    classification: "Restricted Internal",
+    priority: "Restricted",
+    intakeChannel: "Executive Prepared Intake",
+    requestedAction: "Route for HCP restricted review",
+    titlePlaceholder: "Example: HCP parent-level restricted review",
+  },
+  "administration-desk": {
+    requester: "Executive Operations",
+    department: "Administration",
+    category: "Administrative Support",
+    classification: "Internal Governance",
+    priority: "Normal",
+    intakeChannel: "Internal EOS Intake",
+    requestedAction: "Route to assigned department queue",
+    titlePlaceholder: "Example: Administrative workflow clarification",
+  },
+};
+
+function fallbackQueue(): ServiceRequestQueueRecord {
+  const queue = getServiceRequestQueueById("administration-desk") ?? serviceRequestQueues[0];
+
+  if (!queue) {
+    throw new Error("No service request queues are configured.");
+  }
+
+  return queue;
+}
+
+function getQueueDefault(queue: ServiceRequestQueueRecord): QueueDefault {
+  return queueDefaults[queue.id] ?? queueDefaults["administration-desk"];
+}
+
+function resolveRecommendedQueue(
+  department: string,
+  category: string,
+  classification: string,
+): ServiceRequestQueueRecord {
+  if (department === "HCP Restricted" || category === "Parent-Level Review") {
+    return getServiceRequestQueueById("hcp-restricted-review") ?? fallbackQueue();
+  }
+
+  if (
+    department === "HCA Review" ||
+    category === "Governance Review" ||
+    classification === "Restricted Internal"
+  ) {
+    return getServiceRequestQueueById("restricted-hca-review") ?? fallbackQueue();
+  }
+
+  if (department === "Treasury" || category === "Treasury Support") {
+    return getServiceRequestQueueById("treasury-review") ?? fallbackQueue();
+  }
+
+  if (
+    department === "Corporate Records" ||
+    category === "Certified Copy" ||
+    category === "Records Review"
+  ) {
+    return getServiceRequestQueueById("corporate-records-review") ?? fallbackQueue();
+  }
+
+  if (
+    department === "Governance Library" ||
+    category === "Publication Intake" ||
+    category === "Document Replacement"
+  ) {
+    return getServiceRequestQueueById("governance-library-intake") ?? fallbackQueue();
+  }
+
+  return fallbackQueue();
+}
+
+function getRelatedRecordOptions(
+  department: string,
+  category: string,
+  classification: string,
+): RelatedRecordOption[] {
+  const options = new Map<string, RelatedRecordOption>();
+
+  options.set("N/A", {
+    id: "N/A",
+    label: "N/A — No existing record selected",
+    type: "None",
+  });
+
+  serviceRequestRecords.forEach((request) => {
+    const relatedRecordId = request.relatedRecord;
+
+    if (!relatedRecordId || relatedRecordId === "Pending") {
+      return;
+    }
+
+    const departmentMatch = request.department === department;
+    const categoryMatch = request.category === category;
+    const classificationMatch = request.classification === classification;
+
+    if (!departmentMatch && !categoryMatch && !classificationMatch) {
+      return;
+    }
+
+    options.set(relatedRecordId, {
+      id: relatedRecordId,
+      label: `${relatedRecordId} — ${request.relatedRecordTitle}`,
+      type: request.relatedRecordType,
+    });
+  });
+
+  return Array.from(options.values());
+}
+
+function inputClass(): string {
+  return "h-12 w-full rounded-lg border border-[#c8d3df] bg-white px-4 text-sm font-black text-[#050816] outline-none transition placeholder:text-[#7d8999] focus:border-[#ff8a00] focus:ring-2 focus:ring-[#ff8a00]/20";
+}
+
+function labelClass(): string {
+  return "mb-2 block text-[11px] font-black uppercase tracking-[0.35em] text-[#64748b]";
+}
+
+export default function ServiceRequestIntakeClient() {
+  const searchParams = useSearchParams();
+  const queueParam = searchParams.get("queue") ?? searchParams.get("queueId");
+
+  const startingQueue = getServiceRequestQueueById(queueParam ?? "") ?? fallbackQueue();
+  const startingDefaults = getQueueDefault(startingQueue);
+
+  const [requestTitle, setRequestTitle] = useState("");
+  const [requester, setRequester] = useState(startingDefaults.requester);
+  const [department, setDepartment] = useState(startingDefaults.department);
+  const [category, setCategory] = useState(startingDefaults.category);
+  const [classification, setClassification] = useState(startingDefaults.classification);
+  const [priority, setPriority] = useState<ServiceRequestPriority>(startingDefaults.priority);
+  const [intakeChannel, setIntakeChannel] = useState<IntakeChannel>(
+    startingDefaults.intakeChannel,
+  );
+  const [relatedRecord, setRelatedRecord] = useState("N/A");
+  const [requestedAction, setRequestedAction] = useState(startingDefaults.requestedAction);
+  const [dueDate, setDueDate] = useState("");
+  const [summary, setSummary] = useState("");
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [fileInputKey, setFileInputKey] = useState(0);
+  const [prepared, setPrepared] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const recommendedQueue = useMemo(
+    () => resolveRecommendedQueue(department, category, classification),
+    [department, category, classification],
+  );
+
+  const relatedRecordOptions = useMemo(
+    () => getRelatedRecordOptions(department, category, classification),
+    [department, category, classification],
+  );
+
+  const effectiveRelatedRecord = relatedRecordOptions.some(
+    (option) => option.id === relatedRecord,
+  )
+    ? relatedRecord
+    : "N/A";
+
+  const selectedRelatedRecord =
+    relatedRecordOptions.find((option) => option.id === effectiveRelatedRecord) ??
+    relatedRecordOptions[0];
+
+  function updateDepartment(nextDepartment: string) {
+    setPrepared(false);
+    setDepartment(nextDepartment);
+    setRelatedRecord("N/A");
+
+    if (nextDepartment === "Treasury") {
+      setCategory("Treasury Support");
+      setPriority("High");
+      setRequestedAction("Route for treasury review");
+      return;
+    }
+
+    if (nextDepartment === "Corporate Records") {
+      setCategory("Certified Copy");
+      setRequestedAction("Verify source record");
+      return;
+    }
+
+    if (nextDepartment === "Governance Library") {
+      setCategory("Publication Intake");
+      setRequestedAction("Prepare intake review");
+      return;
+    }
+
+    if (nextDepartment === "HCA Review") {
+      setCategory("Governance Review");
+      setClassification("Restricted Internal");
+      setPriority("Restricted");
+      setDueDate("");
+      setRequestedAction("Route for restricted HCA review");
+      return;
+    }
+
+    if (nextDepartment === "HCP Restricted") {
+      setCategory("Parent-Level Review");
+      setClassification("Restricted Internal");
+      setPriority("Restricted");
+      setDueDate("");
+      setRequestedAction("Route for HCP restricted review");
+      return;
+    }
+
+    if (nextDepartment === "Administration") {
+      setCategory("Administrative Support");
+      setRequestedAction("Route to assigned department queue");
+      return;
+    }
+
+    if (nextDepartment === "Third-Party / Client") {
+      setCategory("External Support Request");
+      setClassification("External Intake");
+      setIntakeChannel("Third-Party / Client Intake");
+      setRequestedAction("Assign owner for follow-up");
+    }
+  }
+
+  function updateCategory(nextCategory: string) {
+    setPrepared(false);
+    setCategory(nextCategory);
+    setRelatedRecord("N/A");
+
+    if (nextCategory === "Treasury Support") {
+      setDepartment("Treasury");
+      setPriority("High");
+      setRequestedAction("Route for treasury review");
+      return;
+    }
+
+    if (nextCategory === "Certified Copy" || nextCategory === "Records Review") {
+      setDepartment("Corporate Records");
+      setRequestedAction("Verify source record");
+      return;
+    }
+
+    if (nextCategory === "Publication Intake" || nextCategory === "Document Replacement") {
+      setDepartment("Governance Library");
+      setRequestedAction(
+        nextCategory === "Document Replacement"
+          ? "Prepare document replacement review"
+          : "Prepare intake review",
+      );
+      return;
+    }
+
+    if (nextCategory === "Governance Review") {
+      setDepartment("HCA Review");
+      setClassification("Restricted Internal");
+      setPriority("Restricted");
+      setDueDate("");
+      setRequestedAction("Route for restricted HCA review");
+      return;
+    }
+
+    if (nextCategory === "Parent-Level Review") {
+      setDepartment("HCP Restricted");
+      setClassification("Restricted Internal");
+      setPriority("Restricted");
+      setDueDate("");
+      setRequestedAction("Route for HCP restricted review");
+      return;
+    }
+
+    if (nextCategory === "External Support Request") {
+      setIntakeChannel("Third-Party / Client Intake");
+      setRequestedAction("Assign owner for follow-up");
+    }
+  }
+
+  function updatePriority(nextPriority: ServiceRequestPriority) {
+    setPrepared(false);
+    setPriority(nextPriority);
+
+    if (nextPriority !== "High") {
+      setDueDate("");
+    }
+
+    if (nextPriority === "Restricted") {
+      setClassification("Restricted Internal");
+
+      if (department === "HCP Restricted" || category === "Parent-Level Review") {
+        setRequestedAction("Route for HCP restricted review");
+      } else {
+        setRequestedAction("Route for restricted HCA review");
+      }
+    }
+  }
+
+  function resetDraft() {
+    setRequestTitle("");
+    setRequester(startingDefaults.requester);
+    setDepartment(startingDefaults.department);
+    setCategory(startingDefaults.category);
+    setClassification(startingDefaults.classification);
+    setPriority(startingDefaults.priority);
+    setIntakeChannel(startingDefaults.intakeChannel);
+    setRelatedRecord("N/A");
+    setRequestedAction(startingDefaults.requestedAction);
+    setDueDate("");
+    setSummary("");
+    setSelectedFiles([]);
+    setFileInputKey((currentKey) => currentKey + 1);
+    setPrepared(false);
+    setCopied(false);
+  }
+
+  async function copyDraftPacket() {
+    const draftPacket = [
+      "SERVICE REQUEST DRAFT PACKET",
+      `Title: ${requestTitle || "Pending"}`,
+      `Requester: ${requester}`,
+      `Department: ${department}`,
+      `Category: ${category}`,
+      `Classification: ${classification}`,
+      `Priority: ${priority}`,
+      `Intake Channel: ${intakeChannel}`,
+      `Related Record: ${effectiveRelatedRecord}`,
+      `Reference Type: ${selectedRelatedRecord?.type ?? "None"}`,
+      `Requested Action: ${requestedAction}`,
+      `Recommended Queue: ${recommendedQueue.title}`,
+      `Queue Owner: ${recommendedQueue.owner}`,
+      priority === "High" ? `Due Date: ${dueDate || "Pending"}` : null,
+      `Summary: ${summary || "Pending"}`,
+      `Selected Files: ${
+        selectedFiles.length > 0
+          ? selectedFiles.map((file) => file.name).join(", ")
+          : "None"
+      }`,
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    try {
+      if (typeof navigator !== "undefined" && navigator.clipboard) {
+        await navigator.clipboard.writeText(draftPacket);
+      }
+
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1600);
+    } catch {
+      setCopied(false);
+    }
+  }
+
+  const controlChecks = [
+    {
+      label: "Request title entered",
+      complete: requestTitle.trim().length > 0,
+    },
+    {
+      label: "Requester identified",
+      complete: requester.trim().length > 0,
+    },
+    {
+      label: "Department / desk selected",
+      complete: department.trim().length > 0,
+    },
+    {
+      label: "Category selected",
+      complete: category.trim().length > 0,
+    },
+    {
+      label: "Classification selected",
+      complete: classification.trim().length > 0,
+    },
+    {
+      label: "Related record selected or marked N/A",
+      complete: effectiveRelatedRecord.trim().length > 0,
+    },
+    {
+      label: "Requested action selected",
+      complete: requestedAction.trim().length > 0,
+    },
+    {
+      label: "Request summary documented",
+      complete: summary.trim().length > 0,
+    },
+    {
+      label: "High priority due date selected when required",
+      complete: priority !== "High" || dueDate.trim().length > 0,
+    },
+  ];
+
+  const completedChecks = controlChecks.filter((check) => check.complete).length;
+
+  return (
+    <div className="w-full space-y-6">
+      <section className="rounded-xl bg-[#050816] p-6 text-white shadow-sm lg:p-8">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="text-[11px] font-black uppercase tracking-[0.45em] text-[#ffbf00]">
+              Hassan Industries
+            </p>
+            <h1 className="mt-4 text-3xl font-black uppercase tracking-tight lg:text-4xl">
+              Create Service Request
+            </h1>
+            <p className="mt-4 max-w-5xl text-sm font-semibold leading-7 text-white">
+              Controlled frontend intake workspace for preparing request metadata,
+              routing recommendation, classification, file attachments, and future workflow
+              handoff.
+            </p>
+          </div>
+
+          <div className="w-full rounded-lg border border-[#ffbf00] bg-[#101827] px-8 py-5 text-center sm:w-auto sm:min-w-[230px]">
+            <p className="text-[11px] font-black uppercase tracking-[0.45em] text-white">
+              Intake Status
+            </p>
+            <p className="mt-3 text-3xl font-black text-[#ffbf00]">Draft</p>
+            <p className="mt-1 text-xs font-black text-white">Frontend Preparation</p>
+          </div>
+        </div>
+      </section>
+
+      <div className="flex flex-wrap gap-3">
+        <Link
+          href="/service-requests"
+          className="inline-flex h-11 items-center gap-2 rounded-lg border border-[#c8d3df] bg-white px-5 text-sm font-black text-[#050816] shadow-sm transition hover:border-[#ff8a00]"
+        >
+          <ArrowLeft size={16} className="text-[#ff8a00]" />
+          Service Requests Desk
+        </Link>
+
+        <Link
+          href="/service-requests/queues"
+          className="inline-flex h-11 items-center gap-2 rounded-lg border border-[#c8d3df] bg-white px-5 text-sm font-black text-[#050816] shadow-sm transition hover:border-[#ff8a00]"
+        >
+          <Route size={16} className="text-[#ff8a00]" />
+          Routing Queues
+        </Link>
+
+        <Link
+          href="/"
+          className="inline-flex h-11 items-center gap-2 rounded-lg border border-[#c8d3df] bg-white px-5 text-sm font-black text-[#050816] shadow-sm transition hover:border-[#ff8a00]"
+        >
+          <FolderOpen size={16} className="text-[#ff8a00]" />
+          Dashboard
+        </Link>
+      </div>
+
+      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_390px]">
+        <div className="min-w-0 space-y-6">
+          <section className="rounded-xl border border-[#d8e1ea] bg-white p-6 shadow-sm">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#050816] text-[#ffbf00]">
+                <ClipboardList size={24} />
+              </div>
+
+              <div>
+                <p className="text-[11px] font-black uppercase tracking-[0.45em] text-[#94a3b8]">
+                  Service Request Intake
+                </p>
+                <h2 className="mt-2 text-3xl font-black">New Service Request</h2>
+                <p className="mt-3 text-sm leading-7 text-[#33445c]">
+                  This page prepares a governed request package only. It does not submit,
+                  save, route, assign, notify, or upload to backend storage yet.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <section className="overflow-hidden rounded-xl border border-[#d8e1ea] bg-white shadow-sm">
+            <div className="border-b border-[#d8e1ea] p-6">
+              <p className="text-[11px] font-black uppercase tracking-[0.45em] text-[#94a3b8]">
+                Intake Form
+              </p>
+              <h2 className="mt-2 text-2xl font-black">Request Metadata</h2>
+            </div>
+
+            <div className="grid gap-5 p-6 lg:grid-cols-3">
+              <div className="lg:col-span-2">
+                <label className={labelClass()} htmlFor="request-title">
+                  Request Title *
+                </label>
+                <input
+                  id="request-title"
+                  value={requestTitle}
+                  onChange={(event) => {
+                    setPrepared(false);
+                    setRequestTitle(event.target.value);
+                  }}
+                  placeholder={startingDefaults.titlePlaceholder}
+                  className={inputClass()}
+                />
+              </div>
+
+              <div>
+                <label className={labelClass()} htmlFor="requester">
+                  Requester *
+                </label>
+                <select
+                  id="requester"
+                  value={requester}
+                  onChange={(event) => {
+                    setPrepared(false);
+                    setRequester(event.target.value);
+                  }}
+                  className={inputClass()}
+                >
+                  {requesterOptions.map((option) => (
+                    <option key={option}>{option}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className={labelClass()} htmlFor="department">
+                  Department / Desk
+                </label>
+                <select
+                  id="department"
+                  value={department}
+                  onChange={(event) => updateDepartment(event.target.value)}
+                  className={inputClass()}
+                >
+                  {departmentOptions.map((option) => (
+                    <option key={option}>{option}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className={labelClass()} htmlFor="category">
+                  Request Category
+                </label>
+                <select
+                  id="category"
+                  value={category}
+                  onChange={(event) => updateCategory(event.target.value)}
+                  className={inputClass()}
+                >
+                  {categoryOptions.map((option) => (
+                    <option key={option}>{option}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className={labelClass()} htmlFor="classification">
+                  Classification
+                </label>
+                <select
+                  id="classification"
+                  value={classification}
+                  onChange={(event) => {
+                    const nextClassification = event.target.value;
+
+                    setPrepared(false);
+                    setClassification(nextClassification);
+                    setRelatedRecord("N/A");
+
+                    if (nextClassification === "Restricted Internal") {
+                      setPriority("Restricted");
+                      setDueDate("");
+                      setRequestedAction("Route for restricted HCA review");
+                    }
+                  }}
+                  className={inputClass()}
+                >
+                  {classificationOptions.map((option) => (
+                    <option key={option}>{option}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className={labelClass()} htmlFor="priority">
+                  Priority
+                </label>
+                <select
+                  id="priority"
+                  value={priority}
+                  onChange={(event) =>
+                    updatePriority(event.target.value as ServiceRequestPriority)
+                  }
+                  className={inputClass()}
+                >
+                  {priorityOptions.map((option) => (
+                    <option key={option}>{option}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className={labelClass()} htmlFor="intake-channel">
+                  Intake Channel
+                </label>
+                <select
+                  id="intake-channel"
+                  value={intakeChannel}
+                  onChange={(event) => {
+                    setPrepared(false);
+                    setIntakeChannel(event.target.value as IntakeChannel);
+                  }}
+                  className={inputClass()}
+                >
+                  {intakeChannelOptions.map((option) => (
+                    <option key={option}>{option}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className={labelClass()} htmlFor="related-record">
+                  Related Record
+                </label>
+                <select
+                  id="related-record"
+                  value={effectiveRelatedRecord}
+                  onChange={(event) => {
+                    setPrepared(false);
+                    setRelatedRecord(event.target.value);
+                  }}
+                  className={inputClass()}
+                >
+                  {relatedRecordOptions.map((record) => (
+                    <option key={record.id} value={record.id}>
+                      {record.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className={priority === "High" ? "lg:col-span-2" : "lg:col-span-3"}>
+                <label className={labelClass()} htmlFor="requested-action">
+                  Requested Action *
+                </label>
+                <select
+                  id="requested-action"
+                  value={requestedAction}
+                  onChange={(event) => {
+                    setPrepared(false);
+                    setRequestedAction(event.target.value);
+                  }}
+                  className={inputClass()}
+                >
+                  {requestedActionOptions.map((option) => (
+                    <option key={option}>{option}</option>
+                  ))}
+                </select>
+              </div>
+
+              {priority === "High" ? (
+                <div>
+                  <label className={labelClass()} htmlFor="due-date">
+                    Due Date
+                  </label>
+                  <input
+                    id="due-date"
+                    type="date"
+                    value={dueDate}
+                    onChange={(event) => {
+                      setPrepared(false);
+                      setDueDate(event.target.value);
+                    }}
+                    className={inputClass()}
+                  />
+                </div>
+              ) : null}
+
+              <div className="lg:col-span-3">
+                <label className={labelClass()} htmlFor="summary">
+                  Request Summary *
+                </label>
+                <textarea
+                  id="summary"
+                  value={summary}
+                  onChange={(event) => {
+                    setPrepared(false);
+                    setSummary(event.target.value);
+                  }}
+                  placeholder="Describe the issue, purpose, requested outcome, and why this request needs routing."
+                  className="min-h-28 w-full resize-y rounded-lg border border-[#c8d3df] bg-white px-4 py-3 text-sm font-semibold text-[#050816] outline-none transition placeholder:text-[#7d8999] focus:border-[#ff8a00] focus:ring-2 focus:ring-[#ff8a00]/20"
+                />
+              </div>
+
+              <div className="lg:col-span-3">
+                <label className={labelClass()} htmlFor="service-request-files">
+                  File Attachments
+                </label>
+
+                <input
+                  key={fileInputKey}
+                  id="service-request-files"
+                  type="file"
+                  multiple
+                  className="sr-only"
+                  onChange={(event) => {
+                    setPrepared(false);
+                    setSelectedFiles(Array.from(event.target.files ?? []));
+                  }}
+                />
+
+                <label
+                  htmlFor="service-request-files"
+                  className="flex min-h-28 cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-[#c8d3df] bg-[#f8fafc] px-4 py-6 text-center transition hover:border-[#ff8a00] hover:bg-[#fffaf0]"
+                >
+                  <FileUp className="mb-3 h-7 w-7 text-[#ff8a00]" />
+                  <span className="text-sm font-black text-[#050816]">
+                    Select documents, screenshots, emails, records, or supporting files
+                  </span>
+                  <span className="mt-1 text-xs font-semibold text-[#62708a]">
+                    Frontend only — selected files are not uploaded or stored yet.
+                  </span>
+                </label>
+
+                {selectedFiles.length > 0 ? (
+                  <div className="mt-3 rounded-lg border border-[#d8e1ea] bg-white p-4">
+                    <p className="mb-2 text-[11px] font-black uppercase tracking-[0.35em] text-[#94a3b8]">
+                      Selected Files
+                    </p>
+
+                    <div className="space-y-2">
+                      {selectedFiles.map((file) => (
+                        <div
+                          key={`${file.name}-${file.size}-${file.lastModified}`}
+                          className="flex items-center justify-between gap-3 rounded-md border border-[#d8e1ea] bg-[#f8fafc] px-3 py-2 text-sm font-bold text-[#050816]"
+                        >
+                          <span className="min-w-0 truncate">{file.name}</span>
+                          <span className="shrink-0 text-xs text-[#64748b]">
+                            {(file.size / 1024).toFixed(1)} KB
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          </section>
+
+          <div className="grid gap-6 lg:grid-cols-2">
+            <section className="rounded-xl border border-[#d8e1ea] bg-white p-6 shadow-sm">
+              <div className="mb-5 flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#050816] text-[#ffbf00]">
+                  <SlidersHorizontal className="h-6 w-6" />
+                </div>
+                <h2 className="text-2xl font-black uppercase tracking-[0.3em] text-[#050816]">
+                  Intake Steps
+                </h2>
+              </div>
+
+              <div className="space-y-3">
+                {[
+                  "Identify request purpose",
+                  "Select department or operating desk",
+                  "Confirm requester and owner",
+                  "Classify access level and routing sensitivity",
+                  "Select related record or mark N/A",
+                  "Attach supporting files when available",
+                  "Route for review, approval, execution, or filing",
+                ].map((step, index) => (
+                  <div
+                    key={step}
+                    className="flex items-center gap-4 rounded-lg border border-[#d8e1ea] bg-[#f8fafc] p-4"
+                  >
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#050816] text-sm font-black text-[#ffbf00]">
+                      {index + 1}
+                    </span>
+                    <span className="text-sm font-black text-[#050816]">{step}</span>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section className="rounded-xl border border-[#d8e1ea] bg-white p-6 shadow-sm">
+              <div className="mb-5 flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#050816] text-[#ffbf00]">
+                  <ShieldCheck className="h-6 w-6" />
+                </div>
+                <h2 className="text-2xl font-black uppercase tracking-[0.25em] text-[#050816]">
+                  Control Checklist
+                </h2>
+              </div>
+
+              <div className="space-y-3">
+                {controlChecks.map((check) => (
+                  <div
+                    key={check.label}
+                    className={
+                      check.complete
+                        ? "flex items-center gap-3 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm font-black text-emerald-700"
+                        : "flex items-center gap-3 rounded-lg border border-[#d8e1ea] bg-white p-4 text-sm font-black text-[#050816]"
+                    }
+                  >
+                    <CheckCircle2
+                      className={
+                        check.complete
+                          ? "h-4 w-4 text-emerald-600"
+                          : "h-4 w-4 text-[#ff8a00]"
+                      }
+                    />
+                    {check.label}
+                  </div>
+                ))}
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <aside className="min-w-0 space-y-5 xl:sticky xl:top-24 xl:self-start">
+          <p className="text-[11px] font-black uppercase tracking-[0.55em] text-[#94a3b8]">
+            Controlled Request Intake
+          </p>
+
+          <section className="rounded-xl border border-[#d8e1ea] bg-white p-6 shadow-sm">
+            <h2 className="mb-5 text-2xl font-black uppercase tracking-[0.32em] text-[#050816]">
+              Intake Actions
+            </h2>
+            <p className="mb-5 text-sm leading-7 text-[#33445c]">
+              These controls prepare the request package only. They do not submit or create
+              a backend record.
+            </p>
+
+            <div className="space-y-3">
+              <ActionButton primary onClick={() => setPrepared(true)}>
+                <Send className="h-4 w-4 text-[#ffbf00]" />
+                Prepare Intake Review
+              </ActionButton>
+
+              <ActionButton onClick={copyDraftPacket}>
+                <Copy className="h-4 w-4 text-[#ff8a00]" />
+                {copied ? "Draft Packet Copied" : "Copy Draft Packet"}
+              </ActionButton>
+
+              <ActionButton onClick={resetDraft}>
+                <RotateCcw className="h-4 w-4 text-[#ff8a00]" />
+                Reset Draft
+              </ActionButton>
+
+              <Link
+                href="/service-requests"
+                className="flex h-12 w-full items-center justify-center rounded-lg border border-[#c8d3df] bg-white px-4 text-sm font-black text-[#050816] transition hover:border-[#ff8a00]"
+              >
+                Return to Service Requests Desk
+              </Link>
+            </div>
+
+            {prepared ? (
+              <div className="mt-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-bold leading-6 text-blue-700">
+                Intake package prepared in the frontend workspace. No backend submission
+                occurred.
+              </div>
+            ) : null}
+          </section>
+
+          <section className="rounded-xl border border-[#d8e1ea] bg-white p-6 shadow-sm">
+            <div className="mb-5 flex items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#050816] text-[#ffbf00]">
+                <Route className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-[11px] font-black uppercase tracking-[0.35em] text-[#94a3b8]">
+                  Routing Recommendation
+                </p>
+                <h3 className="mt-2 text-2xl font-black">{recommendedQueue.title}</h3>
+              </div>
+            </div>
+
+            <PanelRow label="Queue Owner" value={recommendedQueue.owner} />
+            <PanelRow label="Department" value={recommendedQueue.department} />
+            <PanelRow label="Access Scope" value={recommendedQueue.accessScope} />
+            <PanelRow label="Priority" value={priority} />
+            <PanelRow label="Intake Channel" value={intakeChannel} />
+
+            <Link
+              href={`/service-requests/queues/${recommendedQueue.id}`}
+              className="mt-5 flex h-12 w-full items-center justify-center rounded-lg bg-[#050816] px-4 text-sm font-black text-white transition hover:bg-[#101827]"
+            >
+              Open Recommended Queue
+            </Link>
+          </section>
+
+          <section className="rounded-xl border border-[#d8e1ea] bg-white p-6 shadow-sm">
+            <div className="mb-5 flex items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#050816] text-[#ffbf00]">
+                <ClipboardList className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-[11px] font-black uppercase tracking-[0.35em] text-[#94a3b8]">
+                  Draft Request Package
+                </p>
+                <h3 className="mt-2 text-3xl font-black">SR-DRAFT</h3>
+              </div>
+            </div>
+
+            <div className="rounded-lg border border-[#d8e1ea] bg-[#f8fafc] p-4">
+              <PanelRow label="Title" value={requestTitle || "Pending"} />
+              <PanelRow label="Department" value={department} />
+              <PanelRow label="Category" value={category} />
+              <PanelRow label="Classification" value={classification} />
+              <PanelRow label="Related Record" value={effectiveRelatedRecord} />
+              <PanelRow label="Reference Type" value={selectedRelatedRecord?.type ?? "None"} />
+              <PanelRow
+                label="Attachments"
+                value={selectedFiles.length > 0 ? `${selectedFiles.length} selected` : "None"}
+              />
+              {priority === "High" ? (
+                <PanelRow label="Due Date" value={dueDate || "Pending"} />
+              ) : null}
+            </div>
+
+            <div className="mt-5 rounded-lg border border-[#ffbf00] bg-[#fff7e6] px-4 py-3 text-sm font-black leading-6 text-[#9a4a00]">
+              {completedChecks}/{controlChecks.length} control checks prepared.
+            </div>
+          </section>
+
+          <section className="rounded-xl border border-dashed border-[#c8d3df] bg-white p-6 shadow-sm">
+            <div className="flex items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#050816] text-[#ffbf00]">
+                <ShieldCheck className="h-6 w-6" />
+              </div>
+              <div>
+                <h3 className="text-2xl font-black uppercase tracking-[0.35em]">
+                  Control Notes
+                </h3>
+                <ul className="mt-5 space-y-4 text-sm leading-7 text-[#33445c]">
+                  <li>• Intake remains frontend-only in this phase.</li>
+                  <li>• Selected files are not uploaded or stored yet.</li>
+                  <li>• No request ID is reserved or saved.</li>
+                  <li>• No owner is actually assigned yet.</li>
+                  <li>
+                    • Restricted and third-party intake should receive separate role-based
+                    pages in a later phase.
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </section>
+        </aside>
+      </div>
+    </div>
+  );
+}
+
+function PanelRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-start justify-between gap-4 border-b border-[#d8e1ea] py-3 last:border-b-0">
+      <span className="text-sm font-bold text-[#64748b]">{label}</span>
+      <span className="max-w-[190px] text-right text-sm font-black text-[#050816]">
+        {value}
+      </span>
+    </div>
+  );
+}
+
+function ActionButton({
+  children,
+  onClick,
+  primary = false,
+}: {
+  children: ReactNode;
+  onClick?: () => void;
+  primary?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={
+        primary
+          ? "flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#050816] px-4 text-sm font-black text-white transition hover:bg-[#101827]"
+          : "flex h-12 w-full items-center justify-center gap-2 rounded-lg border border-[#c8d3df] bg-white px-4 text-sm font-black text-[#050816] transition hover:border-[#ff8a00] hover:bg-[#fffaf0]"
+      }
+    >
+      {children}
+    </button>
+  );
+}
