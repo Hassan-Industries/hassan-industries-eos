@@ -1,30 +1,40 @@
-"use client";
-
 import { Bell, Search } from "lucide-react";
 
-export default function Topbar() {
+type TopbarProps = {
+  /**
+   * Only the root app shell should render the permanent topbar.
+   * Legacy page-level imports without shellOwner will safely render nothing.
+   */
+  shellOwner?: "root" | "page";
+};
+
+export default function Topbar({ shellOwner = "page" }: TopbarProps) {
+  if (shellOwner !== "root") {
+    return null;
+  }
+
   return (
-    <header className="sticky top-0 z-30 border-b border-[#1b2a3d] bg-[#071426]">
-      <div className="flex h-[88px] items-center justify-between gap-6 px-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-30 h-[88px] border-b border-[#203044] bg-[#071426] text-white shadow-sm">
+      <div className="flex h-full items-center justify-between px-4 sm:px-6 lg:px-8">
         <div>
-          <h1 className="text-2xl font-black uppercase tracking-[0.04em] text-white sm:text-3xl">
+          <h1 className="text-2xl font-black uppercase tracking-[0.06em] text-white lg:text-3xl">
             Enterprise Operations Center
           </h1>
-          <p className="mt-1 text-sm font-medium text-white">
+          <p className="mt-1 text-sm font-semibold text-white">
             Unified. Governed. Purpose-Driven.
           </p>
         </div>
 
-        <div className="hidden items-center gap-4 md:flex">
-          <div className="flex h-10 w-44 items-center gap-2 rounded-lg bg-[#1b2a3d] px-4 text-sm text-white">
-            <Search size={16} />
+        <div className="flex items-center gap-4">
+          <div className="hidden h-11 items-center gap-2 rounded-lg bg-[#17263a] px-4 text-sm font-semibold text-white sm:flex">
+            <Search size={17} />
             <span>Search HIEOS...</span>
           </div>
 
           <button
             type="button"
             aria-label="Notifications"
-            className="flex h-10 w-10 items-center justify-center rounded-full text-white transition hover:bg-[#1b2a3d]"
+            className="flex h-11 w-11 items-center justify-center rounded-full text-white transition hover:bg-[#17263a]"
           >
             <Bell size={18} />
           </button>

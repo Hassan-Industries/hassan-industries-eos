@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
-import { ShellProvider } from "@/components/layout/ShellContext";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -17,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Hassan Industries EOS",
-  description: "Hassan Industries Enterprise Operating System",
+  description: "Enterprise Operations Center for Hassan Industries",
 };
 
 export default function RootLayout({
@@ -31,18 +30,17 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable} bg-[#eaf0f5] text-[#050816] antialiased`}
       >
-        <ShellProvider>
-          <div className="min-h-screen bg-[#eaf0f5]">
-            <Sidebar shellOwner="root" />
+        <div className="min-h-screen bg-[#eaf0f5]">
+          <Sidebar shellOwner="root" />
 
-            <div className="min-h-screen lg:pl-[280px]">
-             <Topbar />
-              <main className="min-h-[calc(100vh-88px)] bg-[#eaf0f5] px-4 py-6 sm:px-6 lg:px-8">
-                {children}
-              </main>
-            </div>
+          <div className="min-h-screen lg:pl-[280px]">
+            <Topbar shellOwner="root" />
+
+            <main className="min-h-[calc(100vh-88px)] px-4 py-6 sm:px-6 lg:px-8">
+              {children}
+            </main>
           </div>
-        </ShellProvider>
+        </div>
       </body>
     </html>
   );

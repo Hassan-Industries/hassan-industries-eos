@@ -19,100 +19,160 @@ import {
   ShieldCheck,
   type LucideIcon,
 } from "lucide-react";
-import { useShellActive } from "@/components/layout/ShellContext";
 
 type SidebarProps = {
+  /**
+   * Only the root app shell should render the permanent sidebar.
+   * Legacy page-level imports without shellOwner will safely render nothing.
+   */
   shellOwner?: "root" | "page";
 };
 
-type SidebarItem = {
+type NavItem = {
   label: string;
   href: string;
   icon: LucideIcon;
+  matcher: (pathname: string) => boolean;
 };
 
-const sidebarItems: SidebarItem[] = [
-  { label: "Dashboard", href: "/", icon: LayoutDashboard },
-  { label: "Governance Library", href: "/governance-library", icon: BookOpen },
-  { label: "Administration", href: "/administration", icon: Settings },
-  { label: "Treasury", href: "/treasury", icon: Landmark },
-  { label: "Legal", href: "/legal", icon: Scale },
-  { label: "Tax", href: "/tax", icon: Globe2 },
-  { label: "Corporate Records", href: "/corporate-records", icon: FolderArchive },
-  { label: "Correspondence", href: "/correspondence", icon: Mail },
-  { label: "Technology", href: "/technology", icon: ShieldCheck },
-  { label: "Entity Management", href: "/entity-management", icon: Building2 },
-  { label: "Publications", href: "/governance-library/publications", icon: FileText },
-  { label: "Resolutions", href: "/governance-library/registers/resolutions", icon: Gavel },
-  { label: "Service Requests", href: "/service-requests", icon: Headphones },
-  { label: "Implementation Center", href: "/implementation-center", icon: ClipboardList },
+const navItems: NavItem[] = [
+  {
+    label: "Dashboard",
+    href: "/",
+    icon: LayoutDashboard,
+    matcher: (pathname) => pathname === "/",
+  },
+  {
+    label: "Governance Library",
+    href: "/governance-library",
+    icon: BookOpen,
+    matcher: (pathname) =>
+      pathname === "/governance-library" ||
+      pathname === "/governance-library/registers" ||
+      pathname === "/governance-library/forms" ||
+      pathname === "/governance-library/templates" ||
+      pathname === "/governance-library/certified-copies" ||
+      pathname === "/governance-library/pending-review" ||
+      pathname === "/governance-library/pending-execution" ||
+      pathname === "/governance-library/active-publications" ||
+      pathname === "/governance-library/active-policies",
+  },
+  {
+    label: "Administration",
+    href: "/administration",
+    icon: Settings,
+    matcher: (pathname) => pathname === "/administration",
+  },
+  {
+    label: "Treasury",
+    href: "/treasury",
+    icon: Landmark,
+    matcher: (pathname) => pathname === "/treasury",
+  },
+  {
+    label: "Legal",
+    href: "/legal",
+    icon: Scale,
+    matcher: (pathname) => pathname === "/legal",
+  },
+  {
+    label: "Tax",
+    href: "/tax",
+    icon: Globe2,
+    matcher: (pathname) => pathname === "/tax",
+  },
+  {
+    label: "Corporate Records",
+    href: "/corporate-records",
+    icon: FolderArchive,
+    matcher: (pathname) => pathname === "/corporate-records",
+  },
+  {
+    label: "Correspondence",
+    href: "/correspondence",
+    icon: Mail,
+    matcher: (pathname) => pathname === "/correspondence",
+  },
+  {
+    label: "Technology",
+    href: "/technology",
+    icon: ShieldCheck,
+    matcher: (pathname) => pathname === "/technology",
+  },
+  {
+    label: "Entity Management",
+    href: "/entity-management",
+    icon: Building2,
+    matcher: (pathname) => pathname === "/entity-management",
+  },
+  {
+    label: "Publications",
+    href: "/governance-library/publications",
+    icon: FileText,
+    matcher: (pathname) => pathname.startsWith("/governance-library/publications"),
+  },
+  {
+    label: "Resolutions",
+    href: "/governance-library/registers/resolutions",
+    icon: Gavel,
+    matcher: (pathname) =>
+      pathname === "/resolutions" ||
+      pathname.startsWith("/governance-library/registers/resolutions"),
+  },
+  {
+    label: "Service Requests",
+    href: "/service-requests",
+    icon: Headphones,
+    matcher: (pathname) => pathname.startsWith("/service-requests"),
+  },
+  {
+    label: "Implementation Center",
+    href: "/implementation-center",
+    icon: ClipboardList,
+    matcher: (pathname) => pathname === "/implementation-center",
+  },
 ];
-
-function isActivePath(pathname: string, item: SidebarItem) {
-  if (item.href === "/") {
-    return pathname === "/";
-  }
-
-  if (item.label === "Governance Library") {
-    return pathname === "/governance-library";
-  }
-
-  if (item.label === "Publications") {
-    return pathname.startsWith("/governance-library/publications");
-  }
-
-  if (item.label === "Resolutions") {
-    return (
-      pathname.startsWith("/governance-library/registers/resolutions") ||
-      pathname.startsWith("/governance-library/resolutions")
-    );
-  }
-
-  if (item.label === "Service Requests") {
-    return pathname.startsWith("/service-requests");
-  }
-
-  return pathname === item.href || pathname.startsWith(`${item.href}/`);
-}
 
 export default function Sidebar({ shellOwner = "page" }: SidebarProps) {
   const pathname = usePathname();
-  const shellActive = useShellActive();
 
-  if (shellActive && shellOwner !== "root") {
+  if (shellOwner !== "root") {
     return null;
   }
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-40 hidden w-[280px] border-r border-[#1b2a3d] bg-[#071426] text-white shadow-xl lg:flex lg:flex-col">
-      <div className="border-b border-[#1b2a3d] px-5 py-8">
-        <div className="text-2xl font-black uppercase leading-tight tracking-[0.08em] text-[#ffbf00]">
-          Hassan
-          <br />
-          Industries
-        </div>
-        <div className="mt-5 text-xs font-black uppercase leading-5 tracking-[0.35em] text-white">
-          Enterprise
-          <br />
-          Operating System
-        </div>
+    <aside className="fixed inset-y-0 left-0 z-40 hidden w-[280px] flex-col border-r border-[#203044] bg-[#071426] text-white shadow-xl lg:flex">
+      <div className="border-b border-[#203044] px-6 py-8">
+        <Link href="/" className="block">
+          <p className="text-2xl font-black uppercase tracking-[0.08em] text-[#ffbf00]">
+            Hassan
+            <br />
+            Industries
+          </p>
+          <p className="mt-5 text-[13px] font-black uppercase tracking-[0.42em] text-white">
+            Enterprise
+            <br />
+            Operating System
+          </p>
+        </Link>
       </div>
 
-      <nav className="hide-scrollbar flex-1 overflow-y-auto px-3 py-5">
+      <nav className="eoc-sidebar-scroll flex-1 overflow-y-auto px-3 py-6">
         <div className="space-y-2">
-          {sidebarItems.map((item) => {
+          {navItems.map((item) => {
             const Icon = item.icon;
-            const active = isActivePath(pathname, item);
+            const active = item.matcher(pathname);
 
             return (
               <Link
                 key={item.label}
                 href={item.href}
+                aria-current={active ? "page" : undefined}
                 className={[
-                  "flex h-11 items-center gap-3 rounded-lg px-4 text-sm font-black transition",
+                  "flex h-12 items-center gap-3 rounded-lg px-4 text-sm font-black transition",
                   active
-                    ? "bg-[#ffbf00] text-[#050816]"
-                    : "text-white hover:bg-[#132235] hover:text-[#ffbf00]",
+                    ? "bg-[#ffbf00] text-[#050816] shadow-sm"
+                    : "text-white hover:bg-[#142338] hover:text-white",
                 ].join(" ")}
               >
                 <Icon size={18} />
@@ -123,9 +183,9 @@ export default function Sidebar({ shellOwner = "page" }: SidebarProps) {
         </div>
       </nav>
 
-      <div className="border-t border-[#1b2a3d] px-5 py-6">
+      <div className="border-t border-[#203044] px-6 py-5">
         <p className="text-xs font-black text-[#ffbf00]">Hassan Industries</p>
-        <p className="mt-1 text-xs text-[#b7c4d6]">
+        <p className="text-xs font-semibold text-[#9db0c9]">
           Building Generations of Legacy
         </p>
       </div>

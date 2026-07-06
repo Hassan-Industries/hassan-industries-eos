@@ -1,109 +1,80 @@
-"use client";
-
-import { useMemo, useState } from "react";
 import Link from "next/link";
 import {
-  ArrowRight,
   ClipboardList,
-  Copy,
   FolderOpen,
   LockKeyhole,
-  Plus,
   Route,
-  Search,
+  ShieldCheck,
 } from "lucide-react";
-import ServiceRequestWorkspaceFrame from "@/components/service-requests/ServiceRequestWorkspaceFrame";
-import {
-  getServiceRequestSearchText,
-  serviceRequestDepartmentFilters,
-  serviceRequestRecords,
-  serviceRequestStatusFilters,
-  type ServiceRequestPriority,
-  type ServiceRequestRecord,
-  type ServiceRequestStatus,
-} from "@/data/serviceRequests";
+import { serviceRequestRecords } from "@/data/serviceRequests";
+
+function statCard(label: string, value: number, icon: React.ReactNode) {
+  return (
+    <section className="rounded-xl border border-[#d8e1ea] bg-white p-5 shadow-sm">
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <p className="text-sm font-semibold text-[#44546a]">{label}</p>
+          <p className="mt-2 text-3xl font-black text-[#050816]">{value}</p>
+        </div>
+        <div className="text-[#ff8a00]">{icon}</div>
+      </div>
+    </section>
+  );
+}
+
+function statusClass(status: string) {
+  if (status.includes("Restricted")) {
+    return "bg-rose-100 text-rose-700";
+  }
+
+  if (status.includes("Pending")) {
+    return "bg-amber-100 text-amber-700";
+  }
+
+  if (status.includes("Review")) {
+    return "bg-blue-100 text-blue-700";
+  }
+
+  return "bg-emerald-100 text-emerald-700";
+}
+
+function priorityClass(priority: string) {
+  if (priority === "Restricted") {
+    return "bg-rose-100 text-rose-700";
+  }
+
+  if (priority === "High") {
+    return "bg-amber-100 text-amber-700";
+  }
+
+  return "bg-slate-100 text-[#24364d]";
+}
 
 export default function ServiceRequestsPage() {
-  const [selectedRequest, setSelectedRequest] =
-    useState<ServiceRequestRecord | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("All Statuses");
-  const [departmentFilter, setDepartmentFilter] = useState("All Departments");
-  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const openCount = serviceRequestRecords.filter((item) =>
+    item.status.includes("Open"),
+  ).length;
 
-  const filteredRequests = useMemo(() => {
-    const normalizedSearch = searchTerm.trim().toLowerCase();
+  const pendingCount = serviceRequestRecords.filter((item) =>
+    item.status.includes("Pending"),
+  ).length;
 
-    return serviceRequestRecords.filter((request) => {
-      const matchesSearch =
-        !normalizedSearch ||
-        getServiceRequestSearchText(request).includes(normalizedSearch);
-      const matchesStatus =
-        statusFilter === "All Statuses" || request.status === statusFilter;
-      const matchesDepartment =
-        departmentFilter === "All Departments" ||
-        request.department === departmentFilter;
-
-      return matchesSearch && matchesStatus && matchesDepartment;
-    });
-  }, [departmentFilter, searchTerm, statusFilter]);
-
-  const statCards = [
-    {
-      label: "Service Requests",
-      value: serviceRequestRecords.length.toString(),
-      icon: ClipboardList,
-    },
-    {
-      label: "Open Intake",
-      value: serviceRequestRecords
-        .filter((request) => request.status !== "Closed")
-        .length.toString(),
-      icon: FolderOpen,
-    },
-    {
-      label: "Pending Routing",
-      value: serviceRequestRecords
-        .filter((request) => request.status === "Pending Routing")
-        .length.toString(),
-      icon: Route,
-    },
-    {
-      label: "Restricted Review",
-      value: serviceRequestRecords
-        .filter((request) => request.status === "Restricted Review")
-        .length.toString(),
-      icon: LockKeyhole,
-    },
-  ];
-
-  function clearFilters() {
-    setSearchTerm("");
-    setStatusFilter("All Statuses");
-    setDepartmentFilter("All Departments");
-  }
-
-  function copyRequestId(requestId: string) {
-    if (typeof navigator !== "undefined" && navigator.clipboard) {
-      void navigator.clipboard.writeText(requestId);
-    }
-
-    setCopiedId(requestId);
-    window.setTimeout(() => setCopiedId(null), 1800);
-  }
+  const restrictedCount = serviceRequestRecords.filter(
+    (item) => item.priority === "Restricted" || item.status.includes("Restricted"),
+  ).length;
 
   return (
-    <ServiceRequestWorkspaceFrame>
-      <section className="rounded-xl bg-[#050816] p-6 text-white shadow-sm sm:p-8">
-        <div className="grid gap-6 lg:grid-cols-[1fr_260px] lg:items-center">
+    <div className="mx-auto max-w-[1680px] space-y-6">
+      <section className="rounded-xl bg-[#050816] p-6 text-white shadow-sm lg:p-8">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.5em] text-[#ffbf00]">
+            <p className="text-[11px] font-black uppercase tracking-[0.45em] text-[#ffbf00]">
               Hassan Industries
             </p>
-            <h1 className="mt-4 text-3xl font-black uppercase tracking-tight sm:text-4xl">
+            <h1 className="mt-4 text-3xl font-black uppercase tracking-tight lg:text-4xl">
               Service Requests Desk
             </h1>
-            <p className="mt-4 max-w-5xl text-sm font-semibold leading-7">
+            <p className="mt-4 max-w-5xl text-sm font-semibold leading-7 text-white">
               Universal frontend intake and routing workspace for administrative
               requests, governance review, document-control actions,
               certified-copy support, treasury support, and restricted HCA
@@ -111,14 +82,16 @@ export default function ServiceRequestsPage() {
             </p>
           </div>
 
-          <div className="rounded-lg border border-[#ffbf00] bg-[#111827] p-6 text-center">
-            <p className="text-xs font-black uppercase tracking-[0.45em]">
+          <div className="rounded-lg border border-[#ffbf00] bg-[#101827] px-8 py-5 text-center">
+            <p className="text-[11px] font-black uppercase tracking-[0.45em] text-white">
               Module Status
             </p>
-            <p className="mt-4 text-3xl font-black text-[#ffbf00]">
+            <p className="mt-3 text-3xl font-black text-[#ffbf00]">
               Frontend Desk
             </p>
-            <p className="mt-2 text-xs font-black">Intake Routing Layer</p>
+            <p className="mt-1 text-xs font-black text-white">
+              Intake Routing Layer
+            </p>
           </div>
         </div>
       </section>
@@ -126,379 +99,249 @@ export default function ServiceRequestsPage() {
       <div className="flex flex-wrap gap-3">
         <Link
           href="/"
-          className="rounded-lg border border-slate-300 bg-white px-5 py-3 text-sm font-black text-[#050816] shadow-sm transition hover:border-[#ff8a00] hover:bg-amber-50"
+          className="inline-flex h-11 items-center gap-2 rounded-lg border border-[#c8d3df] bg-white px-5 text-sm font-black text-[#050816] shadow-sm transition hover:border-[#ff8a00]"
         >
+          <FolderOpen size={16} className="text-[#ff8a00]" />
           Back to Dashboard
         </Link>
+
         <Link
           href="/service-requests/queues"
-          className="rounded-lg border border-slate-300 bg-white px-5 py-3 text-sm font-black text-[#050816] shadow-sm transition hover:border-[#ff8a00] hover:bg-amber-50"
+          className="inline-flex h-11 items-center gap-2 rounded-lg border border-[#c8d3df] bg-white px-5 text-sm font-black text-[#050816] shadow-sm transition hover:border-[#ff8a00]"
         >
+          <Route size={16} className="text-[#ff8a00]" />
           Routing Queues
         </Link>
       </div>
 
-      <p className="text-right text-xs font-black uppercase tracking-[0.5em] text-[#94a3b8]">
+      <p className="text-right text-[11px] font-black uppercase tracking-[0.55em] text-[#94a3b8]">
         Universal Intake & Routing
       </p>
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {statCards.map((stat) => {
-          const Icon = stat.icon;
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {statCard(
+          "Service Requests",
+          serviceRequestRecords.length,
+          <ClipboardList size={24} />,
+        )}
+        {statCard("Open Intake", openCount, <FolderOpen size={24} />)}
+        {statCard("Pending Routing", pendingCount, <Route size={24} />)}
+        {statCard("Restricted Review", restrictedCount, <LockKeyhole size={24} />)}
+      </div>
 
-          return (
-            <div
-              key={stat.label}
-              className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
-            >
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-xs font-semibold text-[#536783]">
-                    {stat.label}
-                  </p>
-                  <p className="mt-2 text-3xl font-black text-[#050816]">
-                    {stat.value}
-                  </p>
-                </div>
-                <Icon size={24} className="text-[#ff8a00]" />
-              </div>
-            </div>
-          );
-        })}
-      </section>
-
-      <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <div className="grid gap-4 lg:grid-cols-[1fr_220px_260px_140px]">
+      <section className="rounded-xl border border-[#d8e1ea] bg-white p-5 shadow-sm">
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_220px_260px_150px]">
           <div>
-            <label className="text-xs font-black uppercase tracking-[0.35em] text-[#536783]">
+            <p className="mb-2 text-[11px] font-black uppercase tracking-[0.35em] text-[#64748b]">
               Search Requests
-            </label>
-            <div className="mt-2 flex h-12 items-center gap-3 rounded-lg border border-slate-300 bg-white px-4">
-              <Search size={16} className="text-slate-400" />
-              <input
-                value={searchTerm}
-                onChange={(event) => setSearchTerm(event.target.value)}
-                placeholder="Search by request ID, title, department, owner, category, classification, or status..."
-                className="h-full w-full bg-transparent text-sm outline-none placeholder:text-slate-400"
-              />
-            </div>
+            </p>
+            <input
+              className="h-12 w-full rounded-lg border border-[#c8d3df] bg-white px-4 text-sm font-semibold outline-none"
+              placeholder="Search by request ID, title, department, owner, category, classification, or status..."
+            />
           </div>
 
           <div>
-            <label className="text-xs font-black uppercase tracking-[0.35em] text-[#536783]">
+            <p className="mb-2 text-[11px] font-black uppercase tracking-[0.35em] text-[#64748b]">
               Status
-            </label>
-            <select
-              value={statusFilter}
-              onChange={(event) => setStatusFilter(event.target.value)}
-              className="mt-2 h-12 w-full rounded-lg border border-slate-300 bg-white px-4 text-sm font-black text-[#050816] outline-none"
-            >
-              {serviceRequestStatusFilters.map((status) => (
-                <option key={status}>{status}</option>
-              ))}
+            </p>
+            <select className="h-12 w-full rounded-lg border border-[#c8d3df] bg-white px-4 text-sm font-black outline-none">
+              <option>All Statuses</option>
             </select>
           </div>
 
           <div>
-            <label className="text-xs font-black uppercase tracking-[0.35em] text-[#536783]">
+            <p className="mb-2 text-[11px] font-black uppercase tracking-[0.35em] text-[#64748b]">
               Department
-            </label>
-            <select
-              value={departmentFilter}
-              onChange={(event) => setDepartmentFilter(event.target.value)}
-              className="mt-2 h-12 w-full rounded-lg border border-slate-300 bg-white px-4 text-sm font-black text-[#050816] outline-none"
-            >
-              {serviceRequestDepartmentFilters.map((department) => (
-                <option key={department}>{department}</option>
-              ))}
+            </p>
+            <select className="h-12 w-full rounded-lg border border-[#c8d3df] bg-white px-4 text-sm font-black outline-none">
+              <option>All Departments</option>
             </select>
           </div>
 
-          <button
-            type="button"
-            onClick={clearFilters}
-            className="mt-7 h-12 rounded-lg border border-slate-300 bg-white px-4 text-sm font-black text-[#050816] shadow-sm transition hover:border-[#ff8a00] hover:bg-amber-50"
-          >
-            Clear Filters
-          </button>
+          <div className="flex items-end">
+            <button
+              type="button"
+              className="h-12 w-full rounded-lg border border-[#c8d3df] bg-white px-4 text-sm font-black text-[#050816] shadow-sm"
+            >
+              Clear Filters
+            </button>
+          </div>
         </div>
       </section>
 
-      <section className="grid gap-5 xl:grid-cols-[1fr_420px]">
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 px-6 py-5">
+      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_400px]">
+        <section className="overflow-hidden rounded-xl border border-[#d8e1ea] bg-white shadow-sm">
+          <div className="flex flex-col gap-4 border-b border-[#d8e1ea] p-6 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.45em] text-[#94a3b8]">
+              <p className="text-[11px] font-black uppercase tracking-[0.45em] text-[#94a3b8]">
                 Enterprise Operations System
               </p>
-              <h2 className="mt-2 text-2xl font-black text-[#050816]">
+              <h2 className="mt-2 text-3xl font-black">
                 Service Requests Registry
               </h2>
-              <p className="mt-2 max-w-3xl text-sm leading-6 text-[#33445c]">
-                Select a service request to preview intake authority, routing
+              <p className="mt-3 max-w-3xl text-sm leading-7 text-[#33445c]">
+                Select a service request to review intake authority, routing
                 stage, department ownership, classification, and future workflow
                 controls.
               </p>
             </div>
 
             <div className="flex items-center gap-3">
-              <span className="rounded-full bg-amber-100 px-4 py-3 text-sm font-black text-amber-700">
-                {filteredRequests.length} shown
+              <span className="rounded-full bg-[#fff1bf] px-5 py-3 text-sm font-black text-[#b45309]">
+                {serviceRequestRecords.length} shown
               </span>
+
               <Link
                 href="/service-requests/new"
-                className="flex h-14 items-center gap-2 rounded-lg bg-[#050816] px-5 text-sm font-black text-white transition hover:bg-[#111827]"
+                className="inline-flex h-14 items-center justify-center rounded-lg bg-[#050816] px-6 text-sm font-black text-white"
               >
-                <Plus size={16} className="text-[#ffbf00]" />
-                Create Service Request
+                + Create Service Request
               </Link>
             </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[1040px] text-left text-sm"><thead><tr className="bg-slate-50 text-xs font-black uppercase tracking-[0.35em] text-[#536783]"><th className="px-6 py-4">Request ID</th><th className="px-6 py-4">Title</th><th className="px-6 py-4">Department</th><th className="px-6 py-4">Status</th><th className="px-6 py-4">Priority</th><th className="px-6 py-4">Owner</th><th className="px-6 py-4">Queue</th><th className="px-6 py-4">Actions</th></tr></thead><tbody>{filteredRequests.map((request) => {
-                const isSelected = selectedRequest?.id === request.id;
-
-                return (
-                  <tr
-                    key={request.id}
-                    onClick={() => setSelectedRequest(request)}
-                    className={[
-                      "cursor-pointer border-b border-slate-200 transition last:border-b-0",
-                      isSelected ? "bg-amber-50" : "bg-white hover:bg-slate-50",
-                    ].join(" ")}
-                  >
-                    <td className="px-6 py-5 align-top font-black text-[#050816]">
+          <div className="overflow-x-auto p-5">
+            <table className="min-w-[980px] w-full text-left text-sm">
+              <thead className="bg-[#f8fafc]">
+                <tr>
+                  <th className="px-4 py-4 text-[11px] font-black uppercase tracking-[0.35em] text-[#33445c]">
+                    Request ID
+                  </th>
+                  <th className="px-4 py-4 text-[11px] font-black uppercase tracking-[0.35em] text-[#33445c]">
+                    Title
+                  </th>
+                  <th className="px-4 py-4 text-[11px] font-black uppercase tracking-[0.35em] text-[#33445c]">
+                    Department
+                  </th>
+                  <th className="px-4 py-4 text-[11px] font-black uppercase tracking-[0.35em] text-[#33445c]">
+                    Status
+                  </th>
+                  <th className="px-4 py-4 text-[11px] font-black uppercase tracking-[0.35em] text-[#33445c]">
+                    Priority
+                  </th>
+                  <th className="px-4 py-4 text-[11px] font-black uppercase tracking-[0.35em] text-[#33445c]">
+                    Owner
+                  </th>
+                  <th className="px-4 py-4 text-[11px] font-black uppercase tracking-[0.35em] text-[#33445c]">
+                    Queue
+                  </th>
+                  <th className="px-4 py-4 text-[11px] font-black uppercase tracking-[0.35em] text-[#33445c]">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {serviceRequestRecords.map((request) => (
+                  <tr key={request.id} className="border-b border-[#d8e1ea]">
+                    <td className="px-4 py-5 align-top font-black text-[#050816]">
                       {request.id}
                     </td>
-                    <td className="px-6 py-5 align-top">
+                    <td className="px-4 py-5 align-top">
                       <p className="font-black text-[#050816]">{request.title}</p>
-                      <p className="mt-2 max-w-[240px] text-xs leading-6 text-[#536783]">
+                      <p className="mt-2 max-w-[260px] text-xs font-semibold leading-6 text-[#44546a]">
                         {request.summary}
                       </p>
                     </td>
-                    <td className="px-6 py-5 align-top font-bold text-[#33445c]">
+                    <td className="px-4 py-5 align-top font-bold text-[#24364d]">
                       {request.department}
                     </td>
-                    <td className="px-6 py-5 align-top">
+                    <td className="px-4 py-5 align-top">
                       <span
                         className={[
-                          "rounded-md px-3 py-1 text-xs font-black",
-                          getStatusPillClass(request.status),
+                          "rounded-md px-3 py-2 text-xs font-black",
+                          statusClass(request.status),
                         ].join(" ")}
                       >
                         {request.status}
                       </span>
                     </td>
-                    <td className="px-6 py-5 align-top">
+                    <td className="px-4 py-5 align-top">
                       <span
                         className={[
-                          "rounded-md px-3 py-1 text-xs font-black",
-                          getPriorityPillClass(request.priority),
+                          "rounded-md px-3 py-2 text-xs font-black",
+                          priorityClass(request.priority),
                         ].join(" ")}
                       >
                         {request.priority}
                       </span>
                     </td>
-                    <td className="px-6 py-5 align-top font-black text-[#050816]">
+                    <td className="px-4 py-5 align-top font-black text-[#050816]">
                       {request.owner}
                     </td>
-                    <td className="px-6 py-5 align-top">
+                    <td className="px-4 py-5 align-top">
                       <Link
                         href={`/service-requests/queues/${request.routingQueueId}`}
-                        onClick={(event) => event.stopPropagation()}
-                        className="text-xs font-black text-blue-700 hover:text-[#ff8a00]"
+                        className="font-black text-blue-700"
                       >
                         {request.assignedQueue}
                       </Link>
                     </td>
-                    <td className="px-6 py-5 align-top">
+                    <td className="px-4 py-5 align-top">
                       <Link
-                        href={`/service-requests/${encodeURIComponent(request.id)}`}
-                        onClick={(event) => event.stopPropagation()}
-                        className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-black text-[#050816] transition hover:border-[#ff8a00] hover:bg-amber-50"
+                        href={`/service-requests/${request.id}`}
+                        className="inline-flex h-10 items-center justify-center rounded-lg border border-[#c8d3df] bg-white px-4 text-sm font-black text-[#050816] transition hover:border-[#ff8a00]"
                       >
                         Open
-                        <ArrowRight size={14} className="text-[#ff8a00]" />
                       </Link>
                     </td>
                   </tr>
-                );
-              })}</tbody></table>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </div>
+        </section>
 
-        {selectedRequest ? (
-          <SelectedRequestPanel
-            request={selectedRequest}
-            copiedId={copiedId}
-            onCopyRequestId={() => copyRequestId(selectedRequest.id)}
-          />
-        ) : (
-          <EmptySelectionPanel />
-        )}
-      </section>
-    </ServiceRequestWorkspaceFrame>
-  );
-}
+        <aside className="space-y-5">
+          <section className="rounded-xl border border-[#d8e1ea] bg-white p-6 shadow-sm">
+            <div className="flex items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#050816] text-[#ffbf00]">
+                <ClipboardList size={24} />
+              </div>
+              <div>
+                <p className="text-[11px] font-black uppercase tracking-[0.35em] text-[#94a3b8]">
+                  Request Preview
+                </p>
+                <h2 className="mt-2 text-2xl font-black">
+                  No Request Selected
+                </h2>
+                <p className="mt-4 text-sm leading-7 text-[#33445c]">
+                  Select a service request record to review intake category,
+                  routing stage, ownership, classification, and future workflow
+                  controls.
+                </p>
+              </div>
+            </div>
 
-function EmptySelectionPanel() {
-  return (
-    <aside className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-      <p className="text-xs font-black uppercase tracking-[0.45em] text-[#94a3b8]">
-        Request Preview
-      </p>
-      <h2 className="mt-2 text-2xl font-black text-[#050816]">
-        No Request Selected
-      </h2>
-      <p className="mt-4 text-sm leading-6 text-[#33445c]">
-        Select a service request record to review intake category, routing
-        stage, ownership, classification, and future workflow controls.
-      </p>
+            <div className="mt-5 rounded-lg bg-[#050816] p-5 text-white">
+              <p className="text-[11px] font-black uppercase tracking-[0.35em]">
+                Service Request Workspace
+              </p>
+              <p className="mt-3 text-sm font-semibold leading-6">
+                Request metadata opens only after intentional request selection.
+              </p>
+            </div>
+          </section>
 
-      <div className="mt-6 rounded-lg bg-[#050816] p-5 text-white">
-        <p className="text-xs font-black uppercase tracking-[0.35em]">
-          Service Request Workspace
-        </p>
-        <p className="mt-3 text-sm font-semibold leading-6">
-          Request metadata opens only after intentional request selection.
-        </p>
+          <section className="rounded-xl border border-dashed border-[#c8d3df] bg-white p-6 shadow-sm">
+            <div className="flex items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#050816] text-[#ffbf00]">
+                <ShieldCheck size={24} />
+              </div>
+              <div>
+                <h3 className="text-2xl font-black uppercase tracking-[0.35em]">
+                  Routing Standard
+                </h3>
+                <ul className="mt-5 space-y-3 text-sm leading-7 text-[#33445c]">
+                  <li>• Requests must not remain unassigned.</li>
+                  <li>• Restricted matters require controlled visibility.</li>
+                  <li>• Queues must preserve owner, status, and audit path.</li>
+                </ul>
+              </div>
+            </div>
+          </section>
+        </aside>
       </div>
-    </aside>
-  );
-}
-
-function SelectedRequestPanel({
-  request,
-  copiedId,
-  onCopyRequestId,
-}: {
-  request: ServiceRequestRecord;
-  copiedId: string | null;
-  onCopyRequestId: () => void;
-}) {
-  return (
-    <aside className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-xs font-black uppercase tracking-[0.45em] text-[#94a3b8]">
-            Selected Request
-          </p>
-          <h2 className="mt-2 text-2xl font-black text-[#050816]">
-            {request.id}
-          </h2>
-          <p className="mt-2 text-sm font-black text-[#050816]">
-            {request.title}
-          </p>
-        </div>
-
-        <span
-          className={[
-            "rounded-md px-3 py-1 text-xs font-black",
-            getStatusPillClass(request.status),
-          ].join(" ")}
-        >
-          {request.status}
-        </span>
-      </div>
-
-      <div className="mt-6 rounded-lg bg-[#050816] p-5 text-white">
-        <p className="text-xs font-black uppercase tracking-[0.35em]">
-          Controlled Request
-        </p>
-        <p className="mt-2 text-sm font-black">{request.classification}</p>
-      </div>
-
-      <div className="mt-6 divide-y divide-slate-200">
-        {[
-          ["Requester", request.requester],
-          ["Department", request.department],
-          ["Owner", request.owner],
-          ["Category", request.category],
-          ["Priority", request.priority],
-          ["Stage", request.stage],
-          ["Assigned Queue", request.assignedQueue],
-          ["Due Date", request.dueDate],
-          ["Related Record", request.relatedRecord],
-        ].map(([label, value]) => (
-          <DetailRow key={label} label={label} value={value} />
-        ))}
-      </div>
-
-      <div className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4">
-        <p className="text-xs font-black uppercase tracking-[0.35em] text-[#536783]">
-          Routing Note
-        </p>
-        <p className="mt-3 text-sm leading-6 text-[#33445c]">
-          {request.routingNote}
-        </p>
-      </div>
-
-      <div className="mt-6 grid gap-3">
-        <button
-          type="button"
-          onClick={onCopyRequestId}
-          className="flex h-12 items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 text-sm font-black text-[#050816] transition hover:border-[#ff8a00] hover:bg-amber-50"
-        >
-          <Copy size={16} className="text-[#ff8a00]" />
-          {copiedId === request.id ? "Request ID Copied" : "Copy Request ID"}
-        </button>
-
-        <Link
-          href={`/service-requests/${encodeURIComponent(request.id)}`}
-          className="flex h-12 items-center justify-center gap-2 rounded-lg bg-[#050816] px-4 text-sm font-black text-white transition hover:bg-[#111827]"
-        >
-          Open Detail Workspace
-          <ArrowRight size={16} className="text-[#ffbf00]" />
-        </Link>
-
-        <Link
-          href={`/service-requests/queues/${request.routingQueueId}`}
-          className="flex h-12 items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 text-sm font-black text-[#050816] transition hover:border-[#ff8a00] hover:bg-amber-50"
-        >
-          Open Assigned Queue
-          <Route size={16} className="text-[#ff8a00]" />
-        </Link>
-      </div>
-    </aside>
-  );
-}
-
-function DetailRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-start justify-between gap-4 py-3 text-sm">
-      <span className="font-bold text-[#536783]">{label}</span>
-      <span className="text-right font-black text-[#050816]">{value}</span>
     </div>
   );
-}
-
-function getStatusPillClass(status: ServiceRequestStatus) {
-  switch (status) {
-    case "Open":
-      return "bg-emerald-100 text-emerald-700";
-    case "In Review":
-      return "bg-blue-100 text-blue-700";
-    case "Pending Routing":
-      return "bg-amber-100 text-amber-700";
-    case "Restricted Review":
-      return "bg-rose-100 text-rose-700";
-    case "Closed":
-      return "bg-slate-200 text-slate-600";
-    default:
-      return "bg-slate-200 text-slate-600";
-  }
-}
-
-function getPriorityPillClass(priority: ServiceRequestPriority) {
-  switch (priority) {
-    case "Normal":
-      return "bg-slate-100 text-slate-700";
-    case "High":
-      return "bg-amber-100 text-amber-700";
-    case "Restricted":
-      return "bg-rose-100 text-rose-700";
-    default:
-      return "bg-slate-100 text-slate-700";
-  }
 }
