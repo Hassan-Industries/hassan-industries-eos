@@ -10,7 +10,12 @@ export default function EOCPageShell({
   contentClassName = "",
 }: EOCPageShellProps) {
   return (
-    <div className={["mx-auto w-full max-w-[1600px] space-y-6", contentClassName].join(" ")}>
+    <div
+      className={[
+        "mx-auto w-full max-w-[1600px] space-y-6",
+        contentClassName,
+      ].join(" ")}
+    >
       {children}
     </div>
   );
