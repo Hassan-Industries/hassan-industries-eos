@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState, type ElementType } from "react";
-import { useSearchParams } from "next/navigation";
+import { useMemo, useState } from "react";
 import {
   ArrowLeft,
   BookOpen,
@@ -10,67 +9,14 @@ import {
   Eye,
   FilePlus2,
   FileText,
-  GitBranch,
+  FolderOpen,
   RefreshCcw,
   Search,
   Upload,
 } from "lucide-react";
+import { publications, type PublicationRecord } from "@/data/governanceLibrary";
 
-import {
-  publications,
-  type PublicationRecord,
-} from "@/data/governanceLibrary";
-
-type DisplayPublicationRecord = PublicationRecord & {
-  id?: string;
-  documentId?: string;
-  documentNo?: string;
-  documentNumber?: string;
-  title?: string;
-  name?: string;
-  description?: string;
-  summary?: string;
-  series?: string;
-  publicationSeries?: string;
-  category?: string;
-  owner?: string;
-  authority?: string;
-  version?: string | number;
-  status?: string;
-  statusLabel?: string;
-  documentState?: string;
-  documentType?: string;
-  reviewDate?: string;
-  effectiveDate?: string;
-  classification?: string;
-  retentionCategory?: string;
-  originalExecutedLocation?: string;
-  certifiedCopy?: string;
-  relatedResolution?: string;
-  relatedImplementationProject?: string;
-  notes?: string;
-};
-
-type InitialRegistryFilters = {
-  searchValue: string;
-  statusFilter: string;
-  seriesFilter: string;
-  classificationFilter: string;
-  documentTypeFilter: string;
-};
-
-const statusFilters = [
-  "All Statuses",
-  "AP",
-  "DR",
-  "RV",
-  "OE",
-  "CC",
-  "SP",
-  "AR",
-  "VO",
-];
-
+const statusFilters = ["All Statuses", "AP", "DR", "RV", "OE", "CC", "SP", "AR", "VO"];
 const seriesFilters = [
   "All Series",
   "Administration",
@@ -81,7 +27,6 @@ const seriesFilters = [
   "Legal",
   "Tax",
 ];
-
 const classificationFilters = [
   "All Classifications",
   "Internal Governance",
@@ -91,788 +36,422 @@ const classificationFilters = [
   "Internal Draft",
 ];
 
-export default function EGLPublicationsRegistryShell() {
-  const searchParams = useSearchParams();
-  const queryKey = searchParams.toString();
+function getStatusClass(status: string) {
+  if (status === "AP" || status === "OE") {
+    return "bg-emerald-100 text-emerald-700";
+  }
 
-  const initialFilters = useMemo(
-    () => getInitialFiltersFromQueryKey(queryKey),
-    [queryKey],
-  );
+  if (status === "DR" || status === "RV") {
+    return "bg-blue-100 text-blue-700";
+  }
 
+  return "bg-slate-100 text-slate-700";
+}
+
+function DetailRow({ label, value }: { label: string; value: string }) {
   return (
-    <PublicationsRegistryContent
-      key={queryKey}
-      initialFilters={initialFilters}
-    />
+    <div className="flex items-start justify-between gap-4 border-b border-[#d8e1ea] py-3 text-sm last:border-b-0">
+      <span className="font-bold text-[#64748b]">{label}</span>
+      <span className="max-w-[230px] text-right font-black text-[#050816]">
+        {value}
+      </span>
+    </div>
   );
 }
 
-function PublicationsRegistryContent({
-  initialFilters,
+function RecordRow({
+  record,
+  selected,
+  onSelect,
 }: {
-  initialFilters: InitialRegistryFilters;
+  record: PublicationRecord;
+  selected: boolean;
+  onSelect: () => void;
 }) {
-  const records = useMemo(
-    () => publications.filter(Boolean) as DisplayPublicationRecord[],
-    [],
-  );
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      className={[
+        "grid min-w-[1080px] grid-cols-[150px_minmax(340px,1.7fr)_170px_110px_110px_120px_110px] border-b border-[#d8e1ea] text-left transition last:border-b-0",
+        selected ? "bg-[#fffaf0]" : "bg-white hover:bg-[#f8fafc]",
+      ].join(" ")}
+    >
+      <div className="px-4 py-5 text-sm font-black text-[#050816]">
+        {record.documentNo}
+      </div>
 
-  const [searchValue, setSearchValue] = useState(initialFilters.searchValue);
-  const [statusFilter, setStatusFilter] = useState(initialFilters.statusFilter);
-  const [seriesFilter, setSeriesFilter] = useState(initialFilters.seriesFilter);
-  const [classificationFilter, setClassificationFilter] = useState(
-    initialFilters.classificationFilter,
+      <div className="px-4 py-5">
+        <p className="text-sm font-black leading-6 text-[#050816]">
+          {record.title}
+        </p>
+        <p className="mt-2 max-w-[420px] text-xs font-semibold leading-6 text-[#48617e]">
+          {record.notes}
+        </p>
+      </div>
+
+      <div className="px-4 py-5 text-sm font-bold text-[#24364d]">
+        {record.series}
+      </div>
+
+      <div className="px-4 py-5">
+        <span
+          className={[
+            "inline-flex rounded-md px-3 py-2 text-xs font-black",
+            getStatusClass(record.status),
+          ].join(" ")}
+        >
+          {record.status}
+        </span>
+      </div>
+
+      <div className="px-4 py-5 text-sm font-black text-[#050816]">
+        {record.version}
+      </div>
+
+      <div className="px-4 py-5 text-sm font-black text-[#050816]">
+        {record.owner}
+      </div>
+
+      <div className="px-4 py-5">
+        <span className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-[#c8d3df] bg-white px-4 text-sm font-black text-[#050816]">
+          <Eye className="h-4 w-4 text-[#ff8a00]" />
+          View
+        </span>
+      </div>
+    </button>
   );
-  const [documentTypeFilter, setDocumentTypeFilter] = useState(
-    initialFilters.documentTypeFilter,
-  );
-  const [selectedDocumentNumber, setSelectedDocumentNumber] = useState<
-    string | null
-  >(null);
+}
+
+export default function EGLPublicationsRegistryShell() {
+  const [searchValue, setSearchValue] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All Statuses");
+  const [seriesFilter, setSeriesFilter] = useState("All Series");
+  const [classificationFilter, setClassificationFilter] =
+    useState("All Classifications");
+  const [selectedDocumentNumber, setSelectedDocumentNumber] =
+    useState<string | null>(publications[0]?.documentNo ?? null);
 
   const filteredRecords = useMemo(() => {
     const normalizedSearch = searchValue.trim().toLowerCase();
-    const normalizedDocumentType = documentTypeFilter.trim().toLowerCase();
 
-    return records.filter((record) => {
+    return publications.filter((record) => {
       const searchText = [
-        getDocumentNumber(record),
-        getTitle(record),
-        getDescription(record),
-        getSeries(record),
-        getStatus(record),
-        getOwner(record),
-        getAuthority(record),
-        getClassification(record),
-        getDocumentType(record),
+        record.documentNo,
+        record.title,
+        record.series,
+        record.status,
+        record.owner,
+        record.authority,
+        record.classification,
+        record.documentType,
+        record.notes,
       ]
         .join(" ")
         .toLowerCase();
 
       const matchesSearch =
         normalizedSearch.length === 0 || searchText.includes(normalizedSearch);
+
       const matchesStatus =
-        statusFilter === "All Statuses" || getStatus(record) === statusFilter;
+        statusFilter === "All Statuses" || record.status === statusFilter;
+
       const matchesSeries =
-        seriesFilter === "All Series" || getSeries(record) === seriesFilter;
+        seriesFilter === "All Series" || record.series === seriesFilter;
+
       const matchesClassification =
         classificationFilter === "All Classifications" ||
-        getClassification(record) === classificationFilter;
-      const matchesDocumentType =
-        normalizedDocumentType.length === 0 ||
-        getDocumentType(record).toLowerCase().includes(normalizedDocumentType);
+        record.classification === classificationFilter;
 
-      return (
-        matchesSearch &&
-        matchesStatus &&
-        matchesSeries &&
-        matchesClassification &&
-        matchesDocumentType
-      );
+      return matchesSearch && matchesStatus && matchesSeries && matchesClassification;
     });
-  }, [
-    classificationFilter,
-    documentTypeFilter,
-    records,
-    searchValue,
-    seriesFilter,
-    statusFilter,
-  ]);
+  }, [classificationFilter, searchValue, seriesFilter, statusFilter]);
 
   const selectedRecord =
-    selectedDocumentNumber === null
-      ? null
-      : records.find(
-          (record) => getDocumentNumber(record) === selectedDocumentNumber,
-        ) ?? null;
-
-  const approvedCount = records.filter((record) => getStatus(record) === "AP")
-    .length;
-  const reviewDraftCount = records.filter((record) =>
-    ["DR", "RV"].includes(getStatus(record)),
-  ).length;
-  const originalExecutedCount = records.filter(
-    (record) => getStatus(record) === "OE",
-  ).length;
+    publications.find((record) => record.documentNo === selectedDocumentNumber) ??
+    publications[0];
 
   function clearFilters() {
     setSearchValue("");
     setStatusFilter("All Statuses");
     setSeriesFilter("All Series");
     setClassificationFilter("All Classifications");
-    setDocumentTypeFilter("");
-    setSelectedDocumentNumber(null);
   }
 
   return (
-    <div className="mx-auto max-w-[1500px] space-y-4">
-      <section className="rounded-xl bg-slate-950 p-6 text-white shadow-sm">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+    <div className="mx-auto max-w-[1680px] space-y-6">
+      <section className="rounded-xl bg-[#050816] p-6 text-white shadow-sm lg:p-8">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-[11px] font-extrabold uppercase tracking-[0.42em] text-amber-400">
+            <p className="text-[11px] font-black uppercase tracking-[0.45em] text-[#ffbf00]">
               Hassan Industries
             </p>
-            <h1 className="mt-3 text-3xl font-black uppercase tracking-tight">
+            <h1 className="mt-4 text-3xl font-black uppercase tracking-tight lg:text-4xl">
               Publications Registry
             </h1>
-            <p className="mt-3 max-w-4xl text-sm leading-6 text-slate-100">
+            <p className="mt-4 max-w-5xl text-sm font-semibold leading-7 text-white">
               Controlled frontend registry for Enterprise Governance Library
               publications, manuals, standards, resolutions, policies,
               templates, and related publication records.
             </p>
           </div>
 
-          <div className="rounded-lg border border-amber-500 bg-white/5 px-7 py-5 text-center">
-            <p className="text-[11px] font-extrabold uppercase tracking-[0.35em] text-slate-100">
+          <div className="rounded-lg border border-[#ffbf00] bg-[#101827] px-8 py-5 text-center">
+            <p className="text-[11px] font-black uppercase tracking-[0.45em] text-white">
               Registry Status
             </p>
-            <p className="mt-3 text-2xl font-black text-amber-400">
+            <p className="mt-3 text-3xl font-black text-[#ffbf00]">
               Frontend List
             </p>
-            <p className="mt-1 text-xs font-semibold text-slate-100">
+            <p className="mt-1 text-xs font-black text-white">
               Static Data Layer
             </p>
           </div>
         </div>
       </section>
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <Link
-          href="/governance-library"
-          className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-950 shadow-sm transition hover:border-amber-500 hover:bg-amber-50"
-        >
-          <ArrowLeft className="h-4 w-4 text-amber-600" />
-          Back to EGL Dashboard
-        </Link>
+      <Link href="/governance-library" className="service-button">
+        <ArrowLeft size={16} className="text-[#ff8a00]" />
+        Back to EGL Dashboard
+      </Link>
 
-        <p className="hidden text-[11px] font-extrabold uppercase tracking-[0.35em] text-slate-400 lg:block">
-          Controlled Publication Records
-        </p>
-      </div>
+      <p className="text-right text-[11px] font-black uppercase tracking-[0.55em] text-[#94a3b8]">
+        Controlled Publication Records
+      </p>
 
-      <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-        <RegistryMetric
-          label="Registry Records"
-          value={String(records.length)}
-          icon={ClipboardList}
-        />
-        <RegistryMetric
-          label="Approved"
-          value={String(approvedCount)}
-          icon={FileText}
-        />
-        <RegistryMetric
-          label="Review / Draft"
-          value={String(reviewDraftCount)}
-          icon={RefreshCcw}
-        />
-        <RegistryMetric
-          label="Original Executed"
-          value={String(originalExecutedCount)}
-          icon={BookOpen}
-        />
-      </section>
-
-      <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-        <div className="grid gap-4 xl:grid-cols-[1fr_180px_180px_280px_104px]">
-          <label>
-            <span className="text-[11px] font-extrabold uppercase tracking-[0.35em] text-slate-500">
+      <section className="rounded-xl border border-[#d8e1ea] bg-white p-5 shadow-sm">
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_180px_180px_260px_140px]">
+          <div>
+            <p className="mb-2 text-[11px] font-black uppercase tracking-[0.35em] text-[#64748b]">
               Search Registry
-            </span>
-            <div className="mt-2 flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 transition focus-within:border-amber-500">
-              <Search className="h-4 w-4 text-slate-400" />
+            </p>
+            <div className="flex h-12 items-center gap-3 rounded-lg border border-[#c8d3df] bg-white px-4">
+              <Search className="h-4 w-4 text-[#94a3b8]" />
               <input
                 value={searchValue}
                 onChange={(event) => setSearchValue(event.target.value)}
                 placeholder="Search by document number, title, series, owner, status, or classification..."
-                className="min-w-0 flex-1 px-1 py-3 text-sm outline-none"
+                className="min-w-0 flex-1 text-sm font-semibold text-[#050816] outline-none placeholder:text-[#7d8999]"
               />
             </div>
-          </label>
+          </div>
 
-          <FilterSelect
-            label="Status"
-            value={statusFilter}
-            options={statusFilters}
-            onChange={setStatusFilter}
-          />
+          <div>
+            <p className="mb-2 text-[11px] font-black uppercase tracking-[0.35em] text-[#64748b]">
+              Status
+            </p>
+            <select
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value)}
+              className="h-12 w-full rounded-lg border border-[#c8d3df] bg-white px-4 text-sm font-black text-[#050816]"
+            >
+              {statusFilters.map((status) => (
+                <option key={status}>{status}</option>
+              ))}
+            </select>
+          </div>
 
-          <FilterSelect
-            label="Series"
-            value={seriesFilter}
-            options={seriesFilters}
-            onChange={setSeriesFilter}
-          />
+          <div>
+            <p className="mb-2 text-[11px] font-black uppercase tracking-[0.35em] text-[#64748b]">
+              Series
+            </p>
+            <select
+              value={seriesFilter}
+              onChange={(event) => setSeriesFilter(event.target.value)}
+              className="h-12 w-full rounded-lg border border-[#c8d3df] bg-white px-4 text-sm font-black text-[#050816]"
+            >
+              {seriesFilters.map((series) => (
+                <option key={series}>{series}</option>
+              ))}
+            </select>
+          </div>
 
-          <FilterSelect
-            label="Classification"
-            value={classificationFilter}
-            options={classificationFilters}
-            onChange={setClassificationFilter}
-          />
+          <div>
+            <p className="mb-2 text-[11px] font-black uppercase tracking-[0.35em] text-[#64748b]">
+              Classification
+            </p>
+            <select
+              value={classificationFilter}
+              onChange={(event) => setClassificationFilter(event.target.value)}
+              className="h-12 w-full rounded-lg border border-[#c8d3df] bg-white px-4 text-sm font-black text-[#050816]"
+            >
+              {classificationFilters.map((classification) => (
+                <option key={classification}>{classification}</option>
+              ))}
+            </select>
+          </div>
 
-          <button
-            type="button"
-            onClick={clearFilters}
-            className="self-end rounded-lg border border-slate-300 bg-white px-4 py-3 text-xs font-bold text-slate-950 shadow-sm transition hover:border-amber-500 hover:bg-amber-50"
-          >
-            Clear Filters
-          </button>
+          <div className="flex items-end">
+            <button type="button" onClick={clearFilters} className="service-button h-12 w-full">
+              Clear Filters
+            </button>
+          </div>
         </div>
       </section>
 
-      <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <section className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-          <div className="flex flex-col gap-4 border-b border-slate-200 p-5 lg:flex-row lg:items-start lg:justify-between">
+      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_390px]">
+        <section className="overflow-hidden rounded-xl border border-[#d8e1ea] bg-white shadow-sm">
+          <div className="flex flex-col gap-4 border-b border-[#d8e1ea] p-6 lg:flex-row lg:items-start lg:justify-between">
             <div>
-              <p className="text-[11px] font-extrabold uppercase tracking-[0.35em] text-slate-400">
+              <p className="text-[11px] font-black uppercase tracking-[0.45em] text-[#94a3b8]">
                 Enterprise Governance Library
               </p>
-              <h2 className="mt-2 text-2xl font-black">
+              <h2 className="mt-2 text-3xl font-black text-[#050816]">
                 Publications Registry
               </h2>
-              <p className="mt-2 text-sm text-slate-600">
+              <p className="mt-3 max-w-3xl text-sm leading-7 text-[#33445c]">
                 Select a record to preview metadata or open one of the EGL
                 action shells.
               </p>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="rounded-full bg-amber-100 px-4 py-2 text-xs font-extrabold text-amber-700">
+            <div className="flex items-center gap-3">
+              <span className="rounded-full bg-[#fff0bd] px-5 py-3 text-sm font-black text-[#b45309]">
                 {filteredRecords.length} shown
               </span>
 
               <Link
                 href="/governance-library/publications/new"
-                className="inline-flex items-center gap-2 rounded-lg bg-slate-950 px-4 py-3 text-xs font-bold text-white shadow-sm transition hover:bg-slate-800"
+                className="service-button-primary h-12"
               >
-                <FilePlus2 className="h-4 w-4 text-amber-400" />
+                <FilePlus2 className="h-4 w-4 text-[#ffbf00]" />
                 Create New Publication
               </Link>
             </div>
           </div>
 
           <div className="overflow-x-auto p-5">
-            <table className="min-w-[980px] w-full text-left text-sm">
-              <thead>
-                <tr className="bg-slate-50 text-[11px] font-extrabold uppercase tracking-[0.25em] text-slate-500">
-                  <th className="px-3 py-4">Document No.</th>
-                  <th className="px-3 py-4">Title</th>
-                  <th className="px-3 py-4">Series</th>
-                  <th className="px-3 py-4">Status</th>
-                  <th className="px-3 py-4">Version</th>
-                  <th className="px-3 py-4">Owner</th>
-                  <th className="px-3 py-4">Review Date</th>
-                  <th className="px-3 py-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredRecords.map((record) => {
-                  const documentNumber = getDocumentNumber(record);
-                  const isSelected = selectedDocumentNumber === documentNumber;
-
-                  return (
-                    <tr
-                      key={documentNumber}
-                      className={[
-                        "border-b border-slate-200 transition hover:bg-amber-50/70",
-                        isSelected ? "bg-amber-50" : "bg-white",
-                      ].join(" ")}
-                    >
-                      <td className="px-3 py-4 align-top">
-                        <button
-                          type="button"
-                          onClick={() => setSelectedDocumentNumber(documentNumber)}
-                          className="text-left font-extrabold text-slate-950 hover:text-amber-700"
-                        >
-                          {documentNumber}
-                        </button>
-                      </td>
-
-                      <td className="px-3 py-4 align-top">
-                        <button
-                          type="button"
-                          onClick={() => setSelectedDocumentNumber(documentNumber)}
-                          className="block text-left"
-                        >
-                          <span className="font-extrabold text-slate-950">
-                            {getTitle(record)}
-                          </span>
-                          <span className="mt-2 block max-w-[360px] text-xs leading-5 text-slate-500">
-                            {getDescription(record)}
-                          </span>
-                        </button>
-                      </td>
-
-                      <td className="px-3 py-4 align-top font-semibold text-slate-700">
-                        {getSeries(record)}
-                      </td>
-
-                      <td className="px-3 py-4 align-top">
-                        <StatusBadge status={getStatus(record)} />
-                      </td>
-
-                      <td className="px-3 py-4 align-top font-bold">
-                        {String(record.version ?? "1.0")}
-                      </td>
-
-                      <td className="px-3 py-4 align-top font-bold">
-                        {getOwner(record)}
-                      </td>
-
-                      <td className="px-3 py-4 align-top font-bold">
-                        {getReviewDate(record)}
-                      </td>
-
-                      <td className="px-3 py-4 align-top text-right">
-                        <Link
-                          href={getRecordHref(record)}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-950 transition hover:border-amber-500 hover:bg-amber-50"
-                        >
-                          <Eye className="h-4 w-4 text-amber-500" />
-                          View
-                        </Link>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-
-            {filteredRecords.length === 0 ? (
-              <div className="mt-5 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
-                <p className="text-sm font-extrabold text-slate-950">
-                  No publication records match the current filters.
-                </p>
-                <p className="mt-2 text-sm text-slate-500">
-                  Clear filters or search by another document number, owner,
-                  series, title, or classification.
-                </p>
+            <div className="min-w-[1080px]">
+              <div className="grid grid-cols-[150px_minmax(340px,1.7fr)_170px_110px_110px_120px_110px] bg-[#f8fafc]">
+                {[
+                  "Document No.",
+                  "Title",
+                  "Series",
+                  "Status",
+                  "Version",
+                  "Owner",
+                  "Actions",
+                ].map((heading) => (
+                  <div
+                    key={heading}
+                    className="px-4 py-4 text-[11px] font-black uppercase tracking-[0.3em] text-[#48617e]"
+                  >
+                    {heading}
+                  </div>
+                ))}
               </div>
-            ) : null}
+
+              <div>
+                {filteredRecords.map((record) => (
+                  <RecordRow
+                    key={record.documentNo}
+                    record={record}
+                    selected={selectedRecord?.documentNo === record.documentNo}
+                    onSelect={() => setSelectedDocumentNumber(record.documentNo)}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
         </section>
 
-        <aside className="space-y-4">
+        <aside className="space-y-5">
           {selectedRecord ? (
-            <PublicationPreviewPanel record={selectedRecord} />
-          ) : (
-            <PublicationSelectionPlaceholder />
-          )}
+            <section className="rounded-xl border border-[#d8e1ea] bg-white p-6 shadow-sm">
+              <div className="mb-5 rounded-lg bg-[#050816] p-5 text-white">
+                <div className="flex items-center gap-3">
+                  <BookOpen className="h-7 w-7 text-[#ffbf00]" />
+                  <div>
+                    <h3 className="text-2xl font-black text-white">
+                      {selectedRecord.documentNo}
+                    </h3>
+                    <p className="mt-1 text-sm font-semibold text-white">
+                      {selectedRecord.title}
+                    </p>
+                  </div>
+                </div>
+              </div>
 
-          <section className="rounded-lg border border-dashed border-slate-300 bg-white p-5 shadow-sm">
-            <h3 className="text-[15px] font-black uppercase tracking-[0.28em]">
-              Backend Readiness
-            </h3>
-            <p className="mt-3 text-sm leading-6 text-slate-600">
-              This registry remains frontend-only. Future backend work should
-              connect this list to stored publication records, upload workflows,
-              approval routing, audit logs, certified copy generation, and
-              Microsoft 365 or SharePoint file locations.
-            </p>
+              <DetailRow label="Publication Series" value={selectedRecord.series} />
+              <DetailRow label="Document Type" value={selectedRecord.documentType} />
+              <DetailRow label="Owner" value={selectedRecord.owner} />
+              <DetailRow label="Authority" value={selectedRecord.authority} />
+              <DetailRow label="Version" value={selectedRecord.version} />
+              <DetailRow label="Status" value={selectedRecord.status} />
+              <DetailRow label="Document State" value={selectedRecord.documentState} />
+              <DetailRow label="Effective Date" value={selectedRecord.effectiveDate} />
+              <DetailRow label="Review Date" value={selectedRecord.reviewDate} />
+
+              <div className="mt-5 space-y-3">
+                <Link
+                  href={`/governance-library/publications/${selectedRecord.documentNo}`}
+                  className="service-button-primary w-full justify-center"
+                >
+                  <Eye className="h-4 w-4 text-[#ffbf00]" />
+                  View Record
+                </Link>
+
+                <Link
+                  href={`/governance-library/publications/${selectedRecord.documentNo}/viewer`}
+                  className="service-button w-full justify-center"
+                >
+                  <BookOpen className="h-4 w-4 text-[#ff8a00]" />
+                  Open Viewer
+                </Link>
+              </div>
+            </section>
+          ) : null}
+
+          <section className="rounded-xl border border-[#d8e1ea] bg-white p-6 shadow-sm">
+            <div className="flex items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#050816] text-[#ffbf00]">
+                <ClipboardList className="h-6 w-6" />
+              </div>
+
+              <div>
+                <p className="text-[11px] font-black uppercase tracking-[0.35em] text-[#94a3b8]">
+                  Quick Actions
+                </p>
+                <h3 className="mt-2 text-xl font-black uppercase tracking-[0.2em] text-[#050816]">
+                  HCA Controls
+                </h3>
+              </div>
+            </div>
+
+            <div className="mt-5 space-y-3">
+              <Link href="/governance-library/publications/new" className="service-button-primary w-full justify-center">
+                <FilePlus2 className="h-4 w-4 text-[#ffbf00]" />
+                Create New Publication
+              </Link>
+
+              <Link href="/governance-library/resolutions" className="service-button w-full justify-center">
+                <FileText className="h-4 w-4 text-[#ff8a00]" />
+                New Resolution
+              </Link>
+
+              <Link href="/service-requests/new?queue=governance-library-intake" className="service-button w-full justify-center">
+                <Upload className="h-4 w-4 text-[#ff8a00]" />
+                Upload Document
+              </Link>
+
+              <Link href="/governance-library/forms" className="service-button w-full justify-center">
+                <BookOpen className="h-4 w-4 text-[#ff8a00]" />
+                Forms & Templates
+              </Link>
+
+              <Link href="/governance-library/registers" className="service-button w-full justify-center">
+                <FolderOpen className="h-4 w-4 text-[#ff8a00]" />
+                View Registers
+              </Link>
+
+              <Link href="/service-requests/new?queue=governance-library-intake" className="service-button w-full justify-center">
+                <RefreshCcw className="h-4 w-4 text-[#ff8a00]" />
+                Request Review
+              </Link>
+            </div>
           </section>
         </aside>
-      </section>
-    </div>
-  );
-}
-
-function PublicationPreviewPanel({
-  record,
-}: {
-  record: DisplayPublicationRecord;
-}) {
-  return (
-    <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-[11px] font-extrabold uppercase tracking-[0.35em] text-slate-400">
-            Selected Record
-          </p>
-          <h2 className="mt-2 text-2xl font-black">
-            {getDocumentNumber(record)}
-          </h2>
-          <p className="mt-2 text-sm font-extrabold text-slate-950">
-            {getTitle(record)}
-          </p>
-        </div>
-
-        <StatusBadge status={getStatus(record)} />
-      </div>
-
-      <div className="mt-5 rounded-lg bg-slate-950 p-5 text-white">
-        <div className="flex items-center gap-3">
-          <BookOpen className="h-6 w-6 text-amber-400" />
-          <div>
-            <p className="text-[11px] font-extrabold uppercase tracking-[0.35em]">
-              Controlled Publication
-            </p>
-            <p className="mt-1 text-xs font-semibold">
-              {getClassification(record)}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-5 space-y-2">
-        <PreviewField label="Series" value={getSeries(record)} />
-        <PreviewField label="Document Type" value={getDocumentType(record)} />
-        <PreviewField label="Owner" value={getOwner(record)} />
-        <PreviewField label="Authority" value={getAuthority(record)} />
-        <PreviewField label="Version" value={String(record.version ?? "1.0")} />
-        <PreviewField label="Review Date" value={getReviewDate(record)} />
-        <PreviewField
-          label="Retention"
-          value={record.retentionCategory ?? "Permanent"}
-        />
-      </div>
-
-      <div className="mt-5 space-y-2">
-        <ActionLink href={getRecordHref(record)} label="View Record" icon={Eye} primary newTab />
-        <ActionLink
-          href={`${getRecordHref(record)}/viewer`}
-          label="Open Viewer"
-          icon={FileText}
-          newTab
-        />
-        <ActionLink
-          href={`${getRecordHref(record)}/upload-replacement`}
-          label="Upload Replacement"
-          icon={Upload}
-        />
-        <ActionLink
-          href={`${getRecordHref(record)}/certified-copy`}
-          label="Create Certified Copy"
-          icon={FilePlus2}
-        />
-        <ActionLink
-          href={`${getRecordHref(record)}/revision-history`}
-          label="Revision History"
-          icon={GitBranch}
-        />
-        <ActionLink
-          href={`${getRecordHref(record)}/request-review`}
-          label="Request Review"
-          icon={RefreshCcw}
-        />
-      </div>
-    </section>
-  );
-}
-
-function PublicationSelectionPlaceholder() {
-  return (
-    <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-[11px] font-extrabold uppercase tracking-[0.35em] text-slate-400">
-            Registry Preview
-          </p>
-          <h2 className="mt-2 text-2xl font-black">No Record Selected</h2>
-        </div>
-
-        <div className="rounded-lg bg-slate-950 p-3">
-          <BookOpen className="h-6 w-6 text-amber-400" />
-        </div>
-      </div>
-
-      <p className="mt-4 text-sm leading-6 text-slate-600">
-        Select a controlled publication record to open its profile, metadata,
-        authority, lifecycle status, and available EGL actions.
-      </p>
-
-      <div className="mt-5 rounded-lg bg-slate-950 p-5 text-white">
-        <div className="flex items-center gap-3">
-          <BookOpen className="h-6 w-6 text-amber-400" />
-          <div>
-            <p className="text-[11px] font-extrabold uppercase tracking-[0.35em]">
-              Controlled Publication Workspace
-            </p>
-            <p className="mt-1 text-xs font-semibold">
-              Profiles open only after intentional record selection.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-5 space-y-3">
-        <PlaceholderInstruction
-          title="Select a Record"
-          body="Choose a publication from the registry table before using record-level actions."
-          icon={ClipboardList}
-        />
-        <PlaceholderInstruction
-          title="Review Authority"
-          body="Verify owner, authority, classification, status, and lifecycle metadata."
-          icon={BookOpen}
-        />
-        <PlaceholderInstruction
-          title="Use Record Actions"
-          body="Open the viewer, upload replacement, certify a copy, request review, or view revision history."
-          icon={FileText}
-        />
-      </div>
-
-      <div className="mt-5 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4">
-        <p className="text-[11px] font-extrabold uppercase tracking-[0.3em] text-slate-400">
-          Training Note
-        </p>
-        <p className="mt-3 text-sm leading-6 text-slate-600">
-          Future training materials should describe this registry as the
-          controlled lookup point for publication records before employees or
-          executives perform document actions.
-        </p>
-      </div>
-    </section>
-  );
-}
-
-function PlaceholderInstruction({
-  title,
-  body,
-  icon: Icon,
-}: {
-  title: string;
-  body: string;
-  icon: ElementType;
-}) {
-  return (
-    <div className="flex gap-3 rounded-lg border border-slate-200 bg-slate-50 p-4">
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white">
-        <Icon className="h-4 w-4 text-amber-500" />
-      </div>
-      <div>
-        <p className="text-sm font-extrabold text-slate-950">{title}</p>
-        <p className="mt-1 text-xs leading-5 text-slate-600">{body}</p>
       </div>
     </div>
   );
-}
-
-function RegistryMetric({
-  label,
-  value,
-  icon: Icon,
-}: {
-  label: string;
-  value: string;
-  icon: ElementType;
-}) {
-  return (
-    <div className="flex min-h-[88px] items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm">
-      <div>
-        <p className="text-[11px] text-slate-500">{label}</p>
-        <p className="mt-2 text-[25px] font-black leading-none text-slate-950">
-          {value}
-        </p>
-      </div>
-      <Icon className="h-6 w-6 text-amber-500" />
-    </div>
-  );
-}
-
-function FilterSelect({
-  label,
-  value,
-  options,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  options: string[];
-  onChange: (value: string) => void;
-}) {
-  return (
-    <label>
-      <span className="text-[11px] font-extrabold uppercase tracking-[0.35em] text-slate-500">
-        {label}
-      </span>
-      <select
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-3 text-xs font-semibold text-slate-950 outline-none transition focus:border-amber-500"
-      >
-        {options.map((option) => (
-          <option key={option}>{option}</option>
-        ))}
-      </select>
-    </label>
-  );
-}
-
-function StatusBadge({ status }: { status: string }) {
-  return (
-    <span className="inline-flex rounded-md bg-emerald-100 px-3 py-1 text-xs font-extrabold text-emerald-700">
-      {status}
-    </span>
-  );
-}
-
-function PreviewField({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between gap-4 border-b border-slate-200 py-2 text-sm">
-      <span className="font-semibold text-slate-500">{label}</span>
-      <span className="text-right font-extrabold text-slate-950">{value}</span>
-    </div>
-  );
-}
-
-function ActionLink({
-  href,
-  label,
-  icon: Icon,
-  primary = false,
-  newTab = false,
-}: {
-  href: string;
-  label: string;
-  icon: ElementType;
-  primary?: boolean;
-  newTab?: boolean;
-}) {
-  return (
-    <Link
-      href={href}
-      target={newTab ? "_blank" : undefined}
-      rel={newTab ? "noreferrer" : undefined}
-      className={[
-        "flex w-full items-center justify-center gap-2 rounded-lg border px-4 py-3 text-xs font-bold transition",
-        primary
-          ? "border-slate-950 bg-slate-950 text-white hover:bg-slate-800"
-          : "border-slate-300 bg-white text-slate-950 hover:border-amber-500 hover:bg-amber-50",
-      ].join(" ")}
-    >
-      <Icon
-        className={[
-          "h-4 w-4",
-          primary ? "text-white" : "text-amber-500",
-        ].join(" ")}
-      />
-      {label}
-    </Link>
-  );
-}
-
-function getInitialFiltersFromQueryKey(
-  queryKey: string,
-): InitialRegistryFilters {
-  const params = new URLSearchParams(queryKey);
-  const querySearch = params.get("search") ?? params.get("q") ?? "";
-  const queryStatus = params.get("status");
-  const querySeries = params.get("series");
-  const queryClassification = params.get("classification");
-  const queryDocumentType =
-    params.get("documentType") ?? params.get("type") ?? "";
-
-  return {
-    searchValue: querySearch,
-    statusFilter: getMatchedFilterOption(
-      queryStatus,
-      statusFilters,
-      "All Statuses",
-    ),
-    seriesFilter: getMatchedFilterOption(
-      querySeries,
-      seriesFilters,
-      "All Series",
-    ),
-    classificationFilter: getMatchedFilterOption(
-      queryClassification,
-      classificationFilters,
-      "All Classifications",
-    ),
-    documentTypeFilter: queryDocumentType.trim(),
-  };
-}
-
-function getMatchedFilterOption(
-  rawValue: string | null,
-  options: string[],
-  defaultValue: string,
-) {
-  if (!rawValue) {
-    return defaultValue;
-  }
-
-  const normalizedRawValue = normalizeFilterValue(rawValue);
-
-  return (
-    options.find((option) => normalizeFilterValue(option) === normalizedRawValue) ??
-    defaultValue
-  );
-}
-
-function normalizeFilterValue(value: string) {
-  return safeDecodeURIComponent(value)
-    .replace(/[_-]+/g, "")
-    .trim()
-    .toLowerCase();
-}
-
-function safeDecodeURIComponent(value: string) {
-  try {
-    return decodeURIComponent(value);
-  } catch {
-    return value;
-  }
-}
-
-function getDocumentNumber(record: DisplayPublicationRecord) {
-  return (
-    record.documentNumber ??
-    record.documentNo ??
-    record.documentId ??
-    record.id ??
-    "N/A"
-  );
-}
-
-function getRecordHref(record: DisplayPublicationRecord) {
-  return `/governance-library/publications/${encodeURIComponent(
-    getDocumentNumber(record),
-  )}`;
-}
-
-function getTitle(record: DisplayPublicationRecord) {
-  return record.title ?? record.name ?? "Untitled Publication";
-}
-
-function getDescription(record: DisplayPublicationRecord) {
-  return (
-    record.description ??
-    record.summary ??
-    record.notes ??
-    "Controlled enterprise publication record."
-  );
-}
-
-function getSeries(record: DisplayPublicationRecord) {
-  return record.series ?? record.publicationSeries ?? record.category ?? "Administration";
-}
-
-function getStatus(record: DisplayPublicationRecord) {
-  return record.status ?? "AP";
-}
-
-function getOwner(record: DisplayPublicationRecord) {
-  return record.owner ?? "HCA";
-}
-
-function getAuthority(record: DisplayPublicationRecord) {
-  return record.authority ?? "Hassan Capital Partners, LLC";
-}
-
-function getClassification(record: DisplayPublicationRecord) {
-  return record.classification ?? "Internal Governance";
-}
-
-function getDocumentType(record: DisplayPublicationRecord) {
-  return record.documentType ?? "Publication";
-}
-
-function getReviewDate(record: DisplayPublicationRecord) {
-  return record.reviewDate ?? record.effectiveDate ?? "Pending";
 }

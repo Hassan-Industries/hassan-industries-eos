@@ -9,43 +9,44 @@ import {
   Route,
   Search,
   ShieldCheck,
+  type LucideIcon,
 } from "lucide-react";
 import {
   serviceRequestRecords,
   serviceRequestQueues,
+  type ServiceRequestPriority,
   type ServiceRequestRecord,
+  type ServiceRequestStatus,
 } from "@/data/serviceRequests";
 
-function getStatusClass(status: string) {
-  if (status === "Open") {
-    return "bg-emerald-100 text-emerald-700";
+function getStatusClass(status: ServiceRequestStatus) {
+  switch (status) {
+    case "Open":
+      return "bg-emerald-100 text-emerald-700";
+    case "In Review":
+      return "bg-blue-100 text-blue-700";
+    case "Pending Routing":
+      return "bg-amber-100 text-amber-700";
+    case "Restricted Review":
+      return "bg-rose-100 text-rose-700";
+    case "Closed":
+      return "bg-slate-100 text-slate-700";
+    default:
+      return "bg-slate-100 text-slate-700";
   }
-
-  if (status === "In Review") {
-    return "bg-blue-100 text-blue-700";
-  }
-
-  if (status === "Pending Routing") {
-    return "bg-amber-100 text-amber-700";
-  }
-
-  if (status === "Restricted Review") {
-    return "bg-rose-100 text-rose-700";
-  }
-
-  return "bg-slate-100 text-slate-700";
 }
 
-function getPriorityClass(priority: string) {
-  if (priority === "High") {
-    return "bg-amber-100 text-amber-700";
+function getPriorityClass(priority: ServiceRequestPriority) {
+  switch (priority) {
+    case "High":
+      return "bg-amber-100 text-amber-700";
+    case "Restricted":
+      return "bg-rose-100 text-rose-700";
+    case "Normal":
+      return "bg-slate-100 text-[#24364d]";
+    default:
+      return "bg-slate-100 text-[#24364d]";
   }
-
-  if (priority === "Restricted") {
-    return "bg-rose-100 text-rose-700";
-  }
-
-  return "bg-slate-100 text-[#24364d]";
 }
 
 function getQueueTitle(queueId: string) {
@@ -60,7 +61,7 @@ function StatCard({
 }: {
   label: string;
   value: number;
-  icon: typeof ClipboardList;
+  icon: LucideIcon;
 }) {
   return (
     <section className="rounded-xl border border-[#d8e1ea] bg-white p-5 shadow-sm">
@@ -77,14 +78,14 @@ function StatCard({
 
 function RequestRow({ request }: { request: ServiceRequestRecord }) {
   return (
-    <div className="grid min-w-[980px] grid-cols-[120px_minmax(220px,1.4fr)_150px_150px_130px_150px_170px_100px] border-b border-[#d8e1ea] last:border-b-0">
+    <div className="grid min-w-[1120px] grid-cols-[140px_minmax(320px,1.8fr)_170px_150px_140px_150px_200px_110px] border-b border-[#d8e1ea] last:border-b-0">
       <div className="px-4 py-5 text-sm font-black text-[#050816]">
         {request.id}
       </div>
 
       <div className="px-4 py-5">
         <p className="text-sm font-black text-[#050816]">{request.title}</p>
-        <p className="mt-2 max-w-[260px] text-xs font-semibold leading-6 text-[#48617e]">
+        <p className="mt-2 max-w-[420px] text-xs font-semibold leading-6 text-[#48617e]">
           {request.summary}
         </p>
       </div>
@@ -161,10 +162,10 @@ export default function ServiceRequestsPage() {
               Service Requests Desk
             </h1>
             <p className="mt-4 max-w-5xl text-sm font-semibold leading-7 text-white">
-              Universal frontend intake and routing workspace for
-              administrative requests, governance review, document-control
-              actions, certified-copy support, treasury support, and restricted
-              HCA review preparation.
+              Universal frontend intake and routing workspace for administrative
+              requests, governance review, document-control actions,
+              certified-copy support, treasury support, and restricted HCA/HCP
+              review preparation.
             </p>
           </div>
 
@@ -226,7 +227,7 @@ export default function ServiceRequestsPage() {
             </p>
             <div className="flex h-12 items-center gap-3 rounded-lg border border-[#c8d3df] bg-white px-4 text-sm font-semibold text-[#7d8999]">
               <Search className="h-4 w-4 text-[#94a3b8]" />
-              Search by request ID, title, department, owner, category,
+              Search by request ID, title, department, owner, category, or
               status...
             </div>
           </div>
@@ -278,6 +279,7 @@ export default function ServiceRequestsPage() {
               <span className="rounded-full bg-[#fff0bd] px-5 py-3 text-sm font-black text-[#b45309]">
                 {serviceRequestRecords.length} shown
               </span>
+
               <Link
                 href="/service-requests/new"
                 className="service-button-primary h-12"
@@ -289,8 +291,8 @@ export default function ServiceRequestsPage() {
           </div>
 
           <div className="overflow-x-auto p-5">
-            <div className="min-w-[980px]">
-              <div className="grid grid-cols-[120px_minmax(220px,1.4fr)_150px_150px_130px_150px_170px_100px] bg-[#f8fafc]">
+            <div className="min-w-[1120px]">
+              <div className="grid grid-cols-[140px_minmax(320px,1.8fr)_170px_150px_140px_150px_200px_110px] bg-[#f8fafc]">
                 {[
                   "Request ID",
                   "Title",
@@ -303,7 +305,7 @@ export default function ServiceRequestsPage() {
                 ].map((heading) => (
                   <div
                     key={heading}
-                    className="px-4 py-4 text-[11px] font-black uppercase tracking-[0.35em] text-[#48617e]"
+                    className="px-4 py-4 text-[11px] font-black uppercase tracking-[0.3em] text-[#48617e]"
                   >
                     {heading}
                   </div>
@@ -330,6 +332,7 @@ export default function ServiceRequestsPage() {
                   No Request Selected
                 </h2>
               </div>
+
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#050816] text-[#ffbf00]">
                 <ClipboardList className="h-6 w-6" />
               </div>
@@ -355,6 +358,7 @@ export default function ServiceRequestsPage() {
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#050816] text-[#ffbf00]">
                 <ShieldCheck className="h-6 w-6" />
               </div>
+
               <div>
                 <p className="text-[11px] font-black uppercase tracking-[0.35em] text-[#94a3b8]">
                   Routing Standard
@@ -378,6 +382,7 @@ export default function ServiceRequestsPage() {
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#050816] text-[#ffbf00]">
                 <Headphones className="h-6 w-6" />
               </div>
+
               <div>
                 <p className="text-[11px] font-black uppercase tracking-[0.35em] text-[#94a3b8]">
                   Backend Readiness

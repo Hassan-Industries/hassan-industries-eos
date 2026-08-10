@@ -31,56 +31,20 @@ type NavItem = {
 };
 
 const navItems: NavItem[] = [
-  {
-    label: "Dashboard",
-    href: "/",
-    icon: LayoutDashboard,
-  },
-  {
-    label: "Governance Library",
-    href: "/governance-library",
-    icon: BookOpen,
-  },
-  {
-    label: "Administration",
-    href: "/administration",
-    icon: Settings,
-  },
-  {
-    label: "Treasury",
-    href: "/treasury",
-    icon: Landmark,
-  },
-  {
-    label: "Legal",
-    href: "/legal",
-    icon: Scale,
-  },
-  {
-    label: "Tax",
-    href: "/tax",
-    icon: Globe2,
-  },
+  { label: "Dashboard", href: "/", icon: LayoutDashboard },
+  { label: "Governance Library", href: "/governance-library", icon: BookOpen },
+  { label: "Administration", href: "/administration", icon: Settings },
+  { label: "Treasury", href: "/treasury", icon: Landmark },
+  { label: "Legal", href: "/legal", icon: Scale },
+  { label: "Tax", href: "/tax", icon: Globe2 },
   {
     label: "Corporate Records",
     href: "/corporate-records",
     icon: FolderArchive,
   },
-  {
-    label: "Correspondence",
-    href: "/correspondence",
-    icon: Mail,
-  },
-  {
-    label: "Technology",
-    href: "/technology",
-    icon: ShieldCheck,
-  },
-  {
-    label: "Entity Management",
-    href: "/entity-management",
-    icon: Building2,
-  },
+  { label: "Correspondence", href: "/correspondence", icon: Mail },
+  { label: "Technology", href: "/technology", icon: ShieldCheck },
+  { label: "Entity Management", href: "/entity-management", icon: Building2 },
   {
     label: "Publications",
     href: "/governance-library/publications",
@@ -91,11 +55,7 @@ const navItems: NavItem[] = [
     href: "/governance-library/resolutions",
     icon: Gavel,
   },
-  {
-    label: "Service Requests",
-    href: "/service-requests",
-    icon: Headphones,
-  },
+  { label: "Service Requests", href: "/service-requests", icon: Headphones },
   {
     label: "Implementation Center",
     href: "/implementation-center",
@@ -139,7 +99,6 @@ export default function Sidebar({ shellOwner = "page" }: SidebarProps) {
             <br />
             Industries
           </p>
-
           <p className="mt-4 text-[13px] font-black uppercase leading-6 tracking-[0.35em] text-white">
             Enterprise
             <br />
@@ -180,9 +139,7 @@ export default function Sidebar({ shellOwner = "page" }: SidebarProps) {
       </nav>
 
       <div className="border-t border-[#1d3048] px-5 py-5">
-        <p className="text-xs font-black text-[#ffbf00]">
-          Hassan Industries
-        </p>
+        <p className="text-xs font-black text-[#ffbf00]">Hassan Industries</p>
         <p className="mt-1 text-xs font-semibold text-[#b8c7d9]">
           Building Generations of Legacy
         </p>

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { Dispatch, SetStateAction } from "react";
+import { ArrowRight, BookOpen, Eye } from "lucide-react";
 import type { PublicationRecord } from "@/data/governanceLibrary";
 import { getPublicationDocumentNumber } from "@/lib/eglPublicationRecords";
 
@@ -32,114 +33,13 @@ type DisplayPublicationRecord = PublicationRecord & {
   updatedAt?: string;
 };
 
-export default function RecentlyUpdatedPublications({
-  publications,
-  selectedPublication = null,
-  setSelectedPublication,
-  onSelectPublication,
-}: RecentlyUpdatedPublicationsProps) {
-  const records = publications.filter(Boolean);
-  const selectedKey = selectedPublication
-    ? getPublicationKey(selectedPublication as DisplayPublicationRecord)
-    : null;
-
-  function handleSelect(record: PublicationRecord) {
-    setSelectedPublication?.(record);
-    onSelectPublication?.(record);
-  }
-
-  return (
-    <section className="rounded-xl border border-slate-200 bg-white shadow-sm">
-      <div className="flex items-center justify-between gap-4 border-b border-slate-200 px-6 py-5">
-        <div>
-          <p className="text-xs font-black uppercase tracking-[0.45em] text-[#94a3b8]">
-            Enterprise Governance Library
-          </p>
-          <h2 className="mt-2 text-2xl font-black text-[#050816]">
-            Recently Updated Publications
-          </h2>
-        </div>
-
-        <Link
-          href="/governance-library/publications"
-          className="text-sm font-black text-blue-700 transition hover:text-[#ff8a00]"
-        >
-          View All Publications →
-        </Link>
-      </div>
-
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[760px] text-left text-sm"><thead><tr className="bg-slate-50 text-xs font-black uppercase tracking-[0.35em] text-[#536783]"><th className="px-6 py-4">Document No.</th><th className="px-6 py-4">Title</th><th className="px-6 py-4">Series</th><th className="px-6 py-4">Status</th><th className="px-6 py-4">Version</th><th className="px-6 py-4">Owner</th><th className="px-6 py-4">Review Date</th></tr></thead><tbody>{records.length > 0 ? records.map((publication) => {
-              const record = publication as DisplayPublicationRecord;
-              const recordKey = getPublicationKey(record);
-              const isSelected = selectedKey === recordKey;
-
-              return (
-                <tr
-                  key={recordKey}
-                  tabIndex={0}
-                  onClick={() => handleSelect(publication)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter" || event.key === " ") {
-                      event.preventDefault();
-                      handleSelect(publication);
-                    }
-                  }}
-                  className={[
-                    "cursor-pointer border-b border-slate-200 transition last:border-b-0",
-                    isSelected ? "bg-amber-50" : "bg-white hover:bg-slate-50",
-                  ].join(" ")}
-                >
-                  <td className="px-6 py-5 align-top font-black text-[#050816]">
-                    {getPublicationDocumentNumber(publication)}
-                  </td>
-                  <td className="px-6 py-5 align-top">
-                    <p className="font-black text-[#050816]">{getTitle(record)}</p>
-                    <p className="mt-2 max-w-[260px] text-xs leading-6 text-[#536783]">
-                      {getDescription(record)}
-                    </p>
-                  </td>
-                  <td className="px-6 py-5 align-top font-bold text-[#33445c]">
-                    {getSeries(record)}
-                  </td>
-                  <td className="px-6 py-5 align-top">
-                    <span className="rounded-md bg-emerald-100 px-3 py-1 text-xs font-black text-emerald-700">
-                      {getStatus(record)}
-                    </span>
-                  </td>
-                  <td className="px-6 py-5 align-top font-black text-[#050816]">
-                    {String(record.version ?? "1.0")}
-                  </td>
-                  <td className="px-6 py-5 align-top font-black text-[#050816]">
-                    {record.owner ?? "HCA"}
-                  </td>
-                  <td className="px-6 py-5 align-top font-black text-[#050816]">
-                    {record.reviewDate ?? record.lastUpdated ?? "Pending"}
-                  </td>
-                </tr>
-              );
-            }) : (
-              <tr>
-                <td className="px-6 py-8 text-sm text-[#536783]" colSpan={7}>
-                  No recently updated publications available.
-                </td>
-              </tr>
-            )}</tbody></table>
-      </div>
-
-      <div className="border-t border-slate-200 px-6 py-4 text-xs font-semibold text-[#536783]">
-        Select a publication row to update the Document Profile panel.
-      </div>
-    </section>
-  );
-}
-
 function getPublicationKey(record: DisplayPublicationRecord) {
   return (
     record.id ??
     record.documentId ??
     record.documentNo ??
     record.documentNumber ??
+    getPublicationDocumentNumber(record) ??
     getTitle(record)
   );
 }
@@ -149,13 +49,189 @@ function getTitle(record: DisplayPublicationRecord) {
 }
 
 function getDescription(record: DisplayPublicationRecord) {
-  return record.description ?? record.summary ?? "Controlled enterprise publication record.";
+  return (
+    record.description ??
+    record.summary ??
+    record.notes ??
+    "Controlled enterprise publication record."
+  );
 }
 
 function getSeries(record: DisplayPublicationRecord) {
-  return record.series ?? record.publicationSeries ?? record.category ?? "Administration";
+  return (
+    record.series ??
+    record.publicationSeries ??
+    record.category ??
+    "Administration"
+  );
 }
 
 function getStatus(record: DisplayPublicationRecord) {
   return record.status ?? "AP";
+}
+
+function getStatusClass(status: string) {
+  if (status === "AP" || status === "OE") {
+    return "bg-emerald-100 text-emerald-700";
+  }
+
+  if (status === "DR" || status === "RV") {
+    return "bg-blue-100 text-blue-700";
+  }
+
+  return "bg-slate-100 text-slate-700";
+}
+
+function isPublicationRecord(
+  record: PublicationRecord | null | undefined,
+): record is PublicationRecord {
+  return Boolean(record);
+}
+
+export default function RecentlyUpdatedPublications({
+  publications,
+  selectedPublication = null,
+  setSelectedPublication,
+  onSelectPublication,
+}: RecentlyUpdatedPublicationsProps) {
+  const records = publications.filter(isPublicationRecord);
+  const selectedKey = selectedPublication
+    ? getPublicationKey(selectedPublication as DisplayPublicationRecord)
+    : null;
+
+  function handleSelect(record: PublicationRecord) {
+    if (setSelectedPublication) {
+      setSelectedPublication(record);
+    }
+
+    if (onSelectPublication) {
+      onSelectPublication(record);
+    }
+  }
+
+  return (
+    <section className="overflow-hidden rounded-xl border border-[#d8e1ea] bg-white shadow-sm">
+      <div className="flex flex-col gap-4 border-b border-[#d8e1ea] p-6 lg:flex-row lg:items-start lg:justify-between">
+        <div>
+          <p className="text-[11px] font-black uppercase tracking-[0.45em] text-[#94a3b8]">
+            Enterprise Governance Library
+          </p>
+          <h2 className="mt-2 text-3xl font-black leading-tight text-[#050816]">
+            Recently Updated Publications
+          </h2>
+          <p className="mt-3 max-w-3xl text-sm font-semibold leading-7 text-[#48617e]">
+            Select a publication row to update the Document Profile panel.
+          </p>
+        </div>
+
+        <Link
+          href="/governance-library/publications"
+          className="inline-flex items-center gap-2 text-sm font-black text-blue-700 transition hover:text-[#ff8a00]"
+        >
+          View All Publications
+          <ArrowRight className="h-4 w-4" />
+        </Link>
+      </div>
+
+      <div className="divide-y divide-[#d8e1ea]">
+        {records.length > 0 ? (
+          records.map((publication) => {
+            const record = publication as DisplayPublicationRecord;
+            const recordKey = getPublicationKey(record);
+            const isSelected = selectedKey === recordKey;
+            const documentNumber = getPublicationDocumentNumber(record);
+            const status = getStatus(record);
+
+            return (
+              <button
+                key={recordKey}
+                type="button"
+                onClick={() => handleSelect(publication)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    handleSelect(publication);
+                  }
+                }}
+                className={[
+                  "grid w-full gap-4 p-5 text-left transition lg:grid-cols-[150px_minmax(0,1fr)_120px]",
+                  isSelected ? "bg-[#fffaf0]" : "bg-white hover:bg-[#f8fafc]",
+                ].join(" ")}
+              >
+                <div>
+                  <p className="text-[11px] font-black uppercase tracking-[0.3em] text-[#64748b]">
+                    Document No.
+                  </p>
+                  <p className="mt-3 break-words text-sm font-black text-[#050816]">
+                    {documentNumber}
+                  </p>
+                </div>
+
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="text-base font-black leading-6 text-[#050816]">
+                      {getTitle(record)}
+                    </p>
+                  </div>
+
+                  <p className="mt-2 max-w-3xl text-sm font-semibold leading-7 text-[#48617e]">
+                    {getDescription(record)}
+                  </p>
+
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-[#24364d]">
+                      {getSeries(record)}
+                    </span>
+
+                    <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-[#24364d]">
+                      Version {String(record.version ?? "1.0")}
+                    </span>
+
+                    <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-[#24364d]">
+                      Owner {record.owner ?? "HCA"}
+                    </span>
+
+                    <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-[#24364d]">
+                      Review {record.reviewDate ?? record.lastUpdated ?? "Pending"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-start justify-start lg:justify-end">
+                  <span
+                    className={[
+                      "inline-flex rounded-md px-3 py-2 text-xs font-black",
+                      getStatusClass(status),
+                    ].join(" ")}
+                  >
+                    {status}
+                  </span>
+                </div>
+              </button>
+            );
+          })
+        ) : (
+          <div className="p-6">
+            <div className="rounded-lg border border-dashed border-[#c8d3df] bg-[#f8fafc] p-6 text-center">
+              <BookOpen className="mx-auto h-8 w-8 text-[#ff8a00]" />
+              <h3 className="mt-4 text-xl font-black text-[#050816]">
+                No recently updated publications available.
+              </h3>
+              <p className="mt-3 text-sm font-semibold leading-7 text-[#48617e]">
+                Future backend integration will populate this area from the
+                publication registry and document activity log.
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="border-t border-[#d8e1ea] bg-[#f8fafc] px-6 py-4">
+        <div className="flex items-center gap-2 text-sm font-bold text-[#48617e]">
+          <Eye className="h-4 w-4 text-[#ff8a00]" />
+          Select a publication row to update the Document Profile panel.
+        </div>
+      </div>
+    </section>
+  );
 }
