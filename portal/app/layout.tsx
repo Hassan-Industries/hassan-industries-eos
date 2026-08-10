@@ -15,9 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Hassan Industries Enterprise Operating System",
-  description:
-    "Hassan Industries Enterprise Operations Center for governed administrative, governance, treasury, records, and service request workflows.",
+  title: "Hassan Industries EOS",
+  description: "Enterprise Operations Center for Hassan Industries",
 };
 
 export default function RootLayout({
@@ -32,12 +31,12 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} bg-[#eaf0f5] text-[#050816] antialiased`}
       >
         <div className="min-h-screen bg-[#eaf0f5]">
-          <Sidebar />
+          <Sidebar shellOwner="root" />
 
           <div className="min-h-screen lg:pl-[280px]">
-            <Topbar />
+            <Topbar shellOwner="root" />
 
-            <main className="min-h-[calc(100vh-88px)] bg-[#eaf0f5] px-4 py-6 sm:px-6 lg:px-8">
+            <main className="min-h-[calc(100vh-80px)] bg-[#eaf0f5] px-4 py-6 sm:px-6 lg:px-8">
               {children}
             </main>
           </div>

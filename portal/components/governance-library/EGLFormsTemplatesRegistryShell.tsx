@@ -1,1 +1,511 @@
-"use client"; import Link from"next/link"; import { useMemo, useState, type ElementType } from"react"; import { ArrowLeft, BookOpen, ClipboardCheck, ClipboardList, FileCheck2, FilePlus2, FileText, FolderOpen, Search, ShieldCheck, } from"lucide-react"; import CopyToClipboardButton from"@/components/governance-library/CopyToClipboardButton"; import { eglFormRecords, eglTemplateRecords, type EGLFormsTemplatesRegistryRecord, } from"@/data/eglFormsTemplates"; type RegistryMode ="forms" |"templates"; type RegistryConfig = { mode: RegistryMode; title: string; eyebrow: string; description: string; statusLabel: string; statusSubLabel: string; rightLabel: string; tableTitle: string; tableSubtitle: string; searchLabel: string; searchPlaceholder: string; emptyTitle: string; emptyBody: string; workspaceLabel: string; primaryActionLabel: string; records: EGLFormsTemplatesRegistryRecord[]; }; const configs: Record<RegistryMode, RegistryConfig> = { forms: { mode:"forms", title:"Forms Registry", eyebrow:"Hassan Industries", description:"Controlled frontend registry for Enterprise Governance Library forms, intake packets, review forms, certification requests, and workflow-ready document-control forms.", statusLabel:"Frontend List", statusSubLabel:"Forms Data Layer", rightLabel:"Controlled Forms", tableTitle:"Forms Registry", tableSubtitle:"Select a form record to preview authority, usage, linked publication, and future workflow controls.", searchLabel:"Search Forms", searchPlaceholder:"Search by form ID, title, owner, series, usage, linked publication, or status...", emptyTitle:"No Form Selected", emptyBody:"Select a controlled form record to open its metadata, authority, lifecycle status, and future form actions.", workspaceLabel:"Controlled Form Workspace", primaryActionLabel:"Prepare New Form", records: eglFormRecords, }, templates: { mode:"templates", title:"Templates Registry", eyebrow:"Hassan Industries", description:"Controlled frontend registry for Enterprise Governance Library templates, manual templates, policy templates, resolution templates, certified-copy templates, and executive briefing formats.", statusLabel:"Frontend List", statusSubLabel:"Templates Data Layer", rightLabel:"Controlled Templates", tableTitle:"Templates Registry", tableSubtitle:"Select a template record to preview authority, usage, linked publication, and future generation controls.", searchLabel:"Search Templates", searchPlaceholder:"Search by template ID, title, owner, series, usage, linked publication, or status...", emptyTitle:"No Template Selected", emptyBody:"Select a controlled template record to open its metadata, authority, lifecycle status, and future template actions.", workspaceLabel:"Controlled Template Workspace", primaryActionLabel:"Prepare New Template", records: eglTemplateRecords, }, }; const statusFilters = ["All Statuses","AP","DR","RV","OE","CC","SP","AR","VO"]; export default function EGLFormsTemplatesRegistryShell({ moduleType, }: { moduleType: RegistryMode; }) { const config = configs[moduleType]; const records = config.records; const ownerFilters = useMemo(() => { const owners = Array.from(new Set(records.map((record) => record.owner))); return ["All Owners", ...owners]; }, [records]); const seriesFilters = useMemo(() => { const series = Array.from(new Set(records.map((record) => record.series))); return ["All Series", ...series]; }, [records]); const [searchValue, setSearchValue] = useState(""); const [statusFilter, setStatusFilter] = useState("All Statuses"); const [ownerFilter, setOwnerFilter] = useState("All Owners"); const [seriesFilter, setSeriesFilter] = useState("All Series"); const [selectedRecordId, setSelectedRecordId] = useState<string | null>(null); const filteredRecords = useMemo(() => { const normalizedSearch = searchValue.trim().toLowerCase(); return records.filter((record) => { const searchText = [ record.recordId, record.title, record.description, record.registryType, record.series, record.status, record.statusLabel, record.owner, record.authority, record.classification, record.linkedPublication, record.usage, record.notes, ] .join("") .toLowerCase(); const matchesSearch = normalizedSearch.length === 0 || searchText.includes(normalizedSearch); const matchesStatus = statusFilter ==="All Statuses" || record.status === statusFilter; const matchesOwner = ownerFilter ==="All Owners" || record.owner === ownerFilter; const matchesSeries = seriesFilter ==="All Series" || record.series === seriesFilter; return matchesSearch && matchesStatus && matchesOwner && matchesSeries; }); }, [ownerFilter, records, searchValue, seriesFilter, statusFilter]); const selectedRecord = selectedRecordId === null ? null : records.find((record) => record.recordId === selectedRecordId) ?? null; const draftCount = records.filter((record) => record.status ==="DR").length; const governanceCount = records.filter( (record) => record.classification ==="Internal Governance", ).length; const permanentCount = records.filter( (record) => record.retention ==="Permanent", ).length; return ( <div className="flex min-h-screen bg-slate-100 text-slate-950"> <div className="flex min-h-screen min-w-0 flex-1 flex-col"> <main className="flex-1 px-5 py-4"> <div className="mx-auto max-w-[1500px] space-y-4"> <section className="rounded-xl bg-slate-950 px-5 py-5 text-white shadow-sm"> <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between"> <div> <p className="text-[11px] font-bold uppercase tracking-[0.36em] text-amber-400"> {config.eyebrow} </p> <h1 className="mt-2 text-[26px] font-extrabold uppercase leading-none tracking-wide"> {config.title} </h1> <p className="mt-3 max-w-5xl text-[12px] leading-5 text-slate-200"> {config.description} </p> </div> <div className="rounded-lg border border-amber-500/70 bg-slate-900 px-6 py-4 text-center"> <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-200"> Registry Status </p> <p className="mt-2 text-lg font-extrabold text-amber-400"> {config.statusLabel} </p> <p className="mt-1 text-[11px] text-slate-300"> {config.statusSubLabel} </p> </div> </div> </section> <div className="flex flex-wrap items-center justify-between gap-3"> <Link href="/governance-library" className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-950 shadow-sm transition hover:border-amber-500 hover:bg-amber-50" > <ArrowLeft className="h-4 w-4 text-amber-600" /> Back to EGL Dashboard </Link> <p className="hidden text-xs font-semibold uppercase tracking-[0.18em] text-slate-400 md:block"> {config.rightLabel} </p> </div> <section className="grid gap-3 md:grid-cols-4"> <RegistryMetric label="Registry Records" value={records.length.toString()} icon={ClipboardList} /> <RegistryMetric label="Draft Records" value={draftCount.toString()} icon={FileText} /> <RegistryMetric label="Governance Controlled" value={governanceCount.toString()} icon={ShieldCheck} /> <RegistryMetric label="Permanent Retention" value={permanentCount.toString()} icon={BookOpen} /> </section> <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm"> <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_180px_180px_180px_auto] xl:items-end"> <div className="min-w-0"> <label className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500"> {config.searchLabel} </label> <div className="mt-2 flex overflow-hidden rounded-lg border border-slate-300 bg-white"> <div className="flex w-12 items-center justify-center"> <Search className="h-4 w-4 text-slate-400" /> </div> <input value={searchValue} onChange={(event) => setSearchValue(event.target.value)} placeholder={config.searchPlaceholder} className="min-w-0 flex-1 px-1 py-3 text-sm outline-none" /> </div> </div> <FilterSelect label="Status" value={statusFilter} options={statusFilters} onChange={setStatusFilter} /> <FilterSelect label="Owner" value={ownerFilter} options={ownerFilters} onChange={setOwnerFilter} /> <FilterSelect label="Series" value={seriesFilter} options={seriesFilters} onChange={setSeriesFilter} /> <button type="button" onClick={() => { setSearchValue(""); setStatusFilter("All Statuses"); setOwnerFilter("All Owners"); setSeriesFilter("All Series"); setSelectedRecordId(null); }} className="rounded-lg border border-slate-300 bg-white px-4 py-3 text-xs font-bold text-slate-950 shadow-sm transition hover:border-amber-500 hover:bg-amber-50" > Clear Filters </button> </div> </section> <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_390px]"> <section className="rounded-lg border border-slate-200 bg-white shadow-sm"> <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-200 p-5"> <div> <p className="text-[11px] font-bold uppercase tracking-[0.26em] text-slate-400"> Enterprise Governance Library </p> <h2 className="mt-1 text-lg font-extrabold text-slate-950"> {config.tableTitle} </h2> <p className="mt-1 text-xs leading-5 text-slate-600"> {config.tableSubtitle} </p> </div> <div className="flex flex-wrap items-center gap-2"> <span className="rounded-full bg-amber-100 px-3 py-1 text-[11px] font-bold text-amber-700"> {filteredRecords.length} shown </span> <button type="button" className="inline-flex items-center gap-2 rounded-lg bg-slate-950 px-3 py-2 text-[11px] font-bold text-white transition hover:bg-slate-800" title="Frontend shell only. Backend intake workflow will be added later." > <FilePlus2 className="h-3.5 w-3.5 text-amber-400" /> {config.primaryActionLabel} </button> </div> </div> <div className="overflow-x-auto p-5"> <table className="min-w-[980px] w-full border-collapse text-left text-xs"> <thead> <tr className="border-b border-slate-200 bg-slate-50 text-[11px] uppercase tracking-[0.14em] text-slate-500"> <th className="px-3 py-3 font-extrabold">Record ID</th> <th className="px-3 py-3 font-extrabold">Title</th> <th className="px-3 py-3 font-extrabold">Type</th> <th className="px-3 py-3 font-extrabold">Series</th> <th className="px-3 py-3 font-extrabold">Status</th> <th className="px-3 py-3 font-extrabold">Owner</th> <th className="px-3 py-3 font-extrabold"> Linked Publication </th> <th className="px-3 py-3 text-right font-extrabold"> Select </th> </tr> </thead> <tbody> {filteredRecords.map((record) => { const isSelected = selectedRecordId === record.recordId; return ( <tr key={record.recordId} className={`border-b border-slate-200 transition last:border-b-0 ${ isSelected ?"bg-amber-50" :"bg-white hover:bg-slate-50" }`} > <td className="px-3 py-4 align-top font-extrabold text-slate-950"> <button type="button" onClick={() => setSelectedRecordId(record.recordId) } className="text-left font-extrabold hover:text-amber-700" > {record.recordId} </button> </td> <td className="max-w-[340px] px-3 py-4 align-top"> <button type="button" onClick={() => setSelectedRecordId(record.recordId) } className="block text-left" > <span className="block font-bold leading-5 text-slate-950"> {record.title} </span> <span className="mt-1 block text-[11px] leading-4 text-slate-500"> {record.description} </span> </button> </td> <td className="px-3 py-4 align-top font-semibold text-slate-700"> {record.registryType} </td> <td className="px-3 py-4 align-top font-semibold text-slate-700"> {record.series} </td> <td className="px-3 py-4 align-top"> <StatusBadge status={record.status} /> </td> <td className="px-3 py-4 align-top font-semibold text-slate-950"> {record.owner} </td> <td className="px-3 py-4 align-top font-semibold text-slate-950"> {record.linkedPublication} </td> <td className="px-3 py-4 align-top"> <div className="flex justify-end"> <button type="button" onClick={() => setSelectedRecordId(record.recordId) } className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-2 py-1 text-[11px] font-bold text-slate-950 transition hover:border-amber-500 hover:bg-amber-50" > <ClipboardCheck className="h-3.5 w-3.5 text-amber-600" /> Preview </button> </div> </td> </tr> ); })} </tbody> </table> {filteredRecords.length === 0 && ( <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-8 text-center"> <p className="text-sm font-extrabold text-slate-950"> No records match the current filters. </p> <p className="mt-2 text-xs text-slate-500"> Clear filters or search by another record ID, owner, series, title, usage, or linked publication. </p> </div> )} </div> </section> <aside className="space-y-4"> {selectedRecord ? ( <RegistryPreviewPanel record={selectedRecord} config={config} /> ) : ( <RegistrySelectionPlaceholder config={config} /> )} <section className="rounded-lg border border-dashed border-slate-300 bg-white p-5 shadow-sm"> <h2 className="text-[13px] font-bold uppercase tracking-[0.18em] text-slate-950"> Backend Readiness </h2> <p className="mt-3 text-xs leading-5 text-slate-600"> This registry remains frontend-only. Future backend work should connect these records to document generation, controlled forms, templates, approval routing, access controls, certified-copy packages, Microsoft 365, and SharePoint-backed file locations. </p> </section> </aside> </section> </div> </main> </div> </div> ); } function RegistryPreviewPanel({ record, config, }: { record: EGLFormsTemplatesRegistryRecord; config: RegistryConfig; }) { return ( <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm"> <div className="mb-4 flex items-start justify-between gap-4"> <div> <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-400"> Selected {record.registryType} </p> <h2 className="mt-2 text-xl font-extrabold text-slate-950"> {record.recordId} </h2> <p className="mt-2 text-sm font-bold leading-5 text-slate-800"> {record.title} </p> </div> <StatusBadge status={record.status} /> </div> <div className="rounded-lg bg-slate-950 p-4 text-white"> <div className="flex items-center gap-3"> {record.registryType ==="Form" ? ( <FileText className="h-6 w-6 text-amber-400" /> ) : ( <BookOpen className="h-6 w-6 text-amber-400" /> )} <div> <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-300"> {config.workspaceLabel} </p> <p className="mt-1 text-xs text-slate-200"> {record.classification} </p> </div> </div> </div> <dl className="mt-4 space-y-0"> <PreviewField label="Registry Type" value={record.registryType} /> <PreviewField label="Series" value={record.series} /> <PreviewField label="Owner" value={record.owner} /> <PreviewField label="Authority" value={record.authority} /> <PreviewField label="Version" value={record.version} /> <PreviewField label="Review Date" value={record.reviewDate} /> <PreviewField label="Linked Publication" value={record.linkedPublication} /> <PreviewField label="Retention" value={record.retention} /> </dl> <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4"> <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500"> Controlled Usage </p> <p className="mt-2 text-xs leading-5 text-slate-700"> {record.usage} </p> </div> <div className="mt-4 grid gap-2"> <CopyToClipboardButton value={record.recordId} label={`Copy ${record.registryType} ID`} copiedLabel={`${record.registryType} ID Copied`} /> <button type="button" className="flex w-full items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 py-3 text-xs font-bold text-white transition hover:bg-slate-800" title="Frontend shell only. Generation workflow will be added later." > <FolderOpen className="h-4 w-4 text-amber-400" /> Open Controlled Workspace </button> <button type="button" className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-xs font-bold text-slate-950 transition hover:border-amber-500 hover:bg-amber-50" title="Frontend shell only. Review routing will be added later." > <FileCheck2 className="h-4 w-4 text-amber-600" /> Request Review </button> </div> </section> ); } function RegistrySelectionPlaceholder({ config }: { config: RegistryConfig }) { return ( <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm"> <div className="mb-4 flex items-start justify-between gap-4"> <div> <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-400"> Registry Preview </p> <h2 className="mt-2 text-lg font-extrabold text-slate-950"> {config.emptyTitle} </h2> <p className="mt-2 text-xs leading-5 text-slate-600"> {config.emptyBody} </p> </div> <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-950"> <BookOpen className="h-5 w-5 text-amber-400" /> </div> </div> <div className="rounded-lg bg-slate-950 p-4 text-white"> <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-300"> {config.workspaceLabel} </p> <p className="mt-2 text-xs leading-5 text-slate-200"> Controlled metadata opens only after intentional record selection. </p> </div> <div className="mt-4 space-y-3"> <PlaceholderStep icon={ClipboardList} title="Select a Record" body="Choose a controlled form or template from the registry table." /> <PlaceholderStep icon={ShieldCheck} title="Review Authority" body="Verify owner, authority, classification, retention, and linked publication." /> <PlaceholderStep icon={FileCheck2} title="Prepare Future Workflow" body="Use this area later for generation, completion, routing, approval, and filing controls." /> </div> <div className="mt-4 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4"> <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500"> Training Note </p> <p className="mt-2 text-xs leading-5 text-slate-600"> Future employee and executive training should describe this registry as the controlled lookup point before preparing, using, routing, or approving a form or template. </p> </div> </section> ); } function RegistryMetric({ label, value, icon: Icon, }: { label: string; value: string; icon: ElementType; }) { return ( <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm"> <div className="flex items-center justify-between gap-4"> <div> <p className="text-xs font-semibold text-slate-500">{label}</p> <p className="mt-2 text-2xl font-extrabold text-slate-950"> {value} </p> </div> <Icon className="h-6 w-6 text-amber-500" /> </div> </section> ); } function FilterSelect({ label, value, options, onChange, }: { label: string; value: string; options: string[]; onChange: (value: string) => void; }) { return ( <div className="min-w-[180px]"> <label className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500"> {label} </label> <select value={value} onChange={(event) => onChange(event.target.value)} className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-3 text-xs font-semibold text-slate-950 outline-none transition focus:border-amber-500" > {options.map((option) => ( <option key={option}>{option}</option> ))} </select> </div> ); } function StatusBadge({ status }: { status: string }) { return ( <span className="inline-flex min-w-10 items-center justify-center rounded-md bg-emerald-100 px-2 py-1 text-[11px] font-extrabold text-emerald-700"> {status} </span> ); } function PreviewField({ label, value }: { label: string; value: string }) { return ( <div className="flex justify-between gap-4 border-b border-slate-200 py-2 text-xs last:border-b-0"> <dt className="font-bold text-slate-500">{label}</dt> <dd className="text-right font-semibold text-slate-950">{value}</dd> </div> ); } function PlaceholderStep({ icon: Icon, title, body, }: { icon: ElementType; title: string; body: string; }) { return ( <div className="flex gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3"> <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white"> <Icon className="h-4 w-4 text-amber-600" /> </div> <div> <p className="text-xs font-extrabold text-slate-950">{title}</p> <p className="mt-1 text-[11px] leading-4 text-slate-500">{body}</p> </div> </div> ); }
+"use client";
+
+import Link from "next/link";
+import { useMemo, useState } from "react";
+import {
+  BookOpen,
+  ClipboardList,
+  FileText,
+  FolderOpen,
+  Plus,
+  Search,
+  ShieldCheck,
+} from "lucide-react";
+
+type RegistryType = "forms" | "templates";
+
+type RegistryRecord = {
+  id: string;
+  title: string;
+  type: string;
+  series: string;
+  status: string;
+  owner: string;
+  authority: string;
+  version: string;
+  reviewDate: string;
+  linkedPublication: string;
+  retention: string;
+  description: string;
+};
+
+const templateRecords: RegistryRecord[] = [
+  {
+    id: "HI-TPL-001",
+    title: "Enterprise Policy Template",
+    type: "Template",
+    series: "Administration",
+    status: "DR",
+    owner: "HCA",
+    authority: "Hassan Capital Partners, LLC",
+    version: "0.1",
+    reviewDate: "Pending",
+    linkedPublication: "HI-ADM-002",
+    retention: "Permanent",
+    description:
+      "Standard controlled template for enterprise policies, standards, procedures, and administrative directives.",
+  },
+  {
+    id: "HI-TPL-002",
+    title: "Resolution Template",
+    type: "Template",
+    series: "Resolutions",
+    status: "DR",
+    owner: "Enterprise Governance",
+    authority: "Hassan Capital Partners, LLC",
+    version: "0.1",
+    reviewDate: "Pending",
+    linkedPublication: "HI-GOV-001",
+    retention: "Permanent",
+    description:
+      "Standard controlled template for foundational resolutions, governance approvals, officer actions, and formal decisions.",
+  },
+  {
+    id: "HI-TPL-003",
+    title: "Certified Copy Template",
+    type: "Template",
+    series: "Corporate Records",
+    status: "DR",
+    owner: "Corporate Records",
+    authority: "HCA",
+    version: "0.1",
+    reviewDate: "Pending",
+    linkedPublication: "HI-ADM-001",
+    retention: "Permanent",
+    description:
+      "Template shell for certified copy statements, record certification packages, and evidence packets.",
+  },
+  {
+    id: "HI-TPL-004",
+    title: "Executive Briefing Template",
+    type: "Template",
+    series: "Executive Operations",
+    status: "DR",
+    owner: "Executive Operations",
+    authority: "HCP",
+    version: "0.1",
+    reviewDate: "Pending",
+    linkedPublication: "HI-GOV-001",
+    retention: "Operational",
+    description:
+      "Executive briefing format for decision packets, leadership notes, approvals, and operating reviews.",
+  },
+  {
+    id: "HI-TPL-005",
+    title: "Treasury Memo Template",
+    type: "Template",
+    series: "Treasury",
+    status: "DR",
+    owner: "Treasury",
+    authority: "HCP",
+    version: "0.1",
+    reviewDate: "Pending",
+    linkedPublication: "HI-TRE-001",
+    retention: "Permanent",
+    description:
+      "Controlled memo format for treasury requests, banking authority, payment control notes, and financial governance references.",
+  },
+];
+
+const formRecords: RegistryRecord[] = [
+  {
+    id: "HI-FRM-001",
+    title: "Service Request Intake Form",
+    type: "Form",
+    series: "Administration",
+    status: "DR",
+    owner: "Administration",
+    authority: "HCA",
+    version: "0.1",
+    reviewDate: "Pending",
+    linkedPublication: "HI-ADM-001",
+    retention: "Operational",
+    description:
+      "Controlled intake form for administrative requests, routing preparation, department ownership, and service desk review.",
+  },
+  {
+    id: "HI-FRM-002",
+    title: "Certified Copy Request Form",
+    type: "Form",
+    series: "Corporate Records",
+    status: "DR",
+    owner: "Corporate Records",
+    authority: "HCA",
+    version: "0.1",
+    reviewDate: "Pending",
+    linkedPublication: "HI-ADM-001",
+    retention: "Permanent",
+    description:
+      "Controlled request form for certified copy preparation, source record confirmation, and issuance routing.",
+  },
+  {
+    id: "HI-FRM-003",
+    title: "Treasury Review Request Form",
+    type: "Form",
+    series: "Treasury",
+    status: "DR",
+    owner: "Treasury",
+    authority: "HCP",
+    version: "0.1",
+    reviewDate: "Pending",
+    linkedPublication: "HI-TRE-001",
+    retention: "Permanent",
+    description:
+      "Controlled form for treasury document review, financial authority confirmation, and payment control routing.",
+  },
+];
+
+function getStatusClass(status: string) {
+  if (status === "AP") {
+    return "bg-emerald-100 text-emerald-700";
+  }
+
+  if (status === "OE") {
+    return "bg-blue-100 text-blue-700";
+  }
+
+  return "bg-emerald-100 text-emerald-700";
+}
+
+function DetailRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-start justify-between gap-4 border-b border-[#d8e1ea] py-3 text-sm last:border-b-0">
+      <span className="font-bold text-[#64748b]">{label}</span>
+      <span className="text-right font-black text-[#050816]">{value}</span>
+    </div>
+  );
+}
+
+export default function EGLFormsTemplatesRegistryShell({
+  registryType,
+}: {
+  registryType: RegistryType;
+}) {
+  const records = registryType === "forms" ? formRecords : templateRecords;
+  const [selectedId, setSelectedId] = useState(records[0]?.id ?? "");
+
+  const selectedRecord = useMemo(
+    () => records.find((record) => record.id === selectedId) ?? records[0],
+    [records, selectedId],
+  );
+
+  const label = registryType === "forms" ? "Forms" : "Templates";
+  const title = `${label} Registry`;
+  const subtitle =
+    registryType === "forms"
+      ? "Controlled frontend registry for Enterprise Governance Library forms, intake forms, review forms, filing forms, and administrative workflow forms."
+      : "Controlled frontend registry for Enterprise Governance Library templates, manual templates, policy templates, resolution templates, certified-copy templates, and executive briefing formats.";
+
+  return (
+    <div className="mx-auto max-w-[1680px] space-y-6">
+      <section className="rounded-xl bg-[#050816] p-6 text-white shadow-sm lg:p-8">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="text-[11px] font-black uppercase tracking-[0.45em] text-[#ffbf00]">
+              Hassan Industries
+            </p>
+            <h1 className="mt-4 text-3xl font-black uppercase tracking-tight lg:text-4xl">
+              {title}
+            </h1>
+            <p className="mt-4 max-w-5xl text-sm font-semibold leading-7 text-white">
+              {subtitle}
+            </p>
+          </div>
+
+          <div className="rounded-lg border border-[#ffbf00] bg-[#101827] px-8 py-5 text-center">
+            <p className="text-[11px] font-black uppercase tracking-[0.45em] text-white">
+              Registry Status
+            </p>
+            <p className="mt-3 text-3xl font-black text-[#ffbf00]">
+              Frontend List
+            </p>
+            <p className="mt-1 text-xs font-black text-white">
+              Static Data Layer
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <div className="flex flex-wrap gap-3">
+        <Link href="/governance-library" className="service-button">
+          <FolderOpen size={16} className="text-[#ff8a00]" />
+          Back to EGL Dashboard
+        </Link>
+
+        <Link
+          href="/governance-library/publications/new"
+          className="service-button-primary"
+        >
+          <Plus size={16} className="text-[#ffbf00]" />
+          Prepare New {registryType === "forms" ? "Form" : "Template"}
+        </Link>
+      </div>
+
+      <p className="text-right text-[11px] font-black uppercase tracking-[0.55em] text-[#94a3b8]">
+        Controlled {label}
+      </p>
+
+      <div className="grid gap-4 lg:grid-cols-4">
+        <StatCard label="Registry Records" value={records.length.toString()} />
+        <StatCard label="Draft Records" value={records.length.toString()} />
+        <StatCard label="Governance Controlled" value="100%" />
+        <StatCard label="Permanent Retention" value="Controlled" />
+      </div>
+
+      <section className="rounded-xl border border-[#d8e1ea] bg-white p-5 shadow-sm">
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px_220px_140px]">
+          <div>
+            <p className="mb-2 text-[11px] font-black uppercase tracking-[0.35em] text-[#64748b]">
+              Search {label}
+            </p>
+            <div className="flex h-12 items-center gap-3 rounded-lg border border-[#c8d3df] bg-white px-4 text-sm font-semibold text-[#7d8999]">
+              <Search className="h-4 w-4 text-[#94a3b8]" />
+              Search by ID, title, owner, series, usage, publication, or status...
+            </div>
+          </div>
+
+          <div>
+            <p className="mb-2 text-[11px] font-black uppercase tracking-[0.35em] text-[#64748b]">
+              Status
+            </p>
+            <select className="h-12 w-full rounded-lg border border-[#c8d3df] bg-white px-4 text-sm font-black text-[#050816]">
+              <option>All Statuses</option>
+            </select>
+          </div>
+
+          <div>
+            <p className="mb-2 text-[11px] font-black uppercase tracking-[0.35em] text-[#64748b]">
+              Series
+            </p>
+            <select className="h-12 w-full rounded-lg border border-[#c8d3df] bg-white px-4 text-sm font-black text-[#050816]">
+              <option>All Series</option>
+            </select>
+          </div>
+
+          <div className="flex items-end">
+            <button type="button" className="service-button h-12 w-full">
+              Clear Filters
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_390px]">
+        <section className="overflow-hidden rounded-xl border border-[#d8e1ea] bg-white shadow-sm">
+          <div className="flex flex-col gap-4 border-b border-[#d8e1ea] p-6 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <p className="text-[11px] font-black uppercase tracking-[0.45em] text-[#94a3b8]">
+                Enterprise Governance Library
+              </p>
+              <h2 className="mt-2 text-3xl font-black text-[#050816]">
+                {title}
+              </h2>
+              <p className="mt-3 max-w-3xl text-sm leading-7 text-[#33445c]">
+                Select a record to preview authority, usage, linked
+                publication, retention, and future generation controls.
+              </p>
+            </div>
+
+            <span className="rounded-full bg-[#fff0bd] px-5 py-3 text-sm font-black text-[#b45309]">
+              {records.length} shown
+            </span>
+          </div>
+
+          <div className="overflow-x-auto p-5">
+            <div className="min-w-[980px]">
+              <div className="grid grid-cols-[130px_minmax(260px,1.5fr)_130px_150px_110px_170px_170px_110px] bg-[#f8fafc]">
+                {[
+                  "Record ID",
+                  "Title",
+                  "Type",
+                  "Series",
+                  "Status",
+                  "Owner",
+                  "Linked Publication",
+                  "Select",
+                ].map((heading) => (
+                  <div
+                    key={heading}
+                    className="px-4 py-4 text-[11px] font-black uppercase tracking-[0.35em] text-[#48617e]"
+                  >
+                    {heading}
+                  </div>
+                ))}
+              </div>
+
+              <div>
+                {records.map((record) => {
+                  const selected = selectedRecord?.id === record.id;
+
+                  return (
+                    <button
+                      key={record.id}
+                      type="button"
+                      onClick={() => setSelectedId(record.id)}
+                      className={[
+                        "grid min-w-[980px] grid-cols-[130px_minmax(260px,1.5fr)_130px_150px_110px_170px_170px_110px] border-b border-[#d8e1ea] text-left transition last:border-b-0",
+                        selected ? "bg-[#fffaf0]" : "bg-white hover:bg-[#f8fafc]",
+                      ].join(" ")}
+                    >
+                      <div className="px-4 py-5 text-sm font-black text-[#050816]">
+                        {record.id}
+                      </div>
+
+                      <div className="px-4 py-5">
+                        <p className="text-sm font-black text-[#050816]">
+                          {record.title}
+                        </p>
+                        <p className="mt-2 max-w-[300px] text-xs font-semibold leading-6 text-[#48617e]">
+                          {record.description}
+                        </p>
+                      </div>
+
+                      <div className="px-4 py-5 text-sm font-bold text-[#24364d]">
+                        {record.type}
+                      </div>
+
+                      <div className="px-4 py-5 text-sm font-bold text-[#24364d]">
+                        {record.series}
+                      </div>
+
+                      <div className="px-4 py-5">
+                        <span
+                          className={[
+                            "inline-flex rounded-md px-3 py-2 text-xs font-black",
+                            getStatusClass(record.status),
+                          ].join(" ")}
+                        >
+                          {record.status}
+                        </span>
+                      </div>
+
+                      <div className="px-4 py-5 text-sm font-black text-[#050816]">
+                        {record.owner}
+                      </div>
+
+                      <div className="px-4 py-5 text-sm font-black text-[#050816]">
+                        {record.linkedPublication}
+                      </div>
+
+                      <div className="px-4 py-5 text-sm font-black text-blue-700">
+                        View
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <aside className="space-y-5">
+          {selectedRecord ? (
+            <section className="rounded-xl border border-[#d8e1ea] bg-white p-6 shadow-sm">
+              <div className="mb-5 flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-[11px] font-black uppercase tracking-[0.45em] text-[#94a3b8]">
+                    Selected {registryType === "forms" ? "Form" : "Template"}
+                  </p>
+                  <h2 className="mt-2 text-3xl font-black text-[#050816]">
+                    {selectedRecord.id}
+                  </h2>
+                  <p className="mt-2 text-sm font-black text-[#050816]">
+                    {selectedRecord.title}
+                  </p>
+                </div>
+
+                <span
+                  className={[
+                    "rounded-lg px-3 py-2 text-xs font-black",
+                    getStatusClass(selectedRecord.status),
+                  ].join(" ")}
+                >
+                  {selectedRecord.status}
+                </span>
+              </div>
+
+              <div className="rounded-lg bg-[#050816] p-5 text-white">
+                <div className="flex items-center gap-3">
+                  <BookOpen className="h-6 w-6 text-[#ffbf00]" />
+                  <div>
+                    <p className="text-[11px] font-black uppercase tracking-[0.35em] text-white">
+                      Controlled {registryType === "forms" ? "Form" : "Template"} Workspace
+                    </p>
+                    <p className="mt-1 text-sm font-bold text-white">
+                      Internal Governance
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-5">
+                <DetailRow label="Registry Type" value={selectedRecord.type} />
+                <DetailRow label="Series" value={selectedRecord.series} />
+                <DetailRow label="Owner" value={selectedRecord.owner} />
+                <DetailRow label="Authority" value={selectedRecord.authority} />
+                <DetailRow label="Version" value={selectedRecord.version} />
+                <DetailRow label="Review Date" value={selectedRecord.reviewDate} />
+                <DetailRow
+                  label="Linked Publication"
+                  value={selectedRecord.linkedPublication}
+                />
+                <DetailRow label="Retention" value={selectedRecord.retention} />
+              </div>
+
+              <div className="mt-5 space-y-3">
+                <Link
+                  href={`/governance-library/publications/${selectedRecord.linkedPublication}`}
+                  className="service-button-primary w-full justify-center"
+                >
+                  <BookOpen className="h-4 w-4 text-[#ffbf00]" />
+                  Open Linked Publication
+                </Link>
+
+                <Link
+                  href="/service-requests/new?queue=governance-library-intake"
+                  className="service-button w-full justify-center"
+                >
+                  <ClipboardList className="h-4 w-4 text-[#ff8a00]" />
+                  Request Review
+                </Link>
+              </div>
+            </section>
+          ) : null}
+
+          <section className="rounded-xl border border-dashed border-[#c8d3df] bg-white p-6 shadow-sm">
+            <div className="flex items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#050816] text-[#ffbf00]">
+                <ShieldCheck className="h-6 w-6" />
+              </div>
+              <div>
+                <h3 className="text-xl font-black uppercase tracking-[0.25em] text-[#050816]">
+                  Backend Readiness
+                </h3>
+                <p className="mt-4 text-sm leading-7 text-[#33445c]">
+                  This registry is frontend-only. Future work should connect
+                  forms and templates to controlled generation, approvals,
+                  ownership rules, document-control numbering, and permanent
+                  recordkeeping.
+                </p>
+              </div>
+            </div>
+          </section>
+        </aside>
+      </div>
+    </div>
+  );
+}
+
+function StatCard({ label, value }: { label: string; value: string }) {
+  return (
+    <section className="rounded-xl border border-[#d8e1ea] bg-white p-5 shadow-sm">
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <p className="text-sm font-semibold text-[#48617e]">{label}</p>
+          <p className="mt-2 text-3xl font-black text-[#050816]">{value}</p>
+        </div>
+        <FileText className="h-6 w-6 text-[#ff8a00]" />
+      </div>
+    </section>
+  );
+}

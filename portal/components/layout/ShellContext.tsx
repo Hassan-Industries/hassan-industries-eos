@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { createContext, useContext, type ReactNode } from "react";
 
@@ -9,5 +9,6 @@ export function ShellProvider({ children }: { children: ReactNode }) {
 }
 
 export function useShellActive() {
+    
   return useContext(ShellContext);
 }

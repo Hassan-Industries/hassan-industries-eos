@@ -3,12 +3,6 @@
 :root {
   --background: #eaf0f5;
   --foreground: #050816;
-  --hieos-navy: #050816;
-  --hieos-navy-2: #081528;
-  --hieos-gold: #ffbf00;
-  --hieos-orange: #ff8a00;
-  --hieos-border: #d8e1ea;
-  --hieos-muted: #48617e;
 }
 
 @theme inline {
@@ -24,16 +18,15 @@
 
 html {
   min-height: 100%;
-  background: var(--background);
-  scroll-behavior: smooth;
+  background: #eaf0f5;
 }
 
 body {
   min-height: 100%;
   margin: 0;
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  background: #eaf0f5;
+  color: #050816;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 a {
@@ -48,20 +41,6 @@ textarea {
   font: inherit;
 }
 
-button {
-  cursor: pointer;
-}
-
-button:disabled {
-  cursor: not-allowed;
-}
-
-::selection {
-  background: rgba(255, 191, 0, 0.35);
-  color: #050816;
-}
-
-/* Hide internal sidebar scrollbar while preserving scroll behavior */
 .hieos-sidebar-scroll {
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -71,42 +50,78 @@ button:disabled {
   display: none;
 }
 
-/* Stable horizontal overflow for enterprise tables / registers */
-.hieos-horizontal-scroll {
-  scrollbar-color: #94a3b8 transparent;
-  scrollbar-width: thin;
-}
-
-/* Prevent browser default purple link styling from bleeding into route shells */
-.hieos-link-reset,
-.hieos-link-reset a {
-  color: inherit;
-  text-decoration: none;
-}
-
-/* Primary navy buttons must stay readable on every module page */
-.hieos-primary-action {
+.hieos-dark-button {
   background: #050816;
   color: #ffffff;
 }
 
-.hieos-primary-action svg {
+.hieos-dark-button svg {
   color: #ffbf00;
 }
 
-.hieos-primary-action:hover {
+.hieos-dark-button:hover {
   background: #101827;
+  color: #ffffff;
 }
 
-/* Dashboard and shell cards */
-.hieos-card {
-  border: 1px solid #d8e1ea;
+.service-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid #cbd5e1;
   background: #ffffff;
-  box-shadow: 0 1px 3px rgba(5, 8, 22, 0.08);
+  padding: 0.75rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 900;
+  color: #050816;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.08);
+  transition:
+    border-color 160ms ease,
+    background 160ms ease;
 }
 
-/* Removes browser focus ugliness while keeping clear keyboard focus */
-:focus-visible {
-  outline: 2px solid #ff8a00;
-  outline-offset: 2px;
+.service-button:hover {
+  border-color: #ff8a00;
+  background: #fff7ed;
+}
+
+.service-button-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 0.5rem;
+  background: #050816;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 900;
+  color: #ffffff;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.08);
+  transition: background 160ms ease;
+}
+
+.service-button-primary:hover {
+  background: #111827;
+  color: #ffffff;
+}
+
+.service-button-warning {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid #ff8a00;
+  background: #fff7ed;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 900;
+  color: #9a3412;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.08);
+  transition:
+    border-color 160ms ease,
+    background 160ms ease;
+}
+
+.service-button-warning:hover {
+  background: #ffedd5;
 }

@@ -21,10 +21,6 @@ import {
 } from "lucide-react";
 
 type SidebarProps = {
-  /**
-   * Only the root app shell should render the permanent sidebar.
-   * Legacy page-level imports without shellOwner will safely render nothing.
-   */
   shellOwner?: "root" | "page";
 };
 
@@ -32,7 +28,6 @@ type NavItem = {
   label: string;
   href: string;
   icon: LucideIcon;
-  matcher: (pathname: string) => boolean;
 };
 
 const navItems: NavItem[] = [
@@ -40,116 +35,112 @@ const navItems: NavItem[] = [
     label: "Dashboard",
     href: "/",
     icon: LayoutDashboard,
-    matcher: (pathname) => pathname === "/",
   },
   {
     label: "Governance Library",
     href: "/governance-library",
     icon: BookOpen,
-    matcher: (pathname) =>
-      pathname === "/governance-library" ||
-      pathname === "/governance-library/registers" ||
-      pathname === "/governance-library/forms" ||
-      pathname === "/governance-library/templates" ||
-      pathname === "/governance-library/certified-copies" ||
-      pathname === "/governance-library/pending-review" ||
-      pathname === "/governance-library/pending-execution" ||
-      pathname === "/governance-library/active-publications" ||
-      pathname === "/governance-library/active-policies",
   },
   {
     label: "Administration",
     href: "/administration",
     icon: Settings,
-    matcher: (pathname) => pathname === "/administration",
   },
   {
     label: "Treasury",
     href: "/treasury",
     icon: Landmark,
-    matcher: (pathname) => pathname === "/treasury",
   },
   {
     label: "Legal",
     href: "/legal",
     icon: Scale,
-    matcher: (pathname) => pathname === "/legal",
   },
   {
     label: "Tax",
     href: "/tax",
     icon: Globe2,
-    matcher: (pathname) => pathname === "/tax",
   },
   {
     label: "Corporate Records",
     href: "/corporate-records",
     icon: FolderArchive,
-    matcher: (pathname) => pathname === "/corporate-records",
   },
   {
     label: "Correspondence",
     href: "/correspondence",
     icon: Mail,
-    matcher: (pathname) => pathname === "/correspondence",
   },
   {
     label: "Technology",
     href: "/technology",
     icon: ShieldCheck,
-    matcher: (pathname) => pathname === "/technology",
   },
   {
     label: "Entity Management",
     href: "/entity-management",
     icon: Building2,
-    matcher: (pathname) => pathname === "/entity-management",
   },
   {
     label: "Publications",
     href: "/governance-library/publications",
     icon: FileText,
-    matcher: (pathname) => pathname.startsWith("/governance-library/publications"),
   },
   {
     label: "Resolutions",
-    href: "/governance-library/registers/resolutions",
+    href: "/governance-library/resolutions",
     icon: Gavel,
-    matcher: (pathname) =>
-      pathname === "/resolutions" ||
-      pathname.startsWith("/governance-library/registers/resolutions"),
   },
   {
     label: "Service Requests",
     href: "/service-requests",
     icon: Headphones,
-    matcher: (pathname) => pathname.startsWith("/service-requests"),
   },
   {
     label: "Implementation Center",
     href: "/implementation-center",
     icon: ClipboardList,
-    matcher: (pathname) => pathname === "/implementation-center",
   },
 ];
 
+function routeMatches(pathname: string, href: string) {
+  if (href === "/") {
+    return pathname === "/";
+  }
+
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+function getActiveHref(pathname: string) {
+  const matches = navItems.filter((item) => routeMatches(pathname, item.href));
+
+  if (matches.length === 0) {
+    return "";
+  }
+
+  return matches.sort((a, b) => b.href.length - a.href.length)[0].href;
+}
+
 export default function Sidebar({ shellOwner = "page" }: SidebarProps) {
-  const pathname = usePathname();
+  const pathname = usePathname() || "/";
 
   if (shellOwner !== "root") {
     return null;
   }
 
+  const activeHref = getActiveHref(pathname);
+
   return (
-    <aside className="fixed inset-y-0 left-0 z-40 hidden w-[280px] flex-col border-r border-[#203044] bg-[#071426] text-white shadow-xl lg:flex">
-      <div className="border-b border-[#203044] px-6 py-8">
+    <aside className="fixed inset-y-0 left-0 z-50 hidden w-[280px] border-r border-[#1d3048] bg-[#071426] text-white shadow-xl lg:flex lg:flex-col">
+      <div className="border-b border-[#1d3048] px-5 py-8">
         <Link href="/" className="block">
-          <p className="text-2xl font-black uppercase tracking-[0.08em] text-[#ffbf00]">
+          <p className="text-2xl font-black uppercase leading-tight tracking-[0.06em] text-[#ffbf00]">
             Hassan
             <br />
             Industries
           </p>
-          <p className="mt-5 text-[13px] font-black uppercase tracking-[0.42em] text-white">
+
+          <p className="mt-4 text-[13px] font-black uppercase leading-6 tracking-[0.35em] text-white">
             Enterprise
             <br />
             Operating System
@@ -157,25 +148,30 @@ export default function Sidebar({ shellOwner = "page" }: SidebarProps) {
         </Link>
       </div>
 
-      <nav className="eoc-sidebar-scroll flex-1 overflow-y-auto px-3 py-6">
+      <nav className="hieos-sidebar-scroll flex-1 overflow-y-auto px-3 py-6">
         <div className="space-y-2">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const active = item.matcher(pathname);
+            const active = item.href === activeHref;
 
             return (
               <Link
-                key={item.label}
+                key={item.href}
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={[
                   "flex h-12 items-center gap-3 rounded-lg px-4 text-sm font-black transition",
                   active
                     ? "bg-[#ffbf00] text-[#050816] shadow-sm"
-                    : "text-white hover:bg-[#142338] hover:text-white",
+                    : "text-white hover:bg-[#13243a] hover:text-white",
                 ].join(" ")}
               >
-                <Icon size={18} />
+                <Icon
+                  className={[
+                    "h-5 w-5 shrink-0",
+                    active ? "text-[#050816]" : "text-white",
+                  ].join(" ")}
+                />
                 <span>{item.label}</span>
               </Link>
             );
@@ -183,11 +179,17 @@ export default function Sidebar({ shellOwner = "page" }: SidebarProps) {
         </div>
       </nav>
 
-      <div className="border-t border-[#203044] px-6 py-5">
-        <p className="text-xs font-black text-[#ffbf00]">Hassan Industries</p>
-        <p className="text-xs font-semibold text-[#9db0c9]">
+      <div className="border-t border-[#1d3048] px-5 py-5">
+        <p className="text-xs font-black text-[#ffbf00]">
+          Hassan Industries
+        </p>
+        <p className="mt-1 text-xs font-semibold text-[#b8c7d9]">
           Building Generations of Legacy
         </p>
+      </div>
+
+      <div className="pointer-events-none absolute bottom-4 left-4 flex h-10 w-10 items-center justify-center rounded-full border border-[#475569] bg-[#111827] text-sm font-black text-white">
+        N
       </div>
     </aside>
   );
