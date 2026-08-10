@@ -8,7 +8,6 @@ import {
   ShieldCheck,
   type LucideIcon,
 } from "lucide-react";
-
 import type { ServiceRequestRecord } from "@/data/serviceRequests";
 
 type ServiceRequestActionWorkspaceProps = {
@@ -86,10 +85,12 @@ export default function ServiceRequestActionWorkspace({
             <p className="text-xs font-black uppercase tracking-[0.35em] text-slate-400">
               Request Actions
             </p>
-            <h2 className="mt-2 text-2xl font-black">Action Controls</h2>
+            <h2 className="mt-2 text-2xl font-black text-[#050816]">
+              Action Controls
+            </h2>
             <p className="mt-4 text-sm leading-7 text-slate-600">
-              Select an action to review purpose, authority, next step, and future backend
-              handoff. These controls do not mutate records yet.
+              Select an action to review purpose, authority, next step, and
+              future backend handoff. These controls do not mutate records yet.
             </p>
           </div>
         </div>
@@ -130,7 +131,7 @@ export default function ServiceRequestActionWorkspace({
             <p className="text-xs font-black uppercase tracking-[0.35em] text-slate-400">
               Control Notes
             </p>
-            <h3 className="mt-2 text-xl font-black uppercase tracking-[0.2em]">
+            <h3 className="mt-2 text-xl font-black uppercase tracking-[0.2em] text-[#050816]">
               Frontend Only
             </h3>
           </div>
@@ -141,7 +142,10 @@ export default function ServiceRequestActionWorkspace({
           <li>• No backend assignment is created yet.</li>
           <li>• No approval route is enforced yet.</li>
           <li>• No comments or attachments are saved yet.</li>
-          <li>• Restricted HCA/HCP review controls require future role-based access.</li>
+          <li>
+            • Restricted HCA/HCP review controls require future role-based
+            access.
+          </li>
         </ul>
       </section>
 
@@ -155,7 +159,7 @@ export default function ServiceRequestActionWorkspace({
             <p className="text-xs font-black uppercase tracking-[0.35em] text-slate-400">
               Routing Snapshot
             </p>
-            <h3 className="mt-2 text-xl font-black uppercase tracking-[0.2em]">
+            <h3 className="mt-2 text-xl font-black uppercase tracking-[0.2em] text-[#050816]">
               Current Path
             </h3>
           </div>

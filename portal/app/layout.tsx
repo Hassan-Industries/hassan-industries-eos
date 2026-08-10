@@ -36,7 +36,7 @@ export default function RootLayout({
           <div className="min-h-screen lg:pl-[280px]">
             <Topbar shellOwner="root" />
 
-            <main className="min-h-[calc(100vh-88px)] px-4 py-6 sm:px-6 lg:px-8">
+            <main className="min-h-[calc(100vh-80px)] bg-[#eaf0f5] px-4 py-6 sm:px-6 lg:px-8">
               {children}
             </main>
           </div>

@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import EOCPageShell from "@/components/layout/EOCPageShell";
 
 type ServiceRequestWorkspaceFrameProps = {
   children: ReactNode;
@@ -8,5 +7,5 @@ type ServiceRequestWorkspaceFrameProps = {
 export default function ServiceRequestWorkspaceFrame({
   children,
 }: ServiceRequestWorkspaceFrameProps) {
-  return <EOCPageShell>{children}</EOCPageShell>;
+  return <>{children}</>;
 }
