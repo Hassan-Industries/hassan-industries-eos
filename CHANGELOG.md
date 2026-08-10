@@ -834,3 +834,32 @@ Added and stablized the Service Request Action Workspace for controlled frontend
 - `npm run lint`
 - `npm run build`
 - Manual route review across Service Requests, Service Request Intake, Queue Detail, Resolutions Registry, Resolution Detail, Pending Review, and Pending Execution.
+
+
+## HIEOS-IMP-007F-4: Service Request Layout Recovery & EGL Publication Card Expansion
+
+- Fixed blank Service Request routes by replacing the nested Service Request layout with a pass-through layout.
+- Preserved the universal root shell standard: root layout owns Sidebar, Topbar, and main page rendering.
+- Rebuilt the Governance Library Recently Updated Publications component as a wider card-list registry.
+- Removed cramped table behavior from the dashboard publications preview section.
+- Improved publication preview readability with cleaner row spacing and metadata pills.
+- Added dark-button readability safeguards so navy action buttons do not render black text.
+- Restored the universal EOC shell after styling and layout regression.
+- Reinstated root-owned Sidebar and Topbar rendering across the portal.
+- Fixed blank Service Request routes by replacing the nested Service Request layout with a pass-through child layout.
+- Restored global Tailwind styling and base HIEOS page styles.
+- Hid the sidebar scrollbar while preserving sidebar scroll behavior.
+- Standardized sidebar active-state handling so only one navigation item is highlighted at a time.
+- Added stable dark-button readability styles for navy action controls.
+
+## HIEOS-IMP-007F-5: Registry Polish & Service Request Queue Routing
+
+- Preserved the stable universal EOS shell while applying page-level registry refinements.
+- Cleaned the Governance Library Quick Actions card and widened its dashboard column.
+- Corrected Quick Actions routing links for resolutions, certified copies, forms/templates, registers, and publication replacement.
+- Refined the Resolutions Registry to better match the Publications Registry visual and functional standard.
+- Added Create New Resolution controls to the Resolutions Registry.
+- Added selectable Service Request registry rows with live request preview metadata.
+- Improved Service Request create button layout and dark-button readability.
+- Standardized service request queue detail routing through `/service-requests/queues/[queueId]`.
+- Added stable queue detail rendering for queue IDs such as `hcp-restricted-review` and `administration-desk`.

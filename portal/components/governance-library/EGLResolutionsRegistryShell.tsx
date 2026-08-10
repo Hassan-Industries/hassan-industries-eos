@@ -6,11 +6,11 @@ import {
   ArrowLeft,
   BookOpen,
   ClipboardList,
+  Copy,
   Eye,
-  FileText,
+  FilePlus2,
   Gavel,
   Search,
-  ShieldCheck,
 } from "lucide-react";
 import {
   eglResolutionRecords,
@@ -53,11 +53,18 @@ function ResolutionRow({
   onSelect: () => void;
 }) {
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       onClick={onSelect}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onSelect();
+        }
+      }}
       className={[
-        "grid min-w-[1060px] grid-cols-[190px_minmax(360px,1.7fr)_190px_110px_120px_170px_110px] border-b border-[#d8e1ea] text-left transition last:border-b-0",
+        "grid min-w-[920px] cursor-pointer grid-cols-[180px_minmax(280px,1fr)_170px_95px_90px_160px_115px] border-b border-[#d8e1ea] text-left transition last:border-b-0",
         selected ? "bg-[#fffaf0]" : "bg-white hover:bg-[#f8fafc]",
       ].join(" ")}
     >
@@ -69,12 +76,12 @@ function ResolutionRow({
         <p className="text-sm font-black leading-6 text-[#050816]">
           {record.title}
         </p>
-        <p className="mt-2 max-w-[460px] text-xs font-semibold leading-6 text-[#48617e]">
+        <p className="mt-2 max-w-[420px] text-xs font-semibold leading-6 text-[#48617e]">
           {record.summary}
         </p>
       </div>
 
-      <div className="px-4 py-5 text-sm font-bold text-[#24364d]">
+      <div className="px-4 py-5 text-sm font-bold leading-6 text-[#24364d]">
         {record.resolutionType}
       </div>
 
@@ -98,12 +105,16 @@ function ResolutionRow({
       </div>
 
       <div className="px-4 py-5">
-        <span className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-[#c8d3df] bg-white px-4 text-sm font-black text-[#050816]">
+        <Link
+          href={`/governance-library/resolutions/${record.resolutionId}`}
+          onClick={(event) => event.stopPropagation()}
+          className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-[#c8d3df] bg-white px-4 text-sm font-black text-[#050816] transition hover:border-[#ff8a00] hover:bg-[#fffaf0]"
+        >
           <Eye className="h-4 w-4 text-[#ff8a00]" />
           Open
-        </span>
+        </Link>
       </div>
-    </button>
+    </div>
   );
 }
 
@@ -135,10 +146,8 @@ export default function EGLResolutionsRegistryShell() {
 
       const matchesSearch =
         normalizedSearch.length === 0 || searchText.includes(normalizedSearch);
-
       const matchesStatus =
         statusFilter === "All Statuses" || record.status === statusFilter;
-
       const matchesOwner =
         ownerFilter === "All Owners" || record.owner === ownerFilter;
 
@@ -189,10 +198,17 @@ export default function EGLResolutionsRegistryShell() {
         </div>
       </section>
 
-      <Link href="/governance-library" className="service-button">
-        <ArrowLeft size={16} className="text-[#ff8a00]" />
-        Back to EGL Dashboard
-      </Link>
+      <div className="flex flex-wrap gap-3">
+        <Link href="/governance-library" className="service-button">
+          <ArrowLeft size={16} className="text-[#ff8a00]" />
+          Back to EGL Dashboard
+        </Link>
+
+        <Link href="/governance-library/resolutions/new" className="service-button-primary">
+          <FilePlus2 size={16} className="text-[#ffbf00]" />
+          Create New Resolution
+        </Link>
+      </div>
 
       <p className="text-right text-[11px] font-black uppercase tracking-[0.55em] text-[#94a3b8]">
         Controlled Governance Records
@@ -246,7 +262,11 @@ export default function EGLResolutionsRegistryShell() {
           </div>
 
           <div className="flex items-end">
-            <button type="button" onClick={clearFilters} className="service-button h-12 w-full">
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="service-button h-12 w-full"
+            >
               Clear Filters
             </button>
           </div>
@@ -269,14 +289,23 @@ export default function EGLResolutionsRegistryShell() {
               </p>
             </div>
 
-            <span className="rounded-full bg-[#fff0bd] px-5 py-3 text-sm font-black text-[#b45309]">
-              {filteredRecords.length} shown
-            </span>
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="rounded-full bg-[#fff0bd] px-5 py-3 text-sm font-black text-[#b45309]">
+                {filteredRecords.length} shown
+              </span>
+              <Link
+                href="/governance-library/resolutions/new"
+                className="service-button-primary h-12"
+              >
+                <FilePlus2 className="h-4 w-4 text-[#ffbf00]" />
+                Create Resolution
+              </Link>
+            </div>
           </div>
 
           <div className="overflow-x-auto p-5">
-            <div className="min-w-[1060px]">
-              <div className="grid grid-cols-[190px_minmax(360px,1.7fr)_190px_110px_120px_170px_110px] bg-[#f8fafc]">
+            <div className="min-w-[920px]">
+              <div className="grid grid-cols-[180px_minmax(280px,1fr)_170px_95px_90px_160px_115px] bg-[#f8fafc]">
                 {[
                   "Resolution ID",
                   "Title",
@@ -288,7 +317,7 @@ export default function EGLResolutionsRegistryShell() {
                 ].map((heading) => (
                   <div
                     key={heading}
-                    className="px-4 py-4 text-[11px] font-black uppercase tracking-[0.3em] text-[#48617e]"
+                    className="px-4 py-4 text-[11px] font-black uppercase tracking-[0.28em] text-[#48617e]"
                   >
                     {heading}
                   </div>
@@ -317,14 +346,13 @@ export default function EGLResolutionsRegistryShell() {
                   <p className="text-[11px] font-black uppercase tracking-[0.45em] text-[#94a3b8]">
                     Selected Resolution
                   </p>
-                  <h2 className="mt-2 text-3xl font-black text-[#050816]">
+                  <h2 className="mt-2 text-3xl font-black leading-tight text-[#050816]">
                     {selectedRecord.resolutionId}
                   </h2>
                   <p className="mt-2 text-sm font-black text-[#050816]">
                     {selectedRecord.title}
                   </p>
                 </div>
-
                 <span
                   className={[
                     "rounded-lg px-3 py-2 text-xs font-black",
@@ -386,37 +414,16 @@ export default function EGLResolutionsRegistryShell() {
           <section className="rounded-xl border border-dashed border-[#c8d3df] bg-white p-6 shadow-sm">
             <div className="flex items-start gap-4">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#050816] text-[#ffbf00]">
-                <ShieldCheck className="h-6 w-6" />
+                <ClipboardList className="h-6 w-6" />
               </div>
-
               <div>
-                <h3 className="text-xl font-black uppercase tracking-[0.25em] text-[#050816]">
+                <h3 className="text-2xl font-black uppercase tracking-[0.35em] text-[#050816]">
                   Backend Readiness
                 </h3>
-                <p className="mt-4 text-sm leading-7 text-[#33445c]">
+                <p className="mt-5 text-sm leading-7 text-[#33445c]">
                   This registry is frontend-only. Future work should connect
-                  resolutions to executed files, corporate recordbooks,
-                  approval workflows, officer records, board actions, certified
-                  copies, and audit history.
-                </p>
-              </div>
-            </div>
-          </section>
-
-          <section className="rounded-xl border border-[#d8e1ea] bg-white p-6 shadow-sm">
-            <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#050816] text-[#ffbf00]">
-                <FileText className="h-6 w-6" />
-              </div>
-
-              <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.35em] text-[#94a3b8]">
-                  Training Note
-                </p>
-                <p className="mt-4 text-sm leading-7 text-[#33445c]">
-                  Resolutions should be treated as formal governance evidence.
-                  This page keeps resolution ID, owner, authority, status,
-                  related publication, and retention clearly separated.
+                  resolutions to executed documents, approval workflows, officer
+                  records, certified copies, audit trails, and lifecycle history.
                 </p>
               </div>
             </div>

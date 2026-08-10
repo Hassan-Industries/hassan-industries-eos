@@ -1,7 +1,11 @@
+"use client";
+
 import Link from "next/link";
+import { useMemo, useState } from "react";
 import {
   ArrowRight,
   ClipboardList,
+  Eye,
   FolderOpen,
   Headphones,
   LockKeyhole,
@@ -12,41 +16,44 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import {
+  getServiceRequestSearchText,
+  serviceRequestDepartmentFilters,
   serviceRequestRecords,
+  serviceRequestStatusFilters,
   serviceRequestQueues,
-  type ServiceRequestPriority,
   type ServiceRequestRecord,
-  type ServiceRequestStatus,
 } from "@/data/serviceRequests";
 
-function getStatusClass(status: ServiceRequestStatus) {
-  switch (status) {
-    case "Open":
-      return "bg-emerald-100 text-emerald-700";
-    case "In Review":
-      return "bg-blue-100 text-blue-700";
-    case "Pending Routing":
-      return "bg-amber-100 text-amber-700";
-    case "Restricted Review":
-      return "bg-rose-100 text-rose-700";
-    case "Closed":
-      return "bg-slate-100 text-slate-700";
-    default:
-      return "bg-slate-100 text-slate-700";
+function getStatusClass(status: string) {
+  if (status === "Open") {
+    return "bg-emerald-100 text-emerald-700";
   }
+
+  if (status === "In Review") {
+    return "bg-blue-100 text-blue-700";
+  }
+
+  if (status === "Pending Routing") {
+    return "bg-amber-100 text-amber-700";
+  }
+
+  if (status === "Restricted Review") {
+    return "bg-rose-100 text-rose-700";
+  }
+
+  return "bg-slate-100 text-slate-700";
 }
 
-function getPriorityClass(priority: ServiceRequestPriority) {
-  switch (priority) {
-    case "High":
-      return "bg-amber-100 text-amber-700";
-    case "Restricted":
-      return "bg-rose-100 text-rose-700";
-    case "Normal":
-      return "bg-slate-100 text-[#24364d]";
-    default:
-      return "bg-slate-100 text-[#24364d]";
+function getPriorityClass(priority: string) {
+  if (priority === "High") {
+    return "bg-amber-100 text-amber-700";
   }
+
+  if (priority === "Restricted") {
+    return "bg-rose-100 text-rose-700";
+  }
+
+  return "bg-slate-100 text-[#24364d]";
 }
 
 function getQueueTitle(queueId: string) {
@@ -76,16 +83,49 @@ function StatCard({
   );
 }
 
-function RequestRow({ request }: { request: ServiceRequestRecord }) {
+function DetailRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="grid min-w-[1120px] grid-cols-[140px_minmax(320px,1.8fr)_170px_150px_140px_150px_200px_110px] border-b border-[#d8e1ea] last:border-b-0">
+    <div className="flex items-start justify-between gap-4 border-b border-[#d8e1ea] py-3 text-sm last:border-b-0">
+      <span className="font-bold text-[#64748b]">{label}</span>
+      <span className="max-w-[220px] text-right font-black text-[#050816]">
+        {value}
+      </span>
+    </div>
+  );
+}
+
+function RequestRow({
+  request,
+  selected,
+  onSelect,
+}: {
+  request: ServiceRequestRecord;
+  selected: boolean;
+  onSelect: () => void;
+}) {
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={onSelect}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onSelect();
+        }
+      }}
+      className={[
+        "grid min-w-[980px] cursor-pointer grid-cols-[130px_minmax(260px,1.5fr)_160px_150px_130px_150px_170px_105px] border-b border-[#d8e1ea] text-left transition last:border-b-0",
+        selected ? "bg-[#fffaf0]" : "bg-white hover:bg-[#f8fafc]",
+      ].join(" ")}
+    >
       <div className="px-4 py-5 text-sm font-black text-[#050816]">
         {request.id}
       </div>
 
       <div className="px-4 py-5">
         <p className="text-sm font-black text-[#050816]">{request.title}</p>
-        <p className="mt-2 max-w-[420px] text-xs font-semibold leading-6 text-[#48617e]">
+        <p className="mt-2 max-w-[320px] text-xs font-semibold leading-6 text-[#48617e]">
           {request.summary}
         </p>
       </div>
@@ -127,6 +167,7 @@ function RequestRow({ request }: { request: ServiceRequestRecord }) {
       <div className="px-4 py-5">
         <Link
           href={`/service-requests/${request.id}`}
+          onClick={(event) => event.stopPropagation()}
           className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-[#c8d3df] bg-white px-4 text-sm font-black text-[#050816] transition hover:border-[#ff8a00] hover:bg-[#fffaf0]"
         >
           Open
@@ -138,6 +179,38 @@ function RequestRow({ request }: { request: ServiceRequestRecord }) {
 }
 
 export default function ServiceRequestsPage() {
+  const [searchValue, setSearchValue] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All Statuses");
+  const [departmentFilter, setDepartmentFilter] = useState("All Departments");
+  const [selectedRequestId, setSelectedRequestId] = useState<string | null>(
+    null,
+  );
+
+  const filteredRequests = useMemo(() => {
+    const normalizedSearch = searchValue.trim().toLowerCase();
+
+    return serviceRequestRecords.filter((request) => {
+      const matchesSearch =
+        normalizedSearch.length === 0 ||
+        getServiceRequestSearchText(request).includes(normalizedSearch);
+
+      const matchesStatus =
+        statusFilter === "All Statuses" || request.status === statusFilter;
+
+      const matchesDepartment =
+        departmentFilter === "All Departments" ||
+        request.department === departmentFilter;
+
+      return matchesSearch && matchesStatus && matchesDepartment;
+    });
+  }, [departmentFilter, searchValue, statusFilter]);
+
+  const selectedRequest =
+    selectedRequestId === null
+      ? null
+      : serviceRequestRecords.find((request) => request.id === selectedRequestId) ??
+        null;
+
   const openRequests = serviceRequestRecords.filter(
     (request) => request.status === "Open",
   ).length;
@@ -149,6 +222,13 @@ export default function ServiceRequestsPage() {
   const restrictedReview = serviceRequestRecords.filter(
     (request) => request.status === "Restricted Review",
   ).length;
+
+  function clearFilters() {
+    setSearchValue("");
+    setStatusFilter("All Statuses");
+    setDepartmentFilter("All Departments");
+    setSelectedRequestId(null);
+  }
 
   return (
     <div className="mx-auto max-w-[1680px] space-y-6">
@@ -162,10 +242,10 @@ export default function ServiceRequestsPage() {
               Service Requests Desk
             </h1>
             <p className="mt-4 max-w-5xl text-sm font-semibold leading-7 text-white">
-              Universal frontend intake and routing workspace for administrative
-              requests, governance review, document-control actions,
-              certified-copy support, treasury support, and restricted HCA/HCP
-              review preparation.
+              Universal frontend intake and routing workspace for
+              administrative requests, governance review, document-control
+              actions, certified-copy support, treasury support, and restricted
+              HCA review preparation.
             </p>
           </div>
 
@@ -225,10 +305,14 @@ export default function ServiceRequestsPage() {
             <p className="mb-2 text-[11px] font-black uppercase tracking-[0.35em] text-[#64748b]">
               Search Requests
             </p>
-            <div className="flex h-12 items-center gap-3 rounded-lg border border-[#c8d3df] bg-white px-4 text-sm font-semibold text-[#7d8999]">
+            <div className="flex h-12 items-center gap-3 rounded-lg border border-[#c8d3df] bg-white px-4">
               <Search className="h-4 w-4 text-[#94a3b8]" />
-              Search by request ID, title, department, owner, category, or
-              status...
+              <input
+                value={searchValue}
+                onChange={(event) => setSearchValue(event.target.value)}
+                placeholder="Search by request ID, title, department, owner, category, or status..."
+                className="min-w-0 flex-1 text-sm font-semibold text-[#050816] outline-none placeholder:text-[#7d8999]"
+              />
             </div>
           </div>
 
@@ -236,8 +320,14 @@ export default function ServiceRequestsPage() {
             <p className="mb-2 text-[11px] font-black uppercase tracking-[0.35em] text-[#64748b]">
               Status
             </p>
-            <select className="h-12 w-full rounded-lg border border-[#c8d3df] bg-white px-4 text-sm font-black text-[#050816]">
-              <option>All Statuses</option>
+            <select
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value)}
+              className="h-12 w-full rounded-lg border border-[#c8d3df] bg-white px-4 text-sm font-black text-[#050816]"
+            >
+              {serviceRequestStatusFilters.map((status) => (
+                <option key={status}>{status}</option>
+              ))}
             </select>
           </div>
 
@@ -245,13 +335,23 @@ export default function ServiceRequestsPage() {
             <p className="mb-2 text-[11px] font-black uppercase tracking-[0.35em] text-[#64748b]">
               Department
             </p>
-            <select className="h-12 w-full rounded-lg border border-[#c8d3df] bg-white px-4 text-sm font-black text-[#050816]">
-              <option>All Departments</option>
+            <select
+              value={departmentFilter}
+              onChange={(event) => setDepartmentFilter(event.target.value)}
+              className="h-12 w-full rounded-lg border border-[#c8d3df] bg-white px-4 text-sm font-black text-[#050816]"
+            >
+              {serviceRequestDepartmentFilters.map((department) => (
+                <option key={department}>{department}</option>
+              ))}
             </select>
           </div>
 
           <div className="flex items-end">
-            <button type="button" className="service-button h-12 w-full">
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="service-button h-12 w-full"
+            >
               Clear Filters
             </button>
           </div>
@@ -275,11 +375,10 @@ export default function ServiceRequestsPage() {
               </p>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <span className="rounded-full bg-[#fff0bd] px-5 py-3 text-sm font-black text-[#b45309]">
-                {serviceRequestRecords.length} shown
+                {filteredRequests.length} shown
               </span>
-
               <Link
                 href="/service-requests/new"
                 className="service-button-primary h-12"
@@ -291,8 +390,8 @@ export default function ServiceRequestsPage() {
           </div>
 
           <div className="overflow-x-auto p-5">
-            <div className="min-w-[1120px]">
-              <div className="grid grid-cols-[140px_minmax(320px,1.8fr)_170px_150px_140px_150px_200px_110px] bg-[#f8fafc]">
+            <div className="min-w-[980px]">
+              <div className="grid grid-cols-[130px_minmax(260px,1.5fr)_160px_150px_130px_150px_170px_105px] bg-[#f8fafc]">
                 {[
                   "Request ID",
                   "Title",
@@ -305,7 +404,7 @@ export default function ServiceRequestsPage() {
                 ].map((heading) => (
                   <div
                     key={heading}
-                    className="px-4 py-4 text-[11px] font-black uppercase tracking-[0.3em] text-[#48617e]"
+                    className="px-4 py-4 text-[11px] font-black uppercase tracking-[0.32em] text-[#48617e]"
                   >
                     {heading}
                   </div>
@@ -313,8 +412,13 @@ export default function ServiceRequestsPage() {
               </div>
 
               <div>
-                {serviceRequestRecords.map((request) => (
-                  <RequestRow key={request.id} request={request} />
+                {filteredRequests.map((request) => (
+                  <RequestRow
+                    key={request.id}
+                    request={request}
+                    selected={selectedRequest?.id === request.id}
+                    onSelect={() => setSelectedRequestId(request.id)}
+                  />
                 ))}
               </div>
             </div>
@@ -323,34 +427,107 @@ export default function ServiceRequestsPage() {
 
         <aside className="space-y-5">
           <section className="rounded-xl border border-[#d8e1ea] bg-white p-6 shadow-sm">
-            <div className="mb-5 flex items-start justify-between gap-4">
-              <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.45em] text-[#94a3b8]">
-                  Request Preview
+            {selectedRequest ? (
+              <>
+                <div className="mb-5 flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-[11px] font-black uppercase tracking-[0.45em] text-[#94a3b8]">
+                      Selected Request
+                    </p>
+                    <h2 className="mt-2 text-3xl font-black text-[#050816]">
+                      {selectedRequest.id}
+                    </h2>
+                    <p className="mt-2 text-sm font-black text-[#050816]">
+                      {selectedRequest.title}
+                    </p>
+                  </div>
+
+                  <span
+                    className={[
+                      "rounded-lg px-3 py-2 text-xs font-black",
+                      getStatusClass(selectedRequest.status),
+                    ].join(" ")}
+                  >
+                    {selectedRequest.status}
+                  </span>
+                </div>
+
+                <div className="rounded-lg bg-[#050816] p-5 text-white">
+                  <div className="flex items-center gap-3">
+                    <ClipboardList className="h-7 w-7 text-[#ffbf00]" />
+                    <div>
+                      <p className="text-[11px] font-black uppercase tracking-[0.35em] text-white">
+                        Service Request Workspace
+                      </p>
+                      <p className="mt-1 text-sm font-bold text-white">
+                        {selectedRequest.classification}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-5">
+                  <DetailRow label="Requester" value={selectedRequest.requester} />
+                  <DetailRow label="Department" value={selectedRequest.department} />
+                  <DetailRow label="Owner" value={selectedRequest.owner} />
+                  <DetailRow label="Priority" value={selectedRequest.priority} />
+                  <DetailRow label="Stage" value={selectedRequest.stage} />
+                  <DetailRow label="Assigned Queue" value={selectedRequest.assignedQueue} />
+                  <DetailRow label="Related Record" value={selectedRequest.relatedRecord} />
+                </div>
+
+                <div className="mt-5 space-y-3">
+                  <Link
+                    href={`/service-requests/${selectedRequest.id}`}
+                    className="service-button-primary w-full justify-center"
+                  >
+                    <Eye className="h-4 w-4 text-[#ffbf00]" />
+                    Open Request Detail
+                  </Link>
+
+                  <Link
+                    href={`/service-requests/queues/${selectedRequest.routingQueueId}`}
+                    className="service-button w-full justify-center"
+                  >
+                    <Route className="h-4 w-4 text-[#ff8a00]" />
+                    Open Assigned Queue
+                  </Link>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="mb-5 flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-[11px] font-black uppercase tracking-[0.45em] text-[#94a3b8]">
+                      Request Preview
+                    </p>
+                    <h2 className="mt-2 text-3xl font-black text-[#050816]">
+                      No Request Selected
+                    </h2>
+                  </div>
+
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#050816] text-[#ffbf00]">
+                    <ClipboardList className="h-6 w-6" />
+                  </div>
+                </div>
+
+                <p className="text-sm leading-7 text-[#33445c]">
+                  Select a service request record to review intake category,
+                  routing stage, ownership, classification, and future workflow
+                  controls.
                 </p>
-                <h2 className="mt-2 text-3xl font-black text-[#050816]">
-                  No Request Selected
-                </h2>
-              </div>
 
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#050816] text-[#ffbf00]">
-                <ClipboardList className="h-6 w-6" />
-              </div>
-            </div>
-
-            <p className="text-sm leading-7 text-[#33445c]">
-              Select a service request record to review intake category, routing
-              stage, ownership, classification, and future workflow controls.
-            </p>
-
-            <div className="mt-6 rounded-lg bg-[#050816] p-5 text-white">
-              <p className="text-[11px] font-black uppercase tracking-[0.45em] text-white">
-                Service Request Workspace
-              </p>
-              <p className="mt-3 text-sm font-bold leading-6 text-white">
-                Request metadata opens only after intentional request selection.
-              </p>
-            </div>
+                <div className="mt-6 rounded-lg bg-[#050816] p-5 text-white">
+                  <p className="text-[11px] font-black uppercase tracking-[0.45em] text-white">
+                    Service Request Workspace
+                  </p>
+                  <p className="mt-3 text-sm font-bold leading-6 text-white">
+                    Request metadata opens only after intentional request
+                    selection.
+                  </p>
+                </div>
+              </>
+            )}
           </section>
 
           <section className="rounded-xl border border-[#d8e1ea] bg-white p-6 shadow-sm">
@@ -358,7 +535,6 @@ export default function ServiceRequestsPage() {
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#050816] text-[#ffbf00]">
                 <ShieldCheck className="h-6 w-6" />
               </div>
-
               <div>
                 <p className="text-[11px] font-black uppercase tracking-[0.35em] text-[#94a3b8]">
                   Routing Standard
@@ -382,7 +558,6 @@ export default function ServiceRequestsPage() {
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#050816] text-[#ffbf00]">
                 <Headphones className="h-6 w-6" />
               </div>
-
               <div>
                 <p className="text-[11px] font-black uppercase tracking-[0.35em] text-[#94a3b8]">
                   Backend Readiness
