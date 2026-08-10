@@ -7,5 +7,5 @@ type ServiceRequestWorkspaceFrameProps = {
 export default function ServiceRequestWorkspaceFrame({
   children,
 }: ServiceRequestWorkspaceFrameProps) {
-  return <>{children}</>;
+  return <div className="mx-auto max-w-[1680px] space-y-6">{children}</div>;
 }

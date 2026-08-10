@@ -13,7 +13,7 @@ export default function Topbar({ shellOwner = "page" }: TopbarProps) {
     <header className="sticky top-0 z-40 flex h-20 items-center justify-between border-b border-[#1d3048] bg-[#071426] px-6 text-white shadow-sm lg:px-8">
       <div>
         <h1 className="text-2xl font-black uppercase leading-none tracking-[0.08em] text-white lg:text-3xl">
-          Enterprise Operations Center
+          Enterprise Operations System
         </h1>
         <p className="mt-2 text-sm font-semibold text-white">
           Unified. Governed. Purpose-Driven.

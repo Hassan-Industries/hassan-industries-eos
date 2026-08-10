@@ -7,6 +7,7 @@ import {
   Plus,
   Route,
   ShieldCheck,
+  type LucideIcon,
 } from "lucide-react";
 import {
   getRequestsForQueue,
@@ -17,19 +18,16 @@ import {
 } from "@/data/serviceRequests";
 
 function getQueueStatusClass(status: ServiceRequestQueueStatus) {
-  if (status === "Active Queue") {
-    return "bg-emerald-100 text-emerald-700";
+  switch (status) {
+    case "Active Queue":
+      return "bg-emerald-100 text-emerald-700";
+    case "Department Queue":
+      return "bg-blue-100 text-blue-700";
+    case "Restricted Queue":
+      return "bg-rose-100 text-rose-700";
+    default:
+      return "bg-slate-100 text-slate-700";
   }
-
-  if (status === "Department Queue") {
-    return "bg-blue-100 text-blue-700";
-  }
-
-  if (status === "Restricted Queue") {
-    return "bg-rose-100 text-rose-700";
-  }
-
-  return "bg-slate-100 text-slate-700";
 }
 
 function StatCard({
@@ -39,7 +37,7 @@ function StatCard({
 }: {
   label: string;
   value: string;
-  icon: typeof Route;
+  icon: LucideIcon;
 }) {
   return (
     <section className="rounded-xl border border-[#d8e1ea] bg-white p-5 shadow-sm">
@@ -51,6 +49,15 @@ function StatCard({
         <Icon className="h-6 w-6 text-[#ff8a00]" />
       </div>
     </section>
+  );
+}
+
+function Detail({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-start justify-between gap-4 border-b border-[#d8e1ea] py-2 last:border-b-0">
+      <span className="font-bold text-[#64748b]">{label}</span>
+      <span className="text-right font-black text-[#050816]">{value}</span>
+    </div>
   );
 }
 
@@ -98,6 +105,32 @@ function QueueCard({ queue }: { queue: ServiceRequestQueueRecord }) {
         Open Queue
         <ArrowRight className="h-4 w-4 text-[#ffbf00]" />
       </Link>
+    </section>
+  );
+}
+
+function InfoPanel({
+  icon,
+  title,
+  text,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  text: string;
+}) {
+  return (
+    <section className="rounded-xl border border-dashed border-[#c8d3df] bg-white p-6 shadow-sm">
+      <div className="flex items-start gap-4">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#050816] text-[#ffbf00]">
+          {icon}
+        </div>
+        <div>
+          <h3 className="text-xl font-black uppercase tracking-[0.25em] text-[#050816]">
+            {title}
+          </h3>
+          <p className="mt-4 text-sm leading-7 text-[#33445c]">{text}</p>
+        </div>
+      </div>
     </section>
   );
 }
@@ -224,40 +257,5 @@ export default function ServiceRequestQueuesPage() {
         />
       </div>
     </div>
-  );
-}
-
-function Detail({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-start justify-between gap-4 border-b border-[#d8e1ea] py-2 last:border-b-0">
-      <span className="font-bold text-[#64748b]">{label}</span>
-      <span className="text-right font-black text-[#050816]">{value}</span>
-    </div>
-  );
-}
-
-function InfoPanel({
-  icon,
-  title,
-  text,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  text: string;
-}) {
-  return (
-    <section className="rounded-xl border border-dashed border-[#c8d3df] bg-white p-6 shadow-sm">
-      <div className="flex items-start gap-4">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#050816] text-[#ffbf00]">
-          {icon}
-        </div>
-        <div>
-          <h3 className="text-xl font-black uppercase tracking-[0.25em] text-[#050816]">
-            {title}
-          </h3>
-          <p className="mt-4 text-sm leading-7 text-[#33445c]">{text}</p>
-        </div>
-      </div>
-    </section>
   );
 }

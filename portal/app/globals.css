@@ -50,16 +50,25 @@ textarea {
   display: none;
 }
 
-.hieos-dark-button {
+.hieos-dark-button,
+.service-button-primary,
+.service-button-primary:visited {
   background: #050816;
   color: #ffffff;
 }
 
-.hieos-dark-button svg {
+.hieos-dark-button *,
+.service-button-primary * {
+  color: inherit;
+}
+
+.hieos-dark-button svg,
+.service-button-primary svg {
   color: #ffbf00;
 }
 
-.hieos-dark-button:hover {
+.hieos-dark-button:hover,
+.service-button-primary:hover {
   background: #101827;
   color: #ffffff;
 }
@@ -67,6 +76,7 @@ textarea {
 .service-button {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
   border-radius: 0.5rem;
   border: 1px solid #cbd5e1;
@@ -78,36 +88,36 @@ textarea {
   box-shadow: 0 1px 2px rgb(15 23 42 / 0.08);
   transition:
     border-color 160ms ease,
-    background 160ms ease;
+    background 160ms ease,
+    color 160ms ease;
 }
 
 .service-button:hover {
   border-color: #ff8a00;
   background: #fff7ed;
+  color: #050816;
 }
 
 .service-button-primary {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
   border-radius: 0.5rem;
-  background: #050816;
+  border: 1px solid #050816;
   padding: 0.75rem 1.25rem;
   font-size: 0.875rem;
   font-weight: 900;
-  color: #ffffff;
   box-shadow: 0 1px 2px rgb(15 23 42 / 0.08);
-  transition: background 160ms ease;
-}
-
-.service-button-primary:hover {
-  background: #111827;
-  color: #ffffff;
+  transition:
+    background 160ms ease,
+    color 160ms ease;
 }
 
 .service-button-warning {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
   border-radius: 0.5rem;
   border: 1px solid #ff8a00;
