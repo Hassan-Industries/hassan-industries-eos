@@ -111,7 +111,7 @@ export default function RecentlyUpdatedPublications({
 
   return (
     <section className="overflow-hidden rounded-xl border border-[#d8e1ea] bg-white shadow-sm">
-      <div className="flex flex-col gap-4 border-b border-[#d8e1ea] p-6 lg:flex-row lg:items-start lg:justify-between">
+      <div className="flex flex-col gap-5 border-b border-[#d8e1ea] p-6 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <p className="text-[11px] font-black uppercase tracking-[0.45em] text-[#94a3b8]">
             Enterprise Governance Library
@@ -124,12 +124,12 @@ export default function RecentlyUpdatedPublications({
           </p>
         </div>
 
-        <Link
+        < Link
           href="/governance-library/publications"
-          className="inline-flex items-center gap-2 text-sm font-black text-blue-700 transition hover:text-[#ff8a00]"
+          className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-lg border border-[#050816] bg-[#050816] px-5 py-2.5 text-sm font-black text-white shadow-sm transition hover:border-[#ff8a00] hover:bg-[#111827]"
         >
-          View All Publications
-          <ArrowRight className="h-4 w-4" />
+          <span className="text-white">View All Publications</span>
+          <ArrowRight className="h-4 w-4 text-[#ffbf00]" />
         </Link>
       </div>
 
@@ -154,8 +154,8 @@ export default function RecentlyUpdatedPublications({
                   }
                 }}
                 className={[
-                  "grid w-full gap-4 p-5 text-left transition lg:grid-cols-[150px_minmax(0,1fr)_120px]",
-                  isSelected ? "bg-[#fffaf0]" : "bg-white hover:bg-[#f8fafc]",
+                "grid w-full gap-5 p-5 text-left transition lg:grid-cols-[125px_minmax(0,1fr)_85px]",
+                isSelected ? "bg-[#fffaf0]" : "bg-white hover:bg-[#f8fafc]",
                 ].join(" ")}
               >
                 <div>

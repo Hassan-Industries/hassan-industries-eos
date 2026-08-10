@@ -68,11 +68,11 @@ export default function GovernanceLibraryPage() {
       />
       <EGLStats />
 
-      <section className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_390px]">
+      <section className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
         <div className="min-w-0 space-y-6">
           <PublicationSeriesGrid />
 
-          <section className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+         <section className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_270px]">
             <RecentlyUpdatedPublications
               publications={filteredPublications}
               selectedPublication={selectedPublication}

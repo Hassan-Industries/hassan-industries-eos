@@ -19,21 +19,21 @@ import {
 
 type QueueDetailPageProps = {
   params: Promise<{
-    queueId: string;
+    queuesId: string;
   }>;
 };
 
 export function generateStaticParams() {
   return serviceRequestQueues.map((queue) => ({
-    queueId: queue.id,
+    queuesId: queue.id,
   }));
 }
 
 export default async function ServiceRequestQueueDetailPage({
   params,
 }: QueueDetailPageProps) {
-  const { queueId } = await params;
-  const queue = getServiceRequestQueueById(queueId);
+  const { queuesId } = await params;
+  const queue = getServiceRequestQueueById(queuesId);
 
   if (!queue) {
     notFound();

@@ -863,3 +863,12 @@ Added and stablized the Service Request Action Workspace for controlled frontend
 - Improved Service Request create button layout and dark-button readability.
 - Standardized service request queue detail routing through `/service-requests/queues/[queueId]`.
 - Added stable queue detail rendering for queue IDs such as `hcp-restricted-review` and `administration-desk`.
+
+## HIEOS-IMP-007F-6: Routing Queue Repair & EGL Dashboard Registry Polish
+
+- Fixed Service Request queue detail routing by aligning App Router params with the existing `[queuesId]` route segment.
+- Restored individual routing queue workspaces for Governance Library, Corporate Records, Treasury, HCA Restricted Review, HCP Restricted Review, and Administration.
+- Increased width and readability of the EGL Recently Updated Publications workspace.
+- Reduced compression of publication title and descriptive metadata.
+- Updated View All Publications to the standard EOS navy/white/yellow primary-action treatment.
+- Preserved the stable universal shell, Service Request registry, Publications Registry, and existing global styling.

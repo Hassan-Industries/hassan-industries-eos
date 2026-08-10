@@ -6,7 +6,6 @@ import {
   ArrowLeft,
   BookOpen,
   ClipboardList,
-  Copy,
   Eye,
   FilePlus2,
   Gavel,
